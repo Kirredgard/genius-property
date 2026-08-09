@@ -1,0 +1,13 @@
+{
+  "source_zip": "genius-property-v21-rollout-firestore-flags.zip",
+  "added": [
+    "js/v21/context/user-agency-context.ts",
+    "context.v21.html",
+    "js/v21/pages/context.page.ts",
+    "USER_AGENCY_CONTEXT_V21.md"
+  ],
+  "changed": [
+    "js/v21/pages/rollout.page.ts",
+    "js/v21/bootstrap.js"
+  ]
+}

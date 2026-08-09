@@ -1,0 +1,7 @@
+{
+  "source_zip": "genius-property-v21-owner-payouts.zip",
+  "added": [
+    "js/v21/modules/owner-payouts/exports/owner-payouts-exporter.ts",
+    "tests/v21/owner-payouts/owner-payouts-exporter.test.js"
+  ]
+}

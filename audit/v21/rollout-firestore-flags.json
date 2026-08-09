@@ -1,0 +1,13 @@
+{
+  "source_zip": "genius-property-v21-rollout-flags.zip",
+  "added": [
+    "js/v21/rollout/feature-flags.repository.ts",
+    "ROLLOUT_FIRESTORE_FLAGS_V21.md",
+    "tests/v21/rollout/feature-flags.repository.test.js"
+  ],
+  "changed": [
+    "js/v21/rollout/feature-flags.ts",
+    "js/v21/pages/rollout.page.ts",
+    "firestore.rules.v21"
+  ]
+}

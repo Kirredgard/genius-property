@@ -1,0 +1,94 @@
+# Deliverable Index V21
+
+## Documents principaux
+
+- `FIREBASE_REAL_SETUP_V21.md`
+- `FIRESTORE_REAL_TEST_V21.md`
+- `STORAGE_REAL_TEST_V21.md`
+- `LEGACY_CLEANUP_PHASE2_V21.md`
+- `CI_CD_V21.md`
+- `OPTIMIZATION_V21.md`
+- `PRODUCTION_GUIDE_V21.md`
+- `ROLLBACK_PLAN_V21.md`
+- `POST_DEPLOY_CHECKLIST_V21.md`
+- `RELEASE_MANIFEST_V21.json`
+
+## Documents de migration
+
+- `MIGRATION_AUTH_FIREBASE_V21.md`
+- `MIGRATION_AUTH_SDK_V21.md`
+- `MIGRATION_BUILD_READINESS_V21.md`
+- `MIGRATION_CLEAN_LOADER_V21.md`
+- `MIGRATION_CONTRACTS_V21.md`
+- `MIGRATION_CRUD_FORMS_V21.md`
+- `MIGRATION_DASHBOARD_KPI_V21.md`
+- `MIGRATION_DASHBOARD_PAGE_V21.md`
+- `MIGRATION_DEMO_DATA_V21.md`
+- `MIGRATION_DETAIL_EDIT_PAGES_V21.md`
+- `MIGRATION_DETTES_V21.md`
+- `MIGRATION_DOCUMENTS_FIRESTORE_METADATA_V21.md`
+- `MIGRATION_DOCUMENTS_STORAGE_V21.md`
+- `MIGRATION_DOCUMENTS_UI_V21.md`
+- `MIGRATION_DOMAIN_PAGES_V21.md`
+- `MIGRATION_FACADES_REGISTRY_V21.md`
+- `MIGRATION_FIRESTORE_REPOSITORIES_V21.md`
+- `MIGRATION_FIRESTORE_SDK_V21.md`
+- `MIGRATION_HOTFIX_QUARANTINE_V21.md`
+- `MIGRATION_LEGACY_CLEANUP_V21.md`
+- `MIGRATION_LIST_ACTIONS_V21.md`
+- `MIGRATION_NOTIFICATIONS_V21.md`
+- `MIGRATION_OWNERS_V21.md`
+- `MIGRATION_OWNER_PAYOUTS_V21.md`
+- `MIGRATION_OWNER_PAYOUT_EXPORTS_V21.md`
+- `MIGRATION_OWNER_PROPERTIES_LINK_V21.md`
+- `MIGRATION_OWNER_REPORTING_V21.md`
+- `MIGRATION_PATCHES_V21.md`
+- `MIGRATION_PAYMENTS_V21.md`
+- `MIGRATION_PREBUILD_FIXES_V21.md`
+- `MIGRATION_PROPERTIES_V21.md`
+- `MIGRATION_QUALITY_CI_V21.md`
+- `MIGRATION_REPORTING_EXPORTS_V21.md`
+- `MIGRATION_STORAGE_SDK_V21.md`
+- `MIGRATION_TENANTS_V21.md`
+- `MIGRATION_TYPESCRIPT_PHASE1_V21.md`
+- `MIGRATION_TYPESCRIPT_PHASE2_SERVICES_V21.md`
+- `MIGRATION_TYPESCRIPT_PHASE3_MODULES_V21.md`
+- `MIGRATION_TYPESCRIPT_PHASE4_UI_V21.md`
+- `MIGRATION_TYPESCRIPT_PROGRESSIVE_V21.md`
+- `MIGRATION_TYPESCRIPT_STRICT_DOMAINS_V21.md`
+
+## Pages V21
+
+- `contract-detail.v21.html`
+- `contracts.v21.html`
+- `dashboard.v21.html`
+- `documents.v21.html`
+- `firestore-test.v21.html`
+- `health.v21.html`
+- `index.v21.html`
+- `login.v21.html`
+- `owner-detail.v21.html`
+- `owners.v21.html`
+- `propertie-detail.v21.html`
+- `properties.v21.html`
+- `storage-test.v21.html`
+- `tenant-detail.v21.html`
+- `tenants.v21.html`
+
+## Fichiers Firebase
+
+- `firestore.rules.v21`
+- `storage.rules.v21`
+- `firebase.v21.json`
+
+## Fichiers CI/CD
+
+- `.github/workflows/v21-quality.yml`
+- `.github/workflows/v21-staging.yml`
+- `.github/workflows/v21-production.yml`
+
+## Rapports audit
+
+Voir :
+
+`audit/v21/`

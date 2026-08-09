@@ -1,0 +1,15 @@
+{
+  "source_zip": "genius-property-v21-production-hardening.zip",
+  "version": "21.0.0-rc-production",
+  "added": [
+    "RELEASE_MANIFEST_V21.json",
+    "ROLLBACK_PLAN_V21.md",
+    "POST_DEPLOY_CHECKLIST_V21.md",
+    "POST_DEPLOY_REPORT_V21.md",
+    "scripts/release-manifest-check.mjs"
+  ],
+  "scripts": [
+    "release:check",
+    "production:ready"
+  ]
+}

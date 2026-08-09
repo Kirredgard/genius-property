@@ -1,0 +1,10 @@
+{
+  "source_zip": "genius-property-v21-service-permission-guards.zip",
+  "added": [
+    "js/v21/billing/plans.ts",
+    "js/v21/billing/subscription.service.ts",
+    "js/v21/billing/usage-limits.ts",
+    "billing.v21.html",
+    "BILLING_SUBSCRIPTIONS_V21.md"
+  ]
+}

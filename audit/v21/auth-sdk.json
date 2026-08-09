@@ -1,0 +1,8 @@
+{
+  "source_zip": "genius-property-v21-firestore-sdk.zip",
+  "added": [
+    "js/v21/auth/auth.service.ts",
+    "js/v21/auth/auth.module.ts",
+    "tests/v21/auth/auth.service.test.js"
+  ]
+}

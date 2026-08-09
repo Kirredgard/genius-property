@@ -1,0 +1,15 @@
+{
+  "source_zip": "genius-property-v21-typescript-progressive.zip",
+  "converted_files": [
+    "js/v21/modules/tenants/validators/tenant.validator.ts",
+    "js/v21/modules/tenants/adapters/tenant.firestore.adapter.ts",
+    "js/v21/modules/properties/validators/property.validator.ts",
+    "js/v21/modules/properties/adapters/property.firestore.adapter.ts",
+    "js/v21/modules/contracts/validators/contract.validator.ts",
+    "js/v21/modules/contracts/adapters/contract.firestore.adapter.ts",
+    "js/v21/modules/notifications/adapters/notification.firestore.adapter.ts",
+    "js/v21/modules/notifications/rules/business-alerts.rules.ts",
+    "js/v21/types/domain-types.ts"
+  ],
+  "strategy": "Convert validators/adapters/rules first."
+}

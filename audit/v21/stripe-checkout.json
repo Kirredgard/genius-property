@@ -1,0 +1,11 @@
+{
+  "source_zip": "genius-property-v21-billing-usage-guards.zip",
+  "added": [
+    "upgrade.v21.html",
+    "billing-success.v21.html",
+    "billing-cancel.v21.html",
+    "js/v21/billing/billing-api.client.ts",
+    "api/billing/server.example.mjs",
+    "STRIPE_CHECKOUT_V21.md"
+  ]
+}

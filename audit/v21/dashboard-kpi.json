@@ -1,0 +1,7 @@
+{
+  "source_zip": "genius-property-v21-reporting-exports.zip",
+  "added": [
+    "js/v21/modules/dashboard/services/dashboard-kpi.service.ts",
+    "js/v21/modules/dashboard/ui/dashboard-kpi.view.ts"
+  ]
+}

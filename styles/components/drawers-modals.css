@@ -1,0 +1,21 @@
+/* GP Components — drawers/modales centralisés V20 */
+
+#gpFinanceOverlay,
+#gpadOverlay,
+.modal-backdrop,
+.drawer-backdrop {
+  transition-duration: 0ms !important;
+}
+
+#gpFinanceDrawer,
+#gpadDrawer,
+.gp-drawer,
+.gp-modal {
+  box-sizing: border-box;
+}
+
+body.modal-open,
+body.drawer-open,
+body.gp-modal-open {
+  overflow: auto !important;
+}

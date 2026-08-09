@@ -1,0 +1,17 @@
+{
+  "source_zip": "genius-property-v21-legacy-cleanup-phase2.zip",
+  "added": [
+    ".github/workflows/v21-staging.yml",
+    ".github/workflows/v21-production.yml",
+    ".env.staging.example",
+    ".env.production.example",
+    "CI_CD_V21.md",
+    "DEPLOYMENT_CHECKLIST_V21.md"
+  ],
+  "scripts": [
+    "build:staging",
+    "build:production",
+    "predeploy:staging",
+    "predeploy:production"
+  ]
+}

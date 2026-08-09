@@ -1,0 +1,9 @@
+{
+  "source_zip": "genius-property-v21-saas-analytics.zip",
+  "added": [
+    "js/v21/audit/audit-log.service.ts",
+    "js/v21/audit/product-tracking.service.ts",
+    "js/v21/audit/audit-dashboard.widget.ts",
+    "AUDIT_LOGS_TRACKING_V21.md"
+  ]
+}

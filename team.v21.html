@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genius Property — Team V21</title>
+    <link rel="stylesheet" href="./styles/v21.css" />
+  </head>
+  <body>
+    <main class="v21-shell">
+      <nav class="v21-nav">
+        <a href="./dashboard.v21.html">Dashboard</a>
+        <a href="./profile.v21.html">Profil</a>
+        <a href="./context.v21.html">Contexte</a>
+      </nav>
+
+      <header class="v21-section-header">
+        <h1>Équipe</h1>
+        <p>Inviter des membres dans l’agence.</p>
+      </header>
+
+      <section class="v21-form-card">
+        <form id="invite-form" class="v21-form">
+          <label class="v21-form-field">
+            <span>Email</span>
+            <input name="email" type="email" required />
+          </label>
+          <label class="v21-form-field">
+            <span>Rôle</span>
+            <select name="role">
+              <option value="viewer">viewer</option>
+              <option value="agent">agent</option>
+              <option value="admin">admin</option>
+            </select>
+          </label>
+          <div class="v21-form-actions">
+            <button type="submit">Inviter</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="v21-form-card">
+        <h2>Invitations</h2>
+        <pre id="team-output"></pre>
+      </section>
+    </main>
+
+    <script type="module" src="./js/v21/pages/team.page.js"></script>
+  </body>
+</html>

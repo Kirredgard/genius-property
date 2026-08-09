@@ -1,0 +1,11 @@
+{
+  "source_zip": "genius-property-v21-hotfix-quarantine.zip",
+  "patches_created": [
+    "safe-dom.patch.js",
+    "safe-storage.patch.js",
+    "safe-events.patch.js",
+    "runtime-guards.patch.js",
+    "index.js"
+  ],
+  "strategy": "Replace global consolidated hotfixes with small V21 patches."
+}

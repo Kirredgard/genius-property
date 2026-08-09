@@ -1,0 +1,17 @@
+{
+  "source_zip": "genius-property-v21-billing-subscriptions.zip",
+  "changed": [
+    "js/v21/billing/usage-guard.ts",
+    "js/v21/modules/properties/properties.module.ts",
+    "js/v21/modules/tenants/tenants.module.ts",
+    "js/v21/modules/owners/owners.module.ts",
+    "js/v21/billing/billing-status.widget.ts",
+    "dashboard.v21.html",
+    "js/v21/pages/dashboard.page.ts"
+  ],
+  "added": [
+    "js/v21/billing/usage-guard.ts",
+    "js/v21/billing/billing-status.widget.ts",
+    "BILLING_USAGE_GUARDS_V21.md"
+  ]
+}

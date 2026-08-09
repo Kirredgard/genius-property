@@ -1,0 +1,15 @@
+{
+  "source_zip": "genius-property-v21-detail-edit-pages.zip",
+  "changed": [
+    "js/v21/modules/owners/services/owners.service.ts",
+    "js/v21/modules/properties/services/properties.service.ts",
+    "js/v21/modules/tenants/services/tenants.service.ts",
+    "js/v21/modules/contracts/services/contracts.service.ts",
+    "js/v21/modules/documents/services/document-metadata.service.ts",
+    "js/v21/modules/dashboard/dashboard.module.ts"
+  ],
+  "added": [
+    "js/v21/demo/demo-data.ts",
+    "tests/v21/demo/demo-data.test.js"
+  ]
+}

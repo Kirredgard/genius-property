@@ -1,0 +1,195 @@
+/* ================================================================
+   GENIUS PROPERTY — THEME SYSTEM
+   Variables CSS propres pour light/dark mode
+   Aucun !important sur les variables — cascade naturelle
+================================================================ */
+
+/* ── LIGHT MODE (défaut) ── */
+:root {
+  /* Brand */
+  --gold: #D4AF37;
+  --gold-2: #e6ad18;
+  --gold-bg: #fff8e5;
+  --gold-shadow: rgba(212, 175, 55, 0.3);
+
+  /* Layout */
+  --sidebar-w: 280px;
+  --topbar-h: 58px;
+  --content-pad-x: 20px;
+  --content-pad-top: 76px;
+
+  /* Surfaces */
+  --bg-app: #f4f5f7;
+  --bg-card: #ffffff;
+  --bg-sidebar: #ffffff;
+  --bg-topbar: #ffffff;
+  --bg-input: #ffffff;
+  --bg-hover: #f7f8fb;
+  --bg-btn: #ffffff;
+
+  /* Borders */
+  --line: #e9edf3;
+  --line-strong: #dde3ec;
+
+  /* Text */
+  --text: #16191f;
+  --text-muted: #6b7280;
+  --text-light: #9ca3af;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(20, 24, 32, 0.07);
+  --shadow-md: 0 4px 16px rgba(20, 24, 32, 0.08);
+  --shadow-lg: 0 10px 30px rgba(20, 24, 32, 0.10);
+
+  /* States */
+  --danger: #dc2626;
+  --success: #16a34a;
+  --warning: #d97706;
+  --info: #2563eb;
+
+  /* Misc */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+}
+
+/* ── DARK MODE ── */
+body.dark {
+  --bg-app: #121212;
+  --bg-card: #1e1e2e;
+  --bg-sidebar: #151520;
+  --bg-topbar: #151520;
+  --bg-input: #2a2a38;
+  --bg-hover: #1e1e2e;
+  --bg-btn: #1e1e2e;
+
+  --line: #2a2a38;
+  --line-strong: #333344;
+
+  --text: #e5e5e5;
+  --text-muted: #9ca3af;
+  --text-light: #6b7280;
+
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* ── RESPONSIVE SIDEBAR ── */
+@media (min-width: 1600px) {
+  :root { --sidebar-w: 300px; --content-pad-x: 32px; }
+}
+@media (min-width: 1025px) and (max-width: 1599px) {
+  :root { --sidebar-w: 270px; --content-pad-x: 22px; }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  :root { --sidebar-w: 64px; --content-pad-x: 16px; --content-pad-top: 70px; }
+}
+@media (max-width: 768px) {
+  :root { --sidebar-w: 0px; --content-pad-x: 14px; --content-pad-top: 66px; }
+}
+
+
+/* boutons */
+
+
+/* couleurs */
+#page-paiements .icon-view{
+    background:#e8f1ff !important;
+    color:#d49b00 !important;
+}
+
+#page-paiements .icon-doc{
+    background:#fff4d6 !important;
+    color:#d49b00 !important;
+}
+
+#page-paiements .icon-edit{
+    background:#dcecff !important;
+    color:#d49b00 !important;
+}
+
+#page-paiements .icon-delete{
+    background:
+html body 
+
+
+/* =====================================================
+   PAIEMENTS ACTIONS — SOURCE UNIQUE PROPRE
+   ===================================================== */
+#page-paiements .gp-fin-final .gp-table-wrap{
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+}
+#page-paiements .gp-fin-final table{
+  min-width:1040px!important;
+}
+#page-paiements .gp-fin-final th:last-child,
+#page-paiements .gp-fin-final td:last-child{
+  min-width:150px!important;
+  width:150px!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+}
+#page-paiements .gp-fin-final td:last-child .gp-pay-action{
+  width:32px!important;
+  height:32px!important;
+  min-width:32px!important;
+  min-height:32px!important;
+  max-width:32px!important;
+  max-height:32px!important;
+  margin:0 3px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:10px!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  vertical-align:middle!important;
+  cursor:pointer!important;
+}
+#page-paiements .gp-fin-final td:last-child .gp-pay-action .material-symbols-rounded{
+  font-size:14px!important;
+  width:14px!important;
+  height:14px!important;
+  line-height:14px!important;
+  color:#d4a017!important;
+  overflow:visible!important;
+}
+#page-paiements .gp-fin-final td:last-child .gp-pay-action:hover{
+  background:#f8fafc!important;
+}
+
+
+/* =====================================================
+   REDUCTION FINALE — icones + hauteur
+   ===================================================== */
+
+#page-paiements .gp-fin-final td:last-child .gp-pay-action{
+  width:28px!important;
+  height:28px!important;
+  min-width:28px!important;
+  min-height:28px!important;
+  max-width:28px!important;
+  max-height:28px!important;
+  border-radius:8px!important;
+  margin:0 2px!important;
+}
+
+#page-paiements .gp-fin-final td:last-child .gp-pay-action .material-symbols-rounded{
+  font-size:12px!important;
+  width:12px!important;
+  height:12px!important;
+  line-height:12px!important;
+}
+
+/* colonne actions plus compacte */
+#page-paiements .gp-fin-final th:last-child,
+#page-paiements .gp-fin-final td:last-child{
+  min-width:132px!important;
+  width:132px!important;
+}

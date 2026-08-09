@@ -1,0 +1,30 @@
+{
+  "source_zip": "genius-property-v21-release-candidate-final.zip",
+  "bundle_points": [
+    "executable docs",
+    "manual test matrix",
+    "rollback detailed",
+    "go no-go table",
+    "route index",
+    "final compressed report",
+    "beta client pack"
+  ],
+  "pages": 42,
+  "criticalPages": [
+    "login.v21.html",
+    "onboarding.v21.html",
+    "dashboard.v21.html",
+    "properties.v21.html",
+    "tenants.v21.html",
+    "owners.v21.html",
+    "contracts.v21.html",
+    "documents.v21.html",
+    "billing.v21.html",
+    "support.v21.html",
+    "feedback.v21.html",
+    "health.v21.html",
+    "status.v21.html",
+    "final-stabilization.v21.html",
+    "go-live.v21.html"
+  ]
+}

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genius Property — Beta Program V21</title>
+    <link rel="stylesheet" href="./styles/v21.css" />
+  </head>
+  <body>
+    <main class="v21-shell">
+      <nav class="v21-nav">
+        <a href="./dashboard.v21.html">Dashboard</a>
+        <a href="./observability.v21.html">Observabilité</a>
+        <a href="./saas-analytics.v21.html">Analytics</a>
+      </nav>
+
+      <header class="v21-section-header">
+        <h1>Beta Program V21</h1>
+        <p>Suivre les agences test avant lancement public.</p>
+      </header>
+
+      <section class="v21-form-card">
+        <form id="beta-agency-form" class="v21-form">
+          <label class="v21-form-field">
+            <span>Agency ID</span>
+            <input name="agencyId" required />
+          </label>
+          <label class="v21-form-field">
+            <span>Nom</span>
+            <input name="name" />
+          </label>
+          <label class="v21-form-field">
+            <span>Status</span>
+            <select name="status">
+              <option value="candidate">candidate</option>
+              <option value="invited">invited</option>
+              <option value="active">active</option>
+              <option value="paused">paused</option>
+              <option value="completed">completed</option>
+            </select>
+          </label>
+          <label class="v21-form-field">
+            <span>Cohort</span>
+            <input name="cohort" value="beta-v21" />
+          </label>
+          <label class="v21-form-field">
+            <span>Notes</span>
+            <input name="notes" />
+          </label>
+          <div class="v21-form-actions">
+            <button type="submit">Ajouter agence beta</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="v21-form-card">
+        <h2>Agences beta</h2>
+        <pre id="beta-output"></pre>
+      </section>
+    </main>
+
+    <script type="module" src="./js/v21/pages/beta.page.js"></script>
+  </body>
+</html>

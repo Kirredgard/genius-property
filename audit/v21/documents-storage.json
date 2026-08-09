@@ -1,0 +1,7 @@
+{
+  "source_zip": "genius-property-v21-storage-sdk.zip",
+  "added": [
+    "js/v21/modules/documents/services/document-storage.service.ts",
+    "js/v21/modules/documents/adapters/document.metadata.adapter.ts"
+  ]
+}

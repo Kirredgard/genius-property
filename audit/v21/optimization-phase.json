@@ -1,0 +1,14 @@
+{
+  "source_zip": "genius-property-v21-cicd-phase2.zip",
+  "added": [
+    "scripts/analyze-bundle.mjs",
+    "scripts/performance-budget.mjs",
+    "js/v21/router/lazy-pages.ts",
+    "OPTIMIZATION_V21.md"
+  ],
+  "scripts": [
+    "analyze:bundle",
+    "performance:check",
+    "quality:optimized"
+  ]
+}

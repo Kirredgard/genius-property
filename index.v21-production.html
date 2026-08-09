@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genius Property V21</title>
+    <link rel="stylesheet" href="./styles/v21.css" />
+  </head>
+  <body>
+    <main class="v21-shell">
+      <nav class="v21-nav">
+        <a href="./dashboard.v21.html">Dashboard</a>
+        <a href="./properties.v21.html">Biens</a>
+        <a href="./tenants.v21.html">Locataires</a>
+        <a href="./owners.v21.html">Propriétaires</a>
+        <a href="./contracts.v21.html">Contrats</a>
+        <a href="./documents.v21.html">Documents</a>
+        <a href="./login.v21.html">Connexion</a>
+      </nav>
+
+      <header class="v21-section-header">
+        <h1>Genius Property V21</h1>
+        <p>Version production candidate : legacy et hotfixes désactivés.</p>
+      </header>
+
+      <section id="dashboard-root"></section>
+      <section id="notifications-root"></section>
+    </main>
+
+    <script>
+      window.GPV21_ENABLE_LEGACY = false;
+      window.GPV21_ENABLE_HOTFIXES = false;
+    </script>
+    <script type="module" src="./js/v21/bootstrap.js"></script>
+  </body>
+</html>

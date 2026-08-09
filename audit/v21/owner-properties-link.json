@@ -1,0 +1,7 @@
+{
+  "source_zip": "genius-property-v21-owners.zip",
+  "added": [
+    "js/v21/modules/properties/services/property-owner.service.ts",
+    "tests/v21/properties/property-owner.service.test.js"
+  ]
+}

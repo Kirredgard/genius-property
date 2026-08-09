@@ -1,0 +1,37 @@
+{
+  "source_zip": "genius-property-v21-facades-registry.zip",
+  "total_hotfix_files": 5,
+  "hotfix_files": [
+    {
+      "file": "js/core/consolidated-hotfixes.js",
+      "size_bytes": 122399,
+      "lines": 1055,
+      "window_occurrences": 267
+    },
+    {
+      "file": "js/core/avenir-kpi-fix.js",
+      "size_bytes": 10869,
+      "lines": 320,
+      "window_occurrences": 34
+    },
+    {
+      "file": "js/core/paiements-avenir-button-final-fix.js",
+      "size_bytes": 5775,
+      "lines": 134,
+      "window_occurrences": 16
+    },
+    {
+      "file": "js/core/dashboard-actions-fix.js",
+      "size_bytes": 4884,
+      "lines": 101,
+      "window_occurrences": 10
+    },
+    {
+      "file": "js/core/flicker-fix.js",
+      "size_bytes": 1556,
+      "lines": 43,
+      "window_occurrences": 2
+    }
+  ],
+  "strategy": "Hotfixes are not loaded by default in V21 clean mode. They can be enabled with ?hotfix=1 or window.GPV21_ENABLE_HOTFIXES=true."
+}

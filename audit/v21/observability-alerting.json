@@ -1,0 +1,9 @@
+{
+  "source_zip": "genius-property-v21-audit-logs-tracking.zip",
+  "added": [
+    "js/v21/observability/alerting.service.ts",
+    "js/v21/observability/observability-dashboard.ts",
+    "observability.v21.html",
+    "OBSERVABILITY_ALERTING_V21.md"
+  ]
+}

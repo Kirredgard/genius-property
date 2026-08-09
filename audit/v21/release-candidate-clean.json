@@ -1,0 +1,17 @@
+{
+  "source_zip": "genius-property-v21-final-stabilization-bundle.zip",
+  "pages": 42,
+  "modules": 191,
+  "docs": 89,
+  "badLocalImports": [],
+  "badLocalImportCount": 0,
+  "added": [
+    "release/v21-page-index.json",
+    "release/v21-module-index.json",
+    "scripts/v21-final-release-check.mjs",
+    "FINAL_RISK_REGISTER_V21.md",
+    "BETA_FREEZE_CHECKLIST_V21.md",
+    "BETA_DAY_ONE_GUIDE_V21.md",
+    "RELEASE_CANDIDATE_FINAL_V21.md"
+  ]
+}

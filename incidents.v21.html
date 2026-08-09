@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genius Property — Incidents V21</title>
+    <link rel="stylesheet" href="./styles/v21.css" />
+  </head>
+  <body>
+    <main class="v21-shell">
+      <nav class="v21-nav">
+        <a href="./observability.v21.html">Observabilité</a>
+        <a href="./feedback.v21.html">Feedback</a>
+        <a href="./health.v21.html">Health</a>
+      </nav>
+
+      <header class="v21-section-header">
+        <h1>Incidents</h1>
+        <p>Créer et suivre les incidents beta/production.</p>
+      </header>
+
+      <section class="v21-form-card">
+        <form id="incident-form" class="v21-form">
+          <label class="v21-form-field"><span>Titre</span><input name="title" required /></label>
+          <label class="v21-form-field"><span>Sévérité</span><select name="severity"><option>low</option><option>medium</option><option>high</option><option>critical</option></select></label>
+          <label class="v21-form-field"><span>Description</span><input name="description" /></label>
+          <div class="v21-form-actions"><button type="submit">Créer incident</button></div>
+        </form>
+      </section>
+
+      <section class="v21-form-card"><h2>Incidents</h2><pre id="incident-output"></pre></section>
+    </main>
+
+    <script type="module" src="./js/v21/pages/incidents.page.js"></script>
+  </body>
+</html>

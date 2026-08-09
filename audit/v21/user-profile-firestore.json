@@ -1,0 +1,12 @@
+{
+  "source_zip": "genius-property-v21-user-agency-context.zip",
+  "added": [
+    "js/v21/profile/user-profile.service.ts",
+    "js/v21/profile/permissions.ts",
+    "profile.v21.html",
+    "USER_PROFILE_FIRESTORE_V21.md"
+  ],
+  "changed": [
+    "js/v21/auth/auth.module.ts"
+  ]
+}

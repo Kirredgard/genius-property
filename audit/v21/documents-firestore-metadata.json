@@ -1,0 +1,7 @@
+{
+  "source_zip": "genius-property-v21-documents-storage.zip",
+  "added": [
+    "js/v21/modules/documents/services/document-metadata.service.ts",
+    "tests/v21/documents/document-metadata.service.test.js"
+  ]
+}

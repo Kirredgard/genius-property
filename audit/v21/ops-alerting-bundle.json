@@ -1,0 +1,18 @@
+{
+  "source_zip": "genius-property-v21-beta-operations-bundle.zip",
+  "bundle_points": [
+    "ops alert client",
+    "ops api slack discord",
+    "status page",
+    "command center",
+    "weekly beta report",
+    "changelog",
+    "beta hub navigation"
+  ],
+  "added": [
+    "status.v21.html",
+    "command-center.v21.html",
+    "OPS_ALERTING_BUNDLE_V21.md",
+    "CHANGELOG_V21.md"
+  ]
+}

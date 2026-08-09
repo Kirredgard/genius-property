@@ -1,0 +1,15 @@
+{
+  "source_zip": "genius-property-v21-crud-forms.zip",
+  "changed": [
+    "js/v21/actions/list-actions.ts",
+    "js/v21/modules/properties/ui/properties.list.ts",
+    "js/v21/modules/tenants/ui/tenants.list.ts",
+    "js/v21/modules/owners/ui/owners.list.ts",
+    "js/v21/modules/contracts/ui/contracts.list.ts",
+    "js/v21/pages/properties.page.ts",
+    "js/v21/pages/tenants.page.ts",
+    "js/v21/pages/owners.page.ts",
+    "js/v21/pages/contracts.page.ts",
+    "tests/v21/actions/list-actions.test.js"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "noUncheckedIndexedAccess": false,
+    "exactOptionalPropertyTypes": false,
+    "allowJs": true,
+    "checkJs": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "../js/v21/modules/contracts/**/*.ts",
+    "../js/v21/types/**/*.ts",
+    "../tests/v21/contracts/**/*.js"
+  ]
+}

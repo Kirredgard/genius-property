@@ -1,0 +1,8 @@
+{
+  "source_zip": "genius-property-v21-documents-ui.zip",
+  "added": [
+    "js/v21/modules/owners/owners.module.ts",
+    "js/v21/modules/owners/services/owners.service.ts",
+    "tests/v21/owners/owner.validator.test.js"
+  ]
+}

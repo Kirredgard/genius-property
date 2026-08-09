@@ -1,0 +1,94 @@
+{
+  "source_zip": "genius-property-v21-typescript-strict-domains.zip",
+  "fixed_files": [],
+  "modules": [
+    {
+      "domain": "auth",
+      "module_files": [
+        "js/v21/modules/auth/auth.module.ts"
+      ],
+      "services": [],
+      "tests": []
+    },
+    {
+      "domain": "contracts",
+      "module_files": [
+        "js/v21/modules/contracts/contracts.module.ts"
+      ],
+      "services": [
+        "js/v21/modules/contracts/services/contracts.service.ts"
+      ],
+      "tests": [
+        "tests/v21/contracts/contract.validator.test.js",
+        "tests/v21/contracts/contract.firestore.adapter.test.js"
+      ]
+    },
+    {
+      "domain": "dashboard",
+      "module_files": [
+        "js/v21/modules/dashboard/dashboard.module.ts"
+      ],
+      "services": [
+        "js/v21/modules/dashboard/services/dashboard.service.js"
+      ],
+      "tests": []
+    },
+    {
+      "domain": "notifications",
+      "module_files": [
+        "js/v21/modules/notifications/notifications.module.ts"
+      ],
+      "services": [
+        "js/v21/modules/notifications/services/notifications.service.ts"
+      ],
+      "tests": [
+        "tests/v21/notifications/business-alerts.rules.test.js",
+        "tests/v21/notifications/notification.firestore.adapter.test.js"
+      ]
+    },
+    {
+      "domain": "payments",
+      "module_files": [
+        "js/v21/modules/payments/payments.module.ts"
+      ],
+      "services": [
+        "js/v21/modules/payments/services/payments.service.js"
+      ],
+      "tests": []
+    },
+    {
+      "domain": "properties",
+      "module_files": [
+        "js/v21/modules/properties/properties.module.ts"
+      ],
+      "services": [
+        "js/v21/modules/properties/services/properties.service.ts"
+      ],
+      "tests": [
+        "tests/v21/properties/property.validator.test.js",
+        "tests/v21/properties/property.firestore.adapter.test.js"
+      ]
+    },
+    {
+      "domain": "tenants",
+      "module_files": [
+        "js/v21/modules/tenants/tenants.module.ts"
+      ],
+      "services": [
+        "js/v21/modules/tenants/services/tenants.service.ts"
+      ],
+      "tests": [
+        "tests/v21/tenants/tenant.validator.test.js",
+        "tests/v21/tenants/tenant.firestore.adapter.test.js"
+      ]
+    }
+  ],
+  "next_manual_commands": [
+    "npm install",
+    "npm run healthcheck:v21",
+    "npm run audit:imports",
+    "npm run typecheck",
+    "npm run test",
+    "npm run build"
+  ]
+}

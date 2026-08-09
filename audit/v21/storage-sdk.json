@@ -1,0 +1,8 @@
+{
+  "source_zip": "genius-property-v21-auth-sdk.zip",
+  "added": [
+    "js/v21/storage/storage.service.ts",
+    "js/v21/storage/storage.module.ts",
+    "tests/v21/storage/storage.service.test.js"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "source_zip": "genius-property-v21-permissions-ui.zip",
+  "changed": [
+    "js/v21/permissions/service-permission-guard.ts",
+    "js/v21/modules/owners/owners.module.ts",
+    "js/v21/modules/properties/properties.module.ts",
+    "js/v21/modules/tenants/tenants.module.ts",
+    "js/v21/modules/contracts/contracts.module.ts",
+    "js/v21/modules/owner-payouts/owner-payouts.module.ts"
+  ],
+  "added": [
+    "js/v21/permissions/service-permission-guard.ts",
+    "tests/v21/permissions/service-permission-guard.test.js",
+    "SERVICE_PERMISSION_GUARDS_V21.md"
+  ]
+}

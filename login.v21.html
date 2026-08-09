@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genius Property — Connexion V21</title>
+    <link rel="stylesheet" href="./styles/v21.css" />
+  </head>
+  <body>
+    <main class="v21-shell v21-auth-shell">
+      <section class="v21-form-card v21-auth-card">
+        <h1>Connexion V21</h1>
+        <p>Connecte-toi avec Firebase Auth.</p>
+
+        <form id="login-form" class="v21-form">
+          <label class="v21-form-field">
+            <span>Email</span>
+            <input name="email" type="email" autocomplete="email" required />
+          </label>
+
+          <label class="v21-form-field">
+            <span>Mot de passe</span>
+            <input name="password" type="password" autocomplete="current-password" required />
+          </label>
+
+          <div class="v21-form-actions">
+            <button type="submit">Se connecter</button>
+            <a class="v21-action-button" href="./dashboard.v21.html?demo=1">Mode démo</a>
+          </div>
+
+          <p id="login-message" class="v21-form-message"></p>
+        </form>
+      </section>
+    </main>
+
+    <script type="module" src="./js/v21/pages/login.page.js"></script>
+  </body>
+</html>

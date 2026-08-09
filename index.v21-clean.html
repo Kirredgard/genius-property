@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genius Property — V21 Clean</title>
+    <link rel="stylesheet" href="./styles/main.css" />
+    <link rel="stylesheet" href="./styles/v21.css" />
+  </head>
+  <body>
+    <noscript>JavaScript est requis pour utiliser Genius Property.</noscript>
+
+    <div id="app">
+      <main class="v21-shell">
+        <section class="v21-section-header">
+          <h1>Genius Property V21</h1>
+          <p>Version clean loader — modules modernes chargés en priorité. <a href="./dashboard.v21.html?demo=1">Voir la démo</a></p>
+        </section>
+
+        <div id="dashboard-root"></div>
+        <div id="notifications-root"></div>
+      </main>
+    </div>
+
+    <script>
+      window.GPV21_ENABLE_LEGACY = false;
+      window.GPV21_ENABLE_HOTFIXES = false;
+    </script>
+    <script type="module" src="./js/v21/bootstrap.js"></script>
+  </body>
+</html>

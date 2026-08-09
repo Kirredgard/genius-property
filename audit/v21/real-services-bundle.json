@@ -1,0 +1,20 @@
+{
+  "source_zip": "genius-property-v21-field-validation-bundle.zip",
+  "bundle_points": [
+    "firebase real env",
+    "firebase rules/indexes checklist",
+    "stripe real checklist",
+    "stripe cli scripts",
+    "email real checklist",
+    "real services validation scripts",
+    "real services page",
+    "runbook"
+  ],
+  "added": [
+    ".env.real.example",
+    "firebase.indexes.v21.json",
+    "real-services.v21.html",
+    "REAL_SERVICES_SETUP_V21.md",
+    "REAL_SERVICES_RUNBOOK_V21.md"
+  ]
+}

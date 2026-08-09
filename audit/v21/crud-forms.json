@@ -1,0 +1,15 @@
+{
+  "source_zip": "genius-property-v21-domain-pages.zip",
+  "created_or_changed": [
+    "js/v21/forms/form-utils.ts",
+    "js/v21/pages/properties.page.ts",
+    "properties.v21.html",
+    "js/v21/pages/tenants.page.ts",
+    "tenants.v21.html",
+    "js/v21/pages/owners.page.ts",
+    "owners.v21.html",
+    "js/v21/pages/contracts.page.ts",
+    "contracts.v21.html",
+    "tests/v21/forms/form-utils.test.js"
+  ]
+}

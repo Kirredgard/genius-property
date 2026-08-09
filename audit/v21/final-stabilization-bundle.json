@@ -1,0 +1,12 @@
+{
+  "source_zip": "genius-property-v21-go-live-final.zip",
+  "bundle_points": [
+    "smoke tests",
+    "beta seed",
+    "runtime config validation",
+    "quality report",
+    "quick links",
+    "global demo",
+    "final stabilization page"
+  ]
+}

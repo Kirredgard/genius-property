@@ -1,0 +1,27 @@
+{
+  "source_zip": "genius-property-v21-release-ops.zip",
+  "status": "final handover prepared",
+  "pages": [
+    "contract-detail.v21.html",
+    "contracts.v21.html",
+    "dashboard.v21.html",
+    "documents.v21.html",
+    "firestore-test.v21.html",
+    "health.v21.html",
+    "index.v21.html",
+    "login.v21.html",
+    "owner-detail.v21.html",
+    "owners.v21.html",
+    "propertie-detail.v21.html",
+    "properties.v21.html",
+    "storage-test.v21.html",
+    "tenant-detail.v21.html",
+    "tenants.v21.html"
+  ],
+  "migration_docs_count": 41,
+  "added": [
+    "FINAL_HANDOVER_V21.md",
+    "COMMAND_MATRIX_V21.md",
+    "DELIVERABLE_INDEX_V21.md"
+  ]
+}

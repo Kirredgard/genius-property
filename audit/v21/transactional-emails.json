@@ -1,0 +1,12 @@
+{
+  "source_zip": "genius-property-v21-onboarding-invitations.zip",
+  "added": [
+    "js/v21/emails/email-api.client.ts",
+    "api/emails/server.example.mjs",
+    "api/emails/email-templates.js",
+    "TRANSACTIONAL_EMAILS_V21.md"
+  ],
+  "changed": [
+    "js/v21/pages/team.page.ts"
+  ]
+}

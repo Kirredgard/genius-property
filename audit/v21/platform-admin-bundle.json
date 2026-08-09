@@ -1,0 +1,12 @@
+{
+  "source_zip": "genius-property-v21-ops-alerting-bundle.zip",
+  "bundle_points": [
+    "advanced feature flags",
+    "maintenance mode",
+    "announcements",
+    "backup export",
+    "api keys",
+    "usage quotas",
+    "super admin console"
+  ]
+}

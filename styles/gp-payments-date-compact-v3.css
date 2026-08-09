@@ -1,0 +1,3 @@
+/* Le navigateur garde le picker natif, mais l'indication demandée est bien jj/mm/aaaa */
+input[type="date"]{font-variant-numeric:tabular-nums;}
+input[type="date"]:not(:focus):invalid{color:#9ca3af;}

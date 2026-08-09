@@ -1,0 +1,136 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+
+    function isSuperAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/superAdmins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/superAdmins/$(request.auth.uid)).data.active == true;
+    }
+
+    function memberDoc(agencyId) {
+      return get(/databases/$(database)/documents/agencies/$(agencyId)/members/$(request.auth.uid));
+    }
+
+    function isMember(agencyId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/agencies/$(agencyId)/members/$(request.auth.uid))
+        && memberDoc(agencyId).data.status == 'active';
+    }
+
+    function role(agencyId) { return memberDoc(agencyId).data.role; }
+
+    function canRead(agencyId) {
+      return isSuperAdmin() || (isMember(agencyId) && role(agencyId) in ['owner', 'admin', 'agent', 'viewer']);
+    }
+
+    function canWriteDataByRole(agencyId) {
+      return isSuperAdmin() || (isMember(agencyId) && role(agencyId) in ['owner', 'admin', 'agent']);
+    }
+
+    function canAdmin(agencyId) {
+      return isSuperAdmin() || (isMember(agencyId) && role(agencyId) in ['owner', 'admin']);
+    }
+
+    function isOwner(agencyId) {
+      return isSuperAdmin() || (isMember(agencyId) && role(agencyId) == 'owner');
+    }
+
+    function licenseActive(agencyId) {
+      return isSuperAdmin() || (
+        exists(/databases/$(database)/documents/agencies/$(agencyId))
+        && get(/databases/$(database)/documents/agencies/$(agencyId)).data.licenseStatus in ['active', 'trial']
+        && (
+          !get(/databases/$(database)/documents/agencies/$(agencyId)).data.keys().hasAny(['licenseExpiresAt'])
+          || get(/databases/$(database)/documents/agencies/$(agencyId)).data.licenseExpiresAt == null
+          || request.time < get(/databases/$(database)/documents/agencies/$(agencyId)).data.licenseExpiresAt
+        )
+      );
+    }
+
+    match /superAdmins/{uid} {
+      allow read: if signedIn() && uid == request.auth.uid;
+      allow create, update, delete: if false; // création manuelle dans Firebase Console uniquement
+    }
+
+    match /licenses/{licenseKey} {
+      // Les clients peuvent vérifier/activer uniquement une clé qu’ils connaissent.
+      // Le listing global et la création restent réservés au super admin.
+      allow get: if signedIn();
+      allow list: if isSuperAdmin();
+      allow create, delete: if isSuperAdmin();
+      allow update: if isSuperAdmin()
+        || (signedIn()
+          && resource.data.status in ['unused', 'active']
+          && (!resource.data.keys().hasAny(['agencyId']) || resource.data.agencyId == request.resource.data.agencyId)
+          && request.resource.data.agencyId is string
+          && canAdmin(request.resource.data.agencyId)
+          && request.resource.data.status == 'active');
+    }
+
+    match /licenseEvents/{eventId} {
+      allow read: if isSuperAdmin() || (signedIn() && resource.data.agencyId is string && canRead(resource.data.agencyId));
+      allow create: if signedIn()
+        && request.resource.data.agencyId is string
+        && canRead(request.resource.data.agencyId)
+        && request.resource.data.actorUid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    match /agencies/{agencyId} {
+      allow create: if isSuperAdmin() || (signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.status in ['active', 'trial']);
+
+      allow read: if canRead(agencyId);
+      allow update: if canAdmin(agencyId);
+      allow delete: if isOwner(agencyId);
+
+      match /members/{uid} {
+        allow read: if canRead(agencyId);
+
+        allow create: if isSuperAdmin() || (signedIn()
+          && uid == request.auth.uid
+          && request.resource.data.role == 'owner'
+          && exists(/databases/$(database)/documents/agencies/$(agencyId))
+          && get(/databases/$(database)/documents/agencies/$(agencyId)).data.ownerUid == request.auth.uid)
+          || (canAdmin(agencyId)
+          && request.resource.data.role in ['admin', 'agent', 'viewer']
+          && request.resource.data.status in ['active', 'inactive']);
+
+        allow update: if canAdmin(agencyId)
+          && (
+            request.resource.data.role in ['admin', 'agent', 'viewer']
+            || isOwner(agencyId)
+          );
+
+        allow delete: if isOwner(agencyId);
+      }
+
+      match /data/{docId} {
+        allow read: if canRead(agencyId);
+        allow create, update: if canWriteDataByRole(agencyId)
+          && licenseActive(agencyId)
+          && request.resource.data.agencyId == agencyId;
+        allow delete: if canAdmin(agencyId) && licenseActive(agencyId);
+      }
+
+      match /auditLogs/{logId} {
+        allow read: if canAdmin(agencyId);
+        allow create: if canWriteDataByRole(agencyId)
+          && request.resource.data.actorUid == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+
+    match /gp_databases/{workspaceId} {
+      allow read, update, delete: if signedIn()
+        && workspaceId == request.auth.uid
+        && resource.data.ownerUid == request.auth.uid;
+      allow create: if signedIn()
+        && workspaceId == request.auth.uid
+        && request.resource.data.ownerUid == request.auth.uid;
+    }
+  }
+}

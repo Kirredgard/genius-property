@@ -1,0 +1,12 @@
+{
+  "source_zip": "genius-property-v21-enterprise-bundle.zip",
+  "bundle_points": [
+    "multi region",
+    "performance cache",
+    "queue jobs",
+    "enterprise sso",
+    "ai assistant",
+    "financial reporting",
+    "disaster recovery"
+  ]
+}

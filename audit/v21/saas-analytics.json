@@ -1,0 +1,10 @@
+{
+  "source_zip": "genius-property-v21-stripe-email-notifications.zip",
+  "added": [
+    "js/v21/analytics/saas-metrics.service.ts",
+    "js/v21/analytics/saas-analytics.repository.ts",
+    "js/v21/analytics/saas-analytics.view.ts",
+    "saas-analytics.v21.html",
+    "SAAS_ANALYTICS_V21.md"
+  ]
+}

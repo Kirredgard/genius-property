@@ -1,0 +1,11 @@
+{
+  "source_zip": "genius-property-v21-stripe-checkout.zip",
+  "added_or_changed": [
+    "api/billing/server.example.mjs",
+    "api/billing/stripe-events.js",
+    "api/billing/package.example.json",
+    "js/v21/billing/subscription-banner.ts",
+    "STRIPE_TESTING_CHECKLIST_V21.md",
+    "STRIPE_WEBHOOKS_COMPLETE_V21.md"
+  ]
+}

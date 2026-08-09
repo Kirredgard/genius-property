@@ -1,0 +1,2129 @@
+{
+  "source_zip": "genius-property-v21-notifications-migration.zip",
+  "index_scripts": {
+    "index.html": [],
+    "index.v21.html": []
+  },
+  "totals": {
+    "js_files": 120,
+    "index_files": 2,
+    "window_occurrences": 2869,
+    "files_with_window": 78,
+    "legacy_candidates": 3,
+    "hotfix_files": 5
+  },
+  "legacy_candidates": [
+    {
+      "file": "js/app.legacy.bundle.js",
+      "size_bytes": 596316,
+      "lines": 9364
+    },
+    {
+      "file": "js/core/legacy-bridge.js",
+      "size_bytes": 1926,
+      "lines": 37
+    },
+    {
+      "file": "js/v21/core/legacy-quarantine.js",
+      "size_bytes": 431,
+      "lines": 13
+    }
+  ],
+  "hotfix_files": [
+    {
+      "file": "js/core/consolidated-hotfixes.js",
+      "size_bytes": 122399,
+      "lines": 1055
+    },
+    {
+      "file": "js/core/avenir-kpi-fix.js",
+      "size_bytes": 10869,
+      "lines": 320
+    },
+    {
+      "file": "js/core/paiements-avenir-button-final-fix.js",
+      "size_bytes": 5775,
+      "lines": 134
+    },
+    {
+      "file": "js/core/dashboard-actions-fix.js",
+      "size_bytes": 4884,
+      "lines": 101
+    },
+    {
+      "file": "js/core/flicker-fix.js",
+      "size_bytes": 1556,
+      "lines": 43
+    }
+  ],
+  "window_occurrences": [
+    {
+      "file": "js/app.legacy.bundle.js",
+      "window_occurrences": 458
+    },
+    {
+      "file": "js/core/consolidated-hotfixes.js",
+      "window_occurrences": 267
+    },
+    {
+      "file": "js/core/runtime.js",
+      "window_occurrences": 220
+    },
+    {
+      "file": "js/pages/biens.js",
+      "window_occurrences": 193
+    },
+    {
+      "file": "js/pages/locataires.js",
+      "window_occurrences": 115
+    },
+    {
+      "file": "js/pages/paiements.js",
+      "window_occurrences": 110
+    },
+    {
+      "file": "js/core/firebase-auth.js",
+      "window_occurrences": 87
+    },
+    {
+      "file": "js/pages/contrats.js",
+      "window_occurrences": 71
+    },
+    {
+      "file": "js/pages/dashboard-desktop.js",
+      "window_occurrences": 70
+    },
+    {
+      "file": "js/pages/depenses.js",
+      "window_occurrences": 66
+    },
+    {
+      "file": "js/firebase.js",
+      "window_occurrences": 62
+    },
+    {
+      "file": "js/pages/proprietaires.js",
+      "window_occurrences": 61
+    },
+    {
+      "file": "js/core/firebase-adapter.js",
+      "window_occurrences": 60
+    },
+    {
+      "file": "js/pages/locatives.js",
+      "window_occurrences": 58
+    },
+    {
+      "file": "js/core/ui-functions.js",
+      "window_occurrences": 54
+    },
+    {
+      "file": "js/pages/agenda.js",
+      "window_occurrences": 49
+    },
+    {
+      "file": "js/pages/admin-stockage.js",
+      "window_occurrences": 47
+    },
+    {
+      "file": "js/core/db.js",
+      "window_occurrences": 43
+    },
+    {
+      "file": "js/safe-bootstrap.js",
+      "window_occurrences": 39
+    },
+    {
+      "file": "js/pages/license-activation.js",
+      "window_occurrences": 39
+    },
+    {
+      "file": "js/core/avenir-kpi-fix.js",
+      "window_occurrences": 34
+    },
+    {
+      "file": "js/pages/messagerie.js",
+      "window_occurrences": 34
+    },
+    {
+      "file": "js/core/license-guard.js",
+      "window_occurrences": 33
+    },
+    {
+      "file": "js/core/navigation.js",
+      "window_occurrences": 32
+    },
+    {
+      "file": "js/pages/sync.js",
+      "window_occurrences": 32
+    },
+    {
+      "file": "js/core/simple-role-router.js",
+      "window_occurrences": 31
+    },
+    {
+      "file": "js/pages/rapports.js",
+      "window_occurrences": 29
+    },
+    {
+      "file": "js/inline/inline-script-12.js",
+      "window_occurrences": 23
+    },
+    {
+      "file": "js/pages/dashboard.js",
+      "window_occurrences": 23
+    },
+    {
+      "file": "js/v21/modules/auth/auth.module.js",
+      "window_occurrences": 23
+    },
+    {
+      "file": "js/inline/inline-script-02.module.js",
+      "window_occurrences": 21
+    },
+    {
+      "file": "js/inline/inline-script-11.js",
+      "window_occurrences": 21
+    },
+    {
+      "file": "js/pages/compact-layout.js",
+      "window_occurrences": 21
+    },
+    {
+      "file": "js/pages/mobile-pages.js",
+      "window_occurrences": 20
+    },
+    {
+      "file": "js/inline/inline-script-05.js",
+      "window_occurrences": 19
+    },
+    {
+      "file": "js/core/auth.js",
+      "window_occurrences": 19
+    },
+    {
+      "file": "js/core/finance-pages-sidecards-final.js",
+      "window_occurrences": 18
+    },
+    {
+      "file": "js/inline/inline-script-10.js",
+      "window_occurrences": 17
+    },
+    {
+      "file": "js/pages/admin-saas.js",
+      "window_occurrences": 17
+    },
+    {
+      "file": "js/core/paiements-avenir-button-final-fix.js",
+      "window_occurrences": 16
+    },
+    {
+      "file": "js/inline/inline-script-09.js",
+      "window_occurrences": 15
+    },
+    {
+      "file": "js/core/super-admin-guard.js",
+      "window_occurrences": 15
+    },
+    {
+      "file": "js/core/owner-select-edit.js",
+      "window_occurrences": 14
+    },
+    {
+      "file": "js/core/lazy-libs.js",
+      "window_occurrences": 13
+    },
+    {
+      "file": "js/core/finance-sidecards-restore.js",
+      "window_occurrences": 11
+    },
+    {
+      "file": "js/core/username-lock.js",
+      "window_occurrences": 10
+    },
+    {
+      "file": "js/core/dashboard-actions-fix.js",
+      "window_occurrences": 10
+    },
+    {
+      "file": "js/core/doc-actions-ensure.js",
+      "window_occurrences": 10
+    },
+    {
+      "file": "js/core/legacy-bridge.js",
+      "window_occurrences": 9
+    },
+    {
+      "file": "js/core/renderers.js",
+      "window_occurrences": 9
+    },
+    {
+      "file": "js/core/forms.js",
+      "window_occurrences": 9
+    },
+    {
+      "file": "js/pages/client-subscription.js",
+      "window_occurrences": 8
+    },
+    {
+      "file": "js/core/app-core-v20.js",
+      "window_occurrences": 7
+    },
+    {
+      "file": "js/inline/inline-script-08.js",
+      "window_occurrences": 6
+    },
+    {
+      "file": "js/inline/inline-script-07.js",
+      "window_occurrences": 6
+    },
+    {
+      "file": "js/core/force-finance-right-column.js",
+      "window_occurrences": 6
+    },
+    {
+      "file": "js/core/gp-date-format-global-v3.js",
+      "window_occurrences": 6
+    },
+    {
+      "file": "js/components/drawers/gp-ui-manager.js",
+      "window_occurrences": 6
+    },
+    {
+      "file": "js/core/mobile.js",
+      "window_occurrences": 5
+    },
+    {
+      "file": "js/core/permissions.js",
+      "window_occurrences": 5
+    },
+    {
+      "file": "js/inline/inline-script-06.js",
+      "window_occurrences": 4
+    },
+    {
+      "file": "js/core/storage-adapter.js",
+      "window_occurrences": 4
+    },
+    {
+      "file": "js/v21/modules/contracts/services/contracts.service.js",
+      "window_occurrences": 4
+    },
+    {
+      "file": "js/v21/modules/properties/services/properties.service.js",
+      "window_occurrences": 4
+    },
+    {
+      "file": "js/v21/modules/tenants/services/tenants.service.js",
+      "window_occurrences": 4
+    },
+    {
+      "file": "js/core/flicker-fix.js",
+      "window_occurrences": 2
+    },
+    {
+      "file": "js/core/validation.js",
+      "window_occurrences": 2
+    },
+    {
+      "file": "js/utils/date-utils.js",
+      "window_occurrences": 2
+    },
+    {
+      "file": "js/v21/modules/notifications/services/notifications.service.js",
+      "window_occurrences": 2
+    },
+    {
+      "file": "env.js",
+      "window_occurrences": 1
+    },
+    {
+      "file": "public/env.example.js",
+      "window_occurrences": 1
+    },
+    {
+      "file": "public/env.js",
+      "window_occurrences": 1
+    },
+    {
+      "file": "js/inline/inline-script-04.js",
+      "window_occurrences": 1
+    },
+    {
+      "file": "js/inline/inline-script-01.js",
+      "window_occurrences": 1
+    },
+    {
+      "file": "js/v21/modules/tenants/tenants.module.js",
+      "window_occurrences": 1
+    },
+    {
+      "file": "js/v21/modules/properties/properties.module.js",
+      "window_occurrences": 1
+    },
+    {
+      "file": "js/v21/modules/contracts/contracts.module.js",
+      "window_occurrences": 1
+    },
+    {
+      "file": "js/v21/modules/notifications/notifications.module.js",
+      "window_occurrences": 1
+    }
+  ],
+  "domain_map": {
+    "reporting": [
+      {
+        "file": "js/app.legacy.bundle.js",
+        "score": 89,
+        "size_bytes": 596316,
+        "lines": 9364
+      },
+      {
+        "file": "js/pages/rapports.js",
+        "score": 45,
+        "size_bytes": 6889,
+        "lines": 167
+      },
+      {
+        "file": "js/pages/biens.js",
+        "score": 23,
+        "size_bytes": 131795,
+        "lines": 1297
+      },
+      {
+        "file": "js/pages/dashboard.js",
+        "score": 18,
+        "size_bytes": 4824,
+        "lines": 115
+      },
+      {
+        "file": "js/pages/locataires.js",
+        "score": 18,
+        "size_bytes": 50109,
+        "lines": 468
+      },
+      {
+        "file": "js/inline/inline-script-11.js",
+        "score": 15,
+        "size_bytes": 8722,
+        "lines": 113
+      },
+      {
+        "file": "js/pages/paiements.js",
+        "score": 15,
+        "size_bytes": 60252,
+        "lines": 407
+      },
+      {
+        "file": "js/core/db.js",
+        "score": 10,
+        "size_bytes": 9307,
+        "lines": 278
+      },
+      {
+        "file": "js/pages/admin-stockage.js",
+        "score": 10,
+        "size_bytes": 14920,
+        "lines": 256
+      },
+      {
+        "file": "js/core/consolidated-hotfixes.js",
+        "score": 9,
+        "size_bytes": 122399,
+        "lines": 1055
+      },
+      {
+        "file": "js/pages/sync.js",
+        "score": 9,
+        "size_bytes": 9835,
+        "lines": 148
+      },
+      {
+        "file": "js/core/legacy-bridge.js",
+        "score": 7,
+        "size_bytes": 1926,
+        "lines": 37
+      },
+      {
+        "file": "js/v21/modules/payments/services/payments.service.js",
+        "score": 7,
+        "size_bytes": 3953,
+        "lines": 97
+      },
+      {
+        "file": "js/core/finance-pages-sidecards-final.js",
+        "score": 6,
+        "size_bytes": 24555,
+        "lines": 122
+      },
+      {
+        "file": "js/core/permissions.js",
+        "score": 5,
+        "size_bytes": 5803,
+        "lines": 119
+      },
+      {
+        "file": "js/v21/core/legacy-quarantine.js",
+        "score": 5,
+        "size_bytes": 431,
+        "lines": 13
+      },
+      {
+        "file": "js/v21/modules/payments/payments.formatters.js",
+        "score": 5,
+        "size_bytes": 911,
+        "lines": 31
+      },
+      {
+        "file": "js/v21/modules/contracts/services/contracts.service.js",
+        "score": 5,
+        "size_bytes": 2413,
+        "lines": 97
+      },
+      {
+        "file": "js/v21/modules/properties/services/properties.service.js",
+        "score": 5,
+        "size_bytes": 2292,
+        "lines": 94
+      },
+      {
+        "file": "js/v21/modules/tenants/services/tenants.service.js",
+        "score": 5,
+        "size_bytes": 2405,
+        "lines": 97
+      },
+      {
+        "file": "js/core/runtime.js",
+        "score": 4,
+        "size_bytes": 41241,
+        "lines": 918
+      },
+      {
+        "file": "js/v21/core/global-registry.js",
+        "score": 4,
+        "size_bytes": 889,
+        "lines": 26
+      },
+      {
+        "file": "js/v21/modules/tenants/tenants.module.js",
+        "score": 4,
+        "size_bytes": 1674,
+        "lines": 64
+      },
+      {
+        "file": "js/v21/modules/properties/properties.module.js",
+        "score": 4,
+        "size_bytes": 1777,
+        "lines": 66
+      },
+      {
+        "file": "js/v21/modules/contracts/contracts.module.js",
+        "score": 4,
+        "size_bytes": 1760,
+        "lines": 66
+      },
+      {
+        "file": "js/v21/modules/notifications/services/notifications.service.js",
+        "score": 4,
+        "size_bytes": 1964,
+        "lines": 61
+      },
+      {
+        "file": "js/core/storage-adapter.js",
+        "score": 3,
+        "size_bytes": 5569,
+        "lines": 162
+      },
+      {
+        "file": "js/pages/contrats.js",
+        "score": 3,
+        "size_bytes": 19583,
+        "lines": 265
+      },
+      {
+        "file": "js/v21/modules/notifications/notifications.module.js",
+        "score": 3,
+        "size_bytes": 2105,
+        "lines": 73
+      },
+      {
+        "file": "js/v21/modules/notifications/rules/business-alerts.rules.js",
+        "score": 3,
+        "size_bytes": 3200,
+        "lines": 92
+      }
+    ],
+    "auth": [
+      {
+        "file": "js/core/firebase-auth.js",
+        "score": 124,
+        "size_bytes": 20006,
+        "lines": 488
+      },
+      {
+        "file": "js/firebase.js",
+        "score": 96,
+        "size_bytes": 9906,
+        "lines": 246
+      },
+      {
+        "file": "js/app.legacy.bundle.js",
+        "score": 73,
+        "size_bytes": 596316,
+        "lines": 9364
+      },
+      {
+        "file": "js/pages/admin-stockage.js",
+        "score": 70,
+        "size_bytes": 14920,
+        "lines": 256
+      },
+      {
+        "file": "js/core/firebase-adapter.js",
+        "score": 67,
+        "size_bytes": 14096,
+        "lines": 358
+      },
+      {
+        "file": "js/inline/inline-script-05.js",
+        "score": 62,
+        "size_bytes": 2289,
+        "lines": 48
+      },
+      {
+        "file": "js/v21/modules/auth/auth.module.js",
+        "score": 61,
+        "size_bytes": 3349,
+        "lines": 85
+      },
+      {
+        "file": "js/safe-bootstrap.js",
+        "score": 48,
+        "size_bytes": 6955,
+        "lines": 160
+      },
+      {
+        "file": "js/inline/inline-script-02.module.js",
+        "score": 38,
+        "size_bytes": 2093,
+        "lines": 60
+      },
+      {
+        "file": "js/core/simple-role-router.js",
+        "score": 32,
+        "size_bytes": 6964,
+        "lines": 184
+      },
+      {
+        "file": "js/core/runtime.js",
+        "score": 29,
+        "size_bytes": 41241,
+        "lines": 918
+      },
+      {
+        "file": "js/pages/admin-saas.js",
+        "score": 22,
+        "size_bytes": 17694,
+        "lines": 341
+      },
+      {
+        "file": "js/pages/license-activation.js",
+        "score": 16,
+        "size_bytes": 6087,
+        "lines": 51
+      },
+      {
+        "file": "js/pages/sync.js",
+        "score": 16,
+        "size_bytes": 9835,
+        "lines": 148
+      },
+      {
+        "file": "js/core/super-admin-guard.js",
+        "score": 14,
+        "size_bytes": 4017,
+        "lines": 96
+      },
+      {
+        "file": "js/core/auth.js",
+        "score": 14,
+        "size_bytes": 5310,
+        "lines": 152
+      },
+      {
+        "file": "js/v21/config/firebase-config.js",
+        "score": 14,
+        "size_bytes": 1050,
+        "lines": 34
+      },
+      {
+        "file": "js/core/license-guard.js",
+        "score": 13,
+        "size_bytes": 6862,
+        "lines": 77
+      },
+      {
+        "file": "js/core/ui-functions.js",
+        "score": 13,
+        "size_bytes": 27069,
+        "lines": 480
+      },
+      {
+        "file": "tests/auth.module.test.js",
+        "score": 12,
+        "size_bytes": 465,
+        "lines": 13
+      },
+      {
+        "file": "js/pages/client-subscription.js",
+        "score": 9,
+        "size_bytes": 6946,
+        "lines": 151
+      },
+      {
+        "file": "tests/firebase-config.test.js",
+        "score": 8,
+        "size_bytes": 627,
+        "lines": 21
+      },
+      {
+        "file": "env.js",
+        "score": 6,
+        "size_bytes": 548,
+        "lines": 13
+      },
+      {
+        "file": "public/env.js",
+        "score": 6,
+        "size_bytes": 548,
+        "lines": 13
+      },
+      {
+        "file": "js/core/navigation.js",
+        "score": 5,
+        "size_bytes": 12528,
+        "lines": 220
+      },
+      {
+        "file": "js/core/permissions.js",
+        "score": 4,
+        "size_bytes": 5803,
+        "lines": 119
+      },
+      {
+        "file": "js/v21/main.js",
+        "score": 4,
+        "size_bytes": 2049,
+        "lines": 54
+      },
+      {
+        "file": "js/core/consolidated-hotfixes.js",
+        "score": 3,
+        "size_bytes": 122399,
+        "lines": 1055
+      },
+      {
+        "file": "public/env.example.js",
+        "score": 2,
+        "size_bytes": 252,
+        "lines": 12
+      },
+      {
+        "file": "js/core/db.js",
+        "score": 2,
+        "size_bytes": 9307,
+        "lines": 278
+      }
+    ],
+    "properties": [
+      {
+        "file": "js/app.legacy.bundle.js",
+        "score": 1203,
+        "size_bytes": 596316,
+        "lines": 9364
+      },
+      {
+        "file": "js/core/consolidated-hotfixes.js",
+        "score": 462,
+        "size_bytes": 122399,
+        "lines": 1055
+      },
+      {
+        "file": "js/pages/biens.js",
+        "score": 300,
+        "size_bytes": 131795,
+        "lines": 1297
+      },
+      {
+        "file": "js/pages/paiements.js",
+        "score": 161,
+        "size_bytes": 60252,
+        "lines": 407
+      },
+      {
+        "file": "js/core/runtime.js",
+        "score": 95,
+        "size_bytes": 41241,
+        "lines": 918
+      },
+      {
+        "file": "js/pages/dashboard-desktop.js",
+        "score": 49,
+        "size_bytes": 26944,
+        "lines": 355
+      },
+      {
+        "file": "js/pages/locatives.js",
+        "score": 48,
+        "size_bytes": 8602,
+        "lines": 208
+      },
+      {
+        "file": "js/core/owner-select-edit.js",
+        "score": 38,
+        "size_bytes": 8374,
+        "lines": 132
+      },
+      {
+        "file": "js/pages/locataires.js",
+        "score": 35,
+        "size_bytes": 50109,
+        "lines": 468
+      },
+      {
+        "file": "js/inline/inline-script-06.js",
+        "score": 32,
+        "size_bytes": 3111,
+        "lines": 66
+      },
+      {
+        "file": "js/v21/modules/properties/services/properties.service.js",
+        "score": 30,
+        "size_bytes": 2292,
+        "lines": 94
+      },
+      {
+        "file": "js/pages/depenses.js",
+        "score": 29,
+        "size_bytes": 7790,
+        "lines": 185
+      },
+      {
+        "file": "js/core/navigation.js",
+        "score": 28,
+        "size_bytes": 12528,
+        "lines": 220
+      },
+      {
+        "file": "js/core/dashboard-actions-fix.js",
+        "score": 21,
+        "size_bytes": 4884,
+        "lines": 101
+      },
+      {
+        "file": "js/pages/compact-layout.js",
+        "score": 21,
+        "size_bytes": 14095,
+        "lines": 105
+      },
+      {
+        "file": "js/v21/modules/properties/properties.module.js",
+        "score": 19,
+        "size_bytes": 1777,
+        "lines": 66
+      },
+      {
+        "file": "js/v21/modules/notifications/rules/business-alerts.rules.js",
+        "score": 16,
+        "size_bytes": 3200,
+        "lines": 92
+      },
+      {
+        "file": "js/v21/modules/properties/adapters/property.firestore.adapter.js",
+        "score": 16,
+        "size_bytes": 1209,
+        "lines": 35
+      },
+      {
+        "file": "js/v21/modules/properties/ui/properties.list.js",
+        "score": 14,
+        "size_bytes": 1692,
+        "lines": 62
+      },
+      {
+        "file": "js/core/permissions.js",
+        "score": 12,
+        "size_bytes": 5803,
+        "lines": 119
+      },
+      {
+        "file": "tests/v21/properties/property.validator.test.js",
+        "score": 11,
+        "size_bytes": 952,
+        "lines": 36
+      },
+      {
+        "file": "js/inline/inline-script-11.js",
+        "score": 11,
+        "size_bytes": 8722,
+        "lines": 113
+      },
+      {
+        "file": "js/pages/rapports.js",
+        "score": 9,
+        "size_bytes": 6889,
+        "lines": 167
+      },
+      {
+        "file": "js/pages/proprietaires.js",
+        "score": 9,
+        "size_bytes": 6850,
+        "lines": 166
+      },
+      {
+        "file": "js/core/db.js",
+        "score": 8,
+        "size_bytes": 9307,
+        "lines": 278
+      },
+      {
+        "file": "js/core/finance-pages-sidecards-final.js",
+        "score": 8,
+        "size_bytes": 24555,
+        "lines": 122
+      },
+      {
+        "file": "js/pages/contrats.js",
+        "score": 8,
+        "size_bytes": 19583,
+        "lines": 265
+      },
+      {
+        "file": "js/pages/mobile-pages.js",
+        "score": 8,
+        "size_bytes": 16903,
+        "lines": 267
+      },
+      {
+        "file": "tests/v21/properties/property.firestore.adapter.test.js",
+        "score": 7,
+        "size_bytes": 868,
+        "lines": 30
+      },
+      {
+        "file": "js/core/license-guard.js",
+        "score": 7,
+        "size_bytes": 6862,
+        "lines": 77
+      }
+    ],
+    "dashboard": [
+      {
+        "file": "js/app.legacy.bundle.js",
+        "score": 126,
+        "size_bytes": 596316,
+        "lines": 9364
+      },
+      {
+        "file": "js/core/consolidated-hotfixes.js",
+        "score": 40,
+        "size_bytes": 122399,
+        "lines": 1055
+      },
+      {
+        "file": "js/core/avenir-kpi-fix.js",
+        "score": 32,
+        "size_bytes": 10869,
+        "lines": 320
+      },
+      {
+        "file": "js/pages/dashboard-desktop.js",
+        "score": 32,
+        "size_bytes": 26944,
+        "lines": 355
+      },
+      {
+        "file": "js/pages/dashboard.js",
+        "score": 30,
+        "size_bytes": 4824,
+        "lines": 115
+      },
+      {
+        "file": "js/core/dashboard-actions-fix.js",
+        "score": 19,
+        "size_bytes": 4884,
+        "lines": 101
+      },
+      {
+        "file": "js/pages/locataires.js",
+        "score": 19,
+        "size_bytes": 50109,
+        "lines": 468
+      },
+      {
+        "file": "js/v21/modules/dashboard/dashboard.module.js",
+        "score": 19,
+        "size_bytes": 634,
+        "lines": 16
+      },
+      {
+        "file": "tests/dashboard.service.test.js",
+        "score": 12,
+        "size_bytes": 611,
+        "lines": 23
+      },
+      {
+        "file": "js/v21/modules/dashboard/ui/dashboard.layout.js",
+        "score": 11,
+        "size_bytes": 476,
+        "lines": 16
+      },
+      {
+        "file": "js/core/navigation.js",
+        "score": 10,
+        "size_bytes": 12528,
+        "lines": 220
+      },
+      {
+        "file": "js/pages/admin-stockage.js",
+        "score": 10,
+        "size_bytes": 14920,
+        "lines": 256
+      },
+      {
+        "file": "js/v21/modules/dashboard/widgets.js",
+        "score": 9,
+        "size_bytes": 631,
+        "lines": 22
+      },
+      {
+        "file": "js/safe-bootstrap.js",
+        "score": 8,
+        "size_bytes": 6955,
+        "lines": 160
+      },
+      {
+        "file": "js/v21/modules/dashboard/services/dashboard.service.js",
+        "score": 8,
+        "size_bytes": 420,
+        "lines": 15
+      },
+      {
+        "file": "js/pages/agenda.js",
+        "score": 6,
+        "size_bytes": 7773,
+        "lines": 184
+      },
+      {
+        "file": "js/v21/main.js",
+        "score": 6,
+        "size_bytes": 2049,
+        "lines": 54
+      },
+      {
+        "file": "js/core/permissions.js",
+        "score": 5,
+        "size_bytes": 5803,
+        "lines": 119
+      },
+      {
+        "file": "js/pages/sync.js",
+        "score": 5,
+        "size_bytes": 9835,
+        "lines": 148
+      },
+      {
+        "file": "js/core/username-lock.js",
+        "score": 4,
+        "size_bytes": 3195,
+        "lines": 92
+      },
+      {
+        "file": "js/core/runtime.js",
+        "score": 4,
+        "size_bytes": 41241,
+        "lines": 918
+      },
+      {
+        "file": "js/core/simple-role-router.js",
+        "score": 4,
+        "size_bytes": 6964,
+        "lines": 184
+      },
+      {
+        "file": "js/core/firebase-auth.js",
+        "score": 3,
+        "size_bytes": 20006,
+        "lines": 488
+      },
+      {
+        "file": "js/firebase.js",
+        "score": 2,
+        "size_bytes": 9906,
+        "lines": 246
+      },
+      {
+        "file": "js/inline/inline-script-11.js",
+        "score": 2,
+        "size_bytes": 8722,
+        "lines": 113
+      },
+      {
+        "file": "js/core/auth.js",
+        "score": 2,
+        "size_bytes": 5310,
+        "lines": 152
+      },
+      {
+        "file": "js/pages/admin-saas.js",
+        "score": 2,
+        "size_bytes": 17694,
+        "lines": 341
+      },
+      {
+        "file": "js/pages/messagerie.js",
+        "score": 2,
+        "size_bytes": 5946,
+        "lines": 161
+      },
+      {
+        "file": "js/pages/license-activation.js",
+        "score": 2,
+        "size_bytes": 6087,
+        "lines": 51
+      },
+      {
+        "file": "js/pages/mobile-pages.js",
+        "score": 1,
+        "size_bytes": 16903,
+        "lines": 267
+      }
+    ],
+    "payments": [
+      {
+        "file": "js/app.legacy.bundle.js",
+        "score": 621,
+        "size_bytes": 596316,
+        "lines": 9364
+      },
+      {
+        "file": "js/pages/paiements.js",
+        "score": 142,
+        "size_bytes": 60252,
+        "lines": 407
+      },
+      {
+        "file": "js/core/consolidated-hotfixes.js",
+        "score": 140,
+        "size_bytes": 122399,
+        "lines": 1055
+      },
+      {
+        "file": "js/pages/biens.js",
+        "score": 116,
+        "size_bytes": 131795,
+        "lines": 1297
+      },
+      {
+        "file": "js/pages/dashboard-desktop.js",
+        "score": 93,
+        "size_bytes": 26944,
+        "lines": 355
+      },
+      {
+        "file": "js/core/finance-pages-sidecards-final.js",
+        "score": 53,
+        "size_bytes": 24555,
+        "lines": 122
+      },
+      {
+        "file": "js/core/runtime.js",
+        "score": 38,
+        "size_bytes": 41241,
+        "lines": 918
+      },
+      {
+        "file": "js/v21/modules/payments/payments.module.js",
+        "score": 36,
+        "size_bytes": 1938,
+        "lines": 55
+      },
+      {
+        "file": "js/v21/modules/payments/services/payments.service.js",
+        "score": 34,
+        "size_bytes": 3953,
+        "lines": 97
+      },
+      {
+        "file": "js/core/navigation.js",
+        "score": 30,
+        "size_bytes": 12528,
+        "lines": 220
+      },
+      {
+        "file": "tests/payments.service.test.js",
+        "score": 29,
+        "size_bytes": 2174,
+        "lines": 52
+      },
+      {
+        "file": "js/core/firebase-auth.js",
+        "score": 24,
+        "size_bytes": 20006,
+        "lines": 488
+      },
+      {
+        "file": "js/pages/locatives.js",
+        "score": 23,
+        "size_bytes": 8602,
+        "lines": 208
+      },
+      {
+        "file": "js/v21/modules/notifications/rules/business-alerts.rules.js",
+        "score": 23,
+        "size_bytes": 3200,
+        "lines": 92
+      },
+      {
+        "file": "js/core/force-finance-right-column.js",
+        "score": 21,
+        "size_bytes": 11140,
+        "lines": 103
+      },
+      {
+        "file": "js/core/simple-role-router.js",
+        "score": 20,
+        "size_bytes": 6964,
+        "lines": 184
+      },
+      {
+        "file": "js/pages/locataires.js",
+        "score": 19,
+        "size_bytes": 50109,
+        "lines": 468
+      },
+      {
+        "file": "js/core/finance-sidecards-restore.js",
+        "score": 17,
+        "size_bytes": 9312,
+        "lines": 114
+      },
+      {
+        "file": "js/core/firebase-adapter.js",
+        "score": 17,
+        "size_bytes": 14096,
+        "lines": 358
+      },
+      {
+        "file": "js/core/avenir-kpi-fix.js",
+        "score": 17,
+        "size_bytes": 10869,
+        "lines": 320
+      },
+      {
+        "file": "js/core/permissions.js",
+        "score": 16,
+        "size_bytes": 5803,
+        "lines": 119
+      },
+      {
+        "file": "js/pages/contrats.js",
+        "score": 16,
+        "size_bytes": 19583,
+        "lines": 265
+      },
+      {
+        "file": "js/core/ui-functions.js",
+        "score": 15,
+        "size_bytes": 27069,
+        "lines": 480
+      },
+      {
+        "file": "js/core/dashboard-actions-fix.js",
+        "score": 14,
+        "size_bytes": 4884,
+        "lines": 101
+      },
+      {
+        "file": "js/core/paiements-avenir-button-final-fix.js",
+        "score": 13,
+        "size_bytes": 5775,
+        "lines": 134
+      },
+      {
+        "file": "js/v21/modules/payments/ui/payments.layout.js",
+        "score": 13,
+        "size_bytes": 786,
+        "lines": 16
+      },
+      {
+        "file": "js/v21/modules/contracts/validators/contract.validator.js",
+        "score": 12,
+        "size_bytes": 1606,
+        "lines": 47
+      },
+      {
+        "file": "js/pages/dashboard.js",
+        "score": 11,
+        "size_bytes": 4824,
+        "lines": 115
+      },
+      {
+        "file": "js/v21/modules/contracts/adapters/contract.firestore.adapter.js",
+        "score": 11,
+        "size_bytes": 1205,
+        "lines": 33
+      },
+      {
+        "file": "js/firebase.js",
+        "score": 9,
+        "size_bytes": 9906,
+        "lines": 246
+      }
+    ],
+    "tenants": [
+      {
+        "file": "js/app.legacy.bundle.js",
+        "score": 619,
+        "size_bytes": 596316,
+        "lines": 9364
+      },
+      {
+        "file": "js/pages/locataires.js",
+        "score": 180,
+        "size_bytes": 50109,
+        "lines": 468
+      },
+      {
+        "file": "js/core/consolidated-hotfixes.js",
+        "score": 114,
+        "size_bytes": 122399,
+        "lines": 1055
+      },
+      {
+        "file": "js/pages/biens.js",
+        "score": 81,
+        "size_bytes": 131795,
+        "lines": 1297
+      },
+      {
+        "file": "js/pages/paiements.js",
+        "score": 61,
+        "size_bytes": 60252,
+        "lines": 407
+      },
+      {
+        "file": "js/core/runtime.js",
+        "score": 58,
+        "size_bytes": 41241,
+        "lines": 918
+      },
+      {
+        "file": "js/v21/modules/tenants/tenants.module.js",
+        "score": 42,
+        "size_bytes": 1674,
+        "lines": 64
+      },
+      {
+        "file": "js/v21/modules/tenants/services/tenants.service.js",
+        "score": 39,
+        "size_bytes": 2405,
+        "lines": 97
+      },
+      {
+        "file": "js/pages/locatives.js",
+        "score": 34,
+        "size_bytes": 8602,
+        "lines": 208
+      },
+      {
+        "file": "js/pages/contrats.js",
+        "score": 33,
+        "size_bytes": 19583,
+        "lines": 265
+      },
+      {
+        "file": "js/v21/modules/notifications/rules/business-alerts.rules.js",
+        "score": 25,
+        "size_bytes": 3200,
+        "lines": 92
+      },
+      {
+        "file": "js/v21/modules/tenants/ui/tenants.list.js",
+        "score": 25,
+        "size_bytes": 1762,
+        "lines": 63
+      },
+      {
+        "file": "js/pages/compact-layout.js",
+        "score": 22,
+        "size_bytes": 14095,
+        "lines": 105
+      },
+      {
+        "file": "js/core/owner-select-edit.js",
+        "score": 17,
+        "size_bytes": 8374,
+        "lines": 132
+      },
+      {
+        "file": "js/pages/dashboard-desktop.js",
+        "score": 16,
+        "size_bytes": 26944,
+        "lines": 355
+      },
+      {
+        "file": "js/core/navigation.js",
+        "score": 14,
+        "size_bytes": 12528,
+        "lines": 220
+      },
+      {
+        "file": "js/v21/modules/tenants/adapters/tenant.firestore.adapter.js",
+        "score": 14,
+        "size_bytes": 1105,
+        "lines": 33
+      },
+      {
+        "file": "tests/v21/tenants/tenant.validator.test.js",
+        "score": 13,
+        "size_bytes": 1016,
+        "lines": 38
+      },
+      {
+        "file": "js/v21/modules/payments/services/payments.service.js",
+        "score": 13,
+        "size_bytes": 3953,
+        "lines": 97
+      },
+      {
+        "file": "tests/v21/tenants/tenant.firestore.adapter.test.js",
+        "score": 9,
+        "size_bytes": 876,
+        "lines": 30
+      },
+      {
+        "file": "js/core/permissions.js",
+        "score": 9,
+        "size_bytes": 5803,
+        "lines": 119
+      },
+      {
+        "file": "tests/payments.service.test.js",
+        "score": 7,
+        "size_bytes": 2174,
+        "lines": 52
+      },
+      {
+        "file": "js/v21/main.js",
+        "score": 7,
+        "size_bytes": 2049,
+        "lines": 54
+      },
+      {
+        "file": "js/v21/modules/notifications/services/notifications.service.js",
+        "score": 7,
+        "size_bytes": 1964,
+        "lines": 61
+      },
+      {
+        "file": "js/pages/rapports.js",
+        "score": 6,
+        "size_bytes": 6889,
+        "lines": 167
+      },
+      {
+        "file": "js/pages/dashboard.js",
+        "score": 6,
+        "size_bytes": 4824,
+        "lines": 115
+      },
+      {
+        "file": "js/core/dashboard-actions-fix.js",
+        "score": 5,
+        "size_bytes": 4884,
+        "lines": 101
+      },
+      {
+        "file": "js/v21/modules/contracts/validators/contract.validator.js",
+        "score": 5,
+        "size_bytes": 1606,
+        "lines": 47
+      },
+      {
+        "file": "js/v21/modules/contracts/adapters/contract.firestore.adapter.js",
+        "score": 5,
+        "size_bytes": 1205,
+        "lines": 33
+      },
+      {
+        "file": "js/v21/modules/tenants/validators/tenant.validator.js",
+        "score": 5,
+        "size_bytes": 1268,
+        "lines": 39
+      }
+    ],
+    "contracts": [
+      {
+        "file": "js/app.legacy.bundle.js",
+        "score": 216,
+        "size_bytes": 596316,
+        "lines": 9364
+      },
+      {
+        "file": "js/pages/biens.js",
+        "score": 171,
+        "size_bytes": 131795,
+        "lines": 1297
+      },
+      {
+        "file": "js/pages/contrats.js",
+        "score": 107,
+        "size_bytes": 19583,
+        "lines": 265
+      },
+      {
+        "file": "js/core/runtime.js",
+        "score": 61,
+        "size_bytes": 41241,
+        "lines": 918
+      },
+      {
+        "file": "js/core/consolidated-hotfixes.js",
+        "score": 54,
+        "size_bytes": 122399,
+        "lines": 1055
+      },
+      {
+        "file": "js/v21/modules/contracts/contracts.module.js",
+        "score": 42,
+        "size_bytes": 1760,
+        "lines": 66
+      },
+      {
+        "file": "js/v21/modules/contracts/services/contracts.service.js",
+        "score": 40,
+        "size_bytes": 2413,
+        "lines": 97
+      },
+      {
+        "file": "js/v21/modules/notifications/rules/business-alerts.rules.js",
+        "score": 30,
+        "size_bytes": 3200,
+        "lines": 92
+      },
+      {
+        "file": "js/v21/modules/contracts/ui/contracts.list.js",
+        "score": 22,
+        "size_bytes": 1685,
+        "lines": 62
+      },
+      {
+        "file": "js/core/navigation.js",
+        "score": 15,
+        "size_bytes": 12528,
+        "lines": 220
+      },
+      {
+        "file": "js/pages/dashboard.js",
+        "score": 14,
+        "size_bytes": 4824,
+        "lines": 115
+      },
+      {
+        "file": "js/v21/modules/contracts/adapters/contract.firestore.adapter.js",
+        "score": 14,
+        "size_bytes": 1205,
+        "lines": 33
+      },
+      {
+        "file": "tests/v21/contracts/contract.validator.test.js",
+        "score": 11,
+        "size_bytes": 1142,
+        "lines": 42
+      },
+      {
+        "file": "tests/v21/contracts/contract.firestore.adapter.test.js",
+        "score": 9,
+        "size_bytes": 963,
+        "lines": 33
+      },
+      {
+        "file": "js/core/permissions.js",
+        "score": 9,
+        "size_bytes": 5803,
+        "lines": 119
+      },
+      {
+        "file": "js/pages/rapports.js",
+        "score": 9,
+        "size_bytes": 6889,
+        "lines": 167
+      },
+      {
+        "file": "js/v21/modules/notifications/services/notifications.service.js",
+        "score": 9,
+        "size_bytes": 1964,
+        "lines": 61
+      },
+      {
+        "file": "js/core/ui-functions.js",
+        "score": 7,
+        "size_bytes": 27069,
+        "lines": 480
+      },
+      {
+        "file": "js/v21/main.js",
+        "score": 7,
+        "size_bytes": 2049,
+        "lines": 54
+      },
+      {
+        "file": "js/pages/mobile-pages.js",
+        "score": 6,
+        "size_bytes": 16903,
+        "lines": 267
+      },
+      {
+        "file": "tests/v21/notifications/business-alerts.rules.test.js",
+        "score": 5,
+        "size_bytes": 1268,
+        "lines": 37
+      },
+      {
+        "file": "js/pages/paiements.js",
+        "score": 5,
+        "size_bytes": 60252,
+        "lines": 407
+      },
+      {
+        "file": "js/core/firebase-auth.js",
+        "score": 3,
+        "size_bytes": 20006,
+        "lines": 488
+      },
+      {
+        "file": "js/v21/modules/contracts/validators/contract.validator.js",
+        "score": 3,
+        "size_bytes": 1606,
+        "lines": 47
+      },
+      {
+        "file": "js/firebase.js",
+        "score": 2,
+        "size_bytes": 9906,
+        "lines": 246
+      },
+      {
+        "file": "tests/dashboard.service.test.js",
+        "score": 2,
+        "size_bytes": 611,
+        "lines": 23
+      },
+      {
+        "file": "js/core/db.js",
+        "score": 2,
+        "size_bytes": 9307,
+        "lines": 278
+      },
+      {
+        "file": "js/core/auth.js",
+        "score": 2,
+        "size_bytes": 5310,
+        "lines": 152
+      },
+      {
+        "file": "js/v21/modules/dashboard/widgets.js",
+        "score": 2,
+        "size_bytes": 631,
+        "lines": 22
+      },
+      {
+        "file": "js/v21/modules/dashboard/services/dashboard.service.js",
+        "score": 2,
+        "size_bytes": 420,
+        "lines": 15
+      }
+    ],
+    "expenses": [
+      {
+        "file": "js/app.legacy.bundle.js",
+        "score": 179,
+        "size_bytes": 596316,
+        "lines": 9364
+      },
+      {
+        "file": "js/pages/paiements.js",
+        "score": 98,
+        "size_bytes": 60252,
+        "lines": 407
+      },
+      {
+        "file": "js/core/consolidated-hotfixes.js",
+        "score": 67,
+        "size_bytes": 122399,
+        "lines": 1055
+      },
+      {
+        "file": "js/pages/depenses.js",
+        "score": 51,
+        "size_bytes": 7790,
+        "lines": 185
+      },
+      {
+        "file": "js/pages/biens.js",
+        "score": 47,
+        "size_bytes": 131795,
+        "lines": 1297
+      },
+      {
+        "file": "js/core/finance-pages-sidecards-final.js",
+        "score": 44,
+        "size_bytes": 24555,
+        "lines": 122
+      },
+      {
+        "file": "js/core/force-finance-right-column.js",
+        "score": 22,
+        "size_bytes": 11140,
+        "lines": 103
+      },
+      {
+        "file": "js/pages/dashboard.js",
+        "score": 21,
+        "size_bytes": 4824,
+        "lines": 115
+      },
+      {
+        "file": "js/core/finance-sidecards-restore.js",
+        "score": 16,
+        "size_bytes": 9312,
+        "lines": 114
+      },
+      {
+        "file": "js/pages/rapports.js",
+        "score": 16,
+        "size_bytes": 6889,
+        "lines": 167
+      },
+      {
+        "file": "js/pages/dashboard-desktop.js",
+        "score": 14,
+        "size_bytes": 26944,
+        "lines": 355
+      },
+      {
+        "file": "js/pages/locatives.js",
+        "score": 13,
+        "size_bytes": 8602,
+        "lines": 208
+      },
+      {
+        "file": "js/core/navigation.js",
+        "score": 9,
+        "size_bytes": 12528,
+        "lines": 220
+      },
+      {
+        "file": "js/core/runtime.js",
+        "score": 9,
+        "size_bytes": 41241,
+        "lines": 918
+      },
+      {
+        "file": "js/core/firebase-auth.js",
+        "score": 8,
+        "size_bytes": 20006,
+        "lines": 488
+      },
+      {
+        "file": "js/core/dashboard-actions-fix.js",
+        "score": 6,
+        "size_bytes": 4884,
+        "lines": 101
+      },
+      {
+        "file": "js/pages/contrats.js",
+        "score": 6,
+        "size_bytes": 19583,
+        "lines": 265
+      },
+      {
+        "file": "js/core/permissions.js",
+        "score": 5,
+        "size_bytes": 5803,
+        "lines": 119
+      },
+      {
+        "file": "js/firebase.js",
+        "score": 4,
+        "size_bytes": 9906,
+        "lines": 246
+      },
+      {
+        "file": "js/core/firebase-adapter.js",
+        "score": 4,
+        "size_bytes": 14096,
+        "lines": 358
+      },
+      {
+        "file": "js/pages/mobile-pages.js",
+        "score": 4,
+        "size_bytes": 16903,
+        "lines": 267
+      },
+      {
+        "file": "js/core/ui-functions.js",
+        "score": 3,
+        "size_bytes": 27069,
+        "lines": 480
+      },
+      {
+        "file": "js/safe-bootstrap.js",
+        "score": 2,
+        "size_bytes": 6955,
+        "lines": 160
+      },
+      {
+        "file": "tests/dashboard.service.test.js",
+        "score": 2,
+        "size_bytes": 611,
+        "lines": 23
+      },
+      {
+        "file": "js/inline/inline-script-05.js",
+        "score": 2,
+        "size_bytes": 2289,
+        "lines": 48
+      },
+      {
+        "file": "js/core/db.js",
+        "score": 2,
+        "size_bytes": 9307,
+        "lines": 278
+      },
+      {
+        "file": "js/core/username-lock.js",
+        "score": 2,
+        "size_bytes": 3195,
+        "lines": 92
+      },
+      {
+        "file": "js/core/auth.js",
+        "score": 2,
+        "size_bytes": 5310,
+        "lines": 152
+      },
+      {
+        "file": "js/v21/modules/dashboard/widgets.js",
+        "score": 2,
+        "size_bytes": 631,
+        "lines": 22
+      },
+      {
+        "file": "js/v21/modules/dashboard/services/dashboard.service.js",
+        "score": 2,
+        "size_bytes": 420,
+        "lines": 15
+      }
+    ],
+    "documents": [
+      {
+        "file": "js/app.legacy.bundle.js",
+        "score": 1296,
+        "size_bytes": 596316,
+        "lines": 9364
+      },
+      {
+        "file": "js/core/consolidated-hotfixes.js",
+        "score": 190,
+        "size_bytes": 122399,
+        "lines": 1055
+      },
+      {
+        "file": "js/pages/biens.js",
+        "score": 156,
+        "size_bytes": 131795,
+        "lines": 1297
+      },
+      {
+        "file": "js/core/ui-functions.js",
+        "score": 80,
+        "size_bytes": 27069,
+        "lines": 480
+      },
+      {
+        "file": "js/pages/locataires.js",
+        "score": 79,
+        "size_bytes": 50109,
+        "lines": 468
+      },
+      {
+        "file": "js/pages/paiements.js",
+        "score": 66,
+        "size_bytes": 60252,
+        "lines": 407
+      },
+      {
+        "file": "js/pages/dashboard-desktop.js",
+        "score": 34,
+        "size_bytes": 26944,
+        "lines": 355
+      },
+      {
+        "file": "js/pages/mobile-pages.js",
+        "score": 30,
+        "size_bytes": 16903,
+        "lines": 267
+      },
+      {
+        "file": "js/inline/inline-script-10.js",
+        "score": 24,
+        "size_bytes": 5357,
+        "lines": 116
+      },
+      {
+        "file": "js/pages/compact-layout.js",
+        "score": 24,
+        "size_bytes": 14095,
+        "lines": 105
+      },
+      {
+        "file": "js/core/runtime.js",
+        "score": 22,
+        "size_bytes": 41241,
+        "lines": 918
+      },
+      {
+        "file": "js/core/finance-pages-sidecards-final.js",
+        "score": 20,
+        "size_bytes": 24555,
+        "lines": 122
+      },
+      {
+        "file": "js/pages/contrats.js",
+        "score": 19,
+        "size_bytes": 19583,
+        "lines": 265
+      },
+      {
+        "file": "js/core/forms.js",
+        "score": 18,
+        "size_bytes": 8940,
+        "lines": 238
+      },
+      {
+        "file": "js/inline/inline-script-09.js",
+        "score": 17,
+        "size_bytes": 3111,
+        "lines": 61
+      },
+      {
+        "file": "js/core/lazy-libs.js",
+        "score": 17,
+        "size_bytes": 2497,
+        "lines": 60
+      },
+      {
+        "file": "js/inline/inline-script-11.js",
+        "score": 16,
+        "size_bytes": 8722,
+        "lines": 113
+      },
+      {
+        "file": "js/inline/inline-script-06.js",
+        "score": 15,
+        "size_bytes": 3111,
+        "lines": 66
+      },
+      {
+        "file": "js/core/avenir-kpi-fix.js",
+        "score": 15,
+        "size_bytes": 10869,
+        "lines": 320
+      },
+      {
+        "file": "js/v21/main.js",
+        "score": 15,
+        "size_bytes": 2049,
+        "lines": 54
+      },
+      {
+        "file": "js/core/paiements-avenir-button-final-fix.js",
+        "score": 14,
+        "size_bytes": 5775,
+        "lines": 134
+      },
+      {
+        "file": "js/core/navigation.js",
+        "score": 14,
+        "size_bytes": 12528,
+        "lines": 220
+      },
+      {
+        "file": "js/firebase.js",
+        "score": 13,
+        "size_bytes": 9906,
+        "lines": 246
+      },
+      {
+        "file": "js/components/drawers/gp-ui-manager.js",
+        "score": 12,
+        "size_bytes": 2635,
+        "lines": 106
+      },
+      {
+        "file": "js/inline/inline-script-08.js",
+        "score": 11,
+        "size_bytes": 2729,
+        "lines": 46
+      },
+      {
+        "file": "js/inline/inline-script-07.js",
+        "score": 10,
+        "size_bytes": 5477,
+        "lines": 124
+      },
+      {
+        "file": "js/core/gp-date-format-global-v3.js",
+        "score": 10,
+        "size_bytes": 3331,
+        "lines": 69
+      },
+      {
+        "file": "js/core/owner-select-edit.js",
+        "score": 9,
+        "size_bytes": 8374,
+        "lines": 132
+      },
+      {
+        "file": "js/v21/modules/payments/adapters/payments.dom-adapter.js",
+        "score": 9,
+        "size_bytes": 999,
+        "lines": 27
+      },
+      {
+        "file": "js/inline/inline-script-05.js",
+        "score": 8,
+        "size_bytes": 2289,
+        "lines": 48
+      }
+    ],
+    "notifications": [
+      {
+        "file": "js/v21/modules/notifications/notifications.module.js",
+        "score": 40,
+        "size_bytes": 2105,
+        "lines": 73
+      },
+      {
+        "file": "js/app.legacy.bundle.js",
+        "score": 32,
+        "size_bytes": 596316,
+        "lines": 9364
+      },
+      {
+        "file": "js/v21/modules/notifications/services/notifications.service.js",
+        "score": 29,
+        "size_bytes": 1964,
+        "lines": 61
+      },
+      {
+        "file": "js/v21/modules/notifications/ui/notifications.list.js",
+        "score": 23,
+        "size_bytes": 1556,
+        "lines": 53
+      },
+      {
+        "file": "tests/v21/notifications/business-alerts.rules.test.js",
+        "score": 19,
+        "size_bytes": 1268,
+        "lines": 37
+      },
+      {
+        "file": "js/core/avenir-kpi-fix.js",
+        "score": 12,
+        "size_bytes": 10869,
+        "lines": 320
+      },
+      {
+        "file": "js/pages/dashboard-desktop.js",
+        "score": 12,
+        "size_bytes": 26944,
+        "lines": 355
+      },
+      {
+        "file": "js/v21/modules/notifications/adapters/notification.firestore.adapter.js",
+        "score": 12,
+        "size_bytes": 862,
+        "lines": 28
+      },
+      {
+        "file": "tests/v21/notifications/notification.firestore.adapter.test.js",
+        "score": 11,
+        "size_bytes": 897,
+        "lines": 30
+      },
+      {
+        "file": "js/pages/locataires.js",
+        "score": 8,
+        "size_bytes": 50109,
+        "lines": 468
+      },
+      {
+        "file": "js/v21/main.js",
+        "score": 7,
+        "size_bytes": 2049,
+        "lines": 54
+      },
+      {
+        "file": "js/v21/modules/notifications/rules/business-alerts.rules.js",
+        "score": 5,
+        "size_bytes": 3200,
+        "lines": 92
+      },
+      {
+        "file": "js/core/dashboard-actions-fix.js",
+        "score": 3,
+        "size_bytes": 4884,
+        "lines": 101
+      },
+      {
+        "file": "js/pages/paiements.js",
+        "score": 3,
+        "size_bytes": 60252,
+        "lines": 407
+      },
+      {
+        "file": "js/pages/admin-saas.js",
+        "score": 2,
+        "size_bytes": 17694,
+        "lines": 341
+      },
+      {
+        "file": "js/pages/license-activation.js",
+        "score": 2,
+        "size_bytes": 6087,
+        "lines": 51
+      },
+      {
+        "file": "js/core/consolidated-hotfixes.js",
+        "score": 1,
+        "size_bytes": 122399,
+        "lines": 1055
+      },
+      {
+        "file": "js/pages/admin-stockage.js",
+        "score": 1,
+        "size_bytes": 14920,
+        "lines": 256
+      },
+      {
+        "file": "js/pages/sync.js",
+        "score": 1,
+        "size_bytes": 9835,
+        "lines": 148
+      }
+    ]
+  }
+}

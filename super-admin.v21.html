@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genius Property — Super Admin V21</title>
+    <link rel="stylesheet" href="./styles/v21.css" />
+  </head>
+  <body>
+    <main class="v21-shell">
+      <nav class="v21-nav">
+        <a href="./command-center.v21.html">Command Center</a>
+        <a href="./status.v21.html">Status</a>
+        <a href="./observability.v21.html">Observabilité</a>
+      </nav>
+
+      <header class="v21-section-header">
+        <h1>Super Admin Console</h1>
+        <p>Administration plateforme V21.</p>
+      </header>
+
+      <section class="v21-form-card">
+        <h2>Annonce in-app</h2>
+
+        <form id="announcement-form" class="v21-form">
+          <label class="v21-form-field">
+            <span>Titre</span>
+            <input name="title" required />
+          </label>
+
+          <label class="v21-form-field">
+            <span>Sévérité</span>
+            <select name="severity">
+              <option>info</option>
+              <option>warning</option>
+              <option>critical</option>
+            </select>
+          </label>
+
+          <label class="v21-form-field">
+            <span>Message</span>
+            <input name="message" required />
+          </label>
+
+          <div class="v21-form-actions">
+            <button type="submit">Publier</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="v21-form-card">
+        <div class="v21-form-actions">
+          <button id="create-api-key" type="button">Créer API Key</button>
+          <button id="download-backup" type="button">Exporter Backup</button>
+        </div>
+      </section>
+
+      <section class="v21-form-card">
+        <h2>Données Admin</h2>
+        <pre id="super-admin-output"></pre>
+      </section>
+    </main>
+
+    <script type="module" src="./js/v21/pages/super-admin.page.js"></script>
+  </body>
+</html>

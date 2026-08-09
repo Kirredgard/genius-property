@@ -1,0 +1,205 @@
+/* GP UI — icône documents type dossier + bouton fermer visible en haut à droite */
+
+/* Boutons documents : style dossier arrondi comme la référence */
+.icon-btn.icon-doc,
+.prop-action-btn.docs,
+.emp-action-btn.docs,
+.gp-mini-action.docs,
+button[data-gp-doc-action]{
+  width:34px !important;
+  height:34px !important;
+  min-width:34px !important;
+  border-radius:9px !important;
+  border:1px solid #dbe3ef !important;
+  background:#fff !important;
+  color:#0f172a !important;
+  box-shadow:0 1px 2px rgba(15,23,42,.06) !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 !important;
+  position:relative !important;
+  overflow:hidden !important;
+}
+.icon-btn.icon-doc > .material-symbols-rounded,
+.prop-action-btn.docs > .material-symbols-rounded,
+.emp-action-btn.docs > .material-symbols-rounded,
+.gp-mini-action.docs > .material-symbols-rounded,
+button[data-gp-doc-action] > .material-symbols-rounded{
+  display:none !important;
+}
+.icon-btn.icon-doc::before,
+.prop-action-btn.docs::before,
+.emp-action-btn.docs::before,
+.gp-mini-action.docs::before,
+button[data-gp-doc-action]::before{
+  content:"";
+  width:19px;
+  height:19px;
+  display:block;
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:19px 19px;
+  background-image:url("data:image/svg+xml,%3Csvg width='22' height='22' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3.75 7.25C3.75 6.42157 4.42157 5.75 5.25 5.75H9.15C9.62 5.75 10.063 5.97041 10.346 6.346L11.35 7.68C11.633 8.05559 12.076 8.276 12.546 8.276H18.75C19.5784 8.276 20.25 8.94757 20.25 9.776V17.75C20.25 18.5784 19.5784 19.25 18.75 19.25H5.25C4.42157 19.25 3.75 18.5784 3.75 17.75V7.25Z' stroke='%230F172A' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M3.9 10.25H20.1' stroke='%230F172A' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.icon-btn.icon-doc:hover,
+.prop-action-btn.docs:hover,
+.emp-action-btn.docs:hover,
+.gp-mini-action.docs:hover,
+button[data-gp-doc-action]:hover{
+  background:#f8fafc !important;
+  border-color:#94a3b8 !important;
+  color:#020617 !important;
+  transform:translateY(-1px) !important;
+}
+
+/* En-têtes de formulaires/drawers/modals : espace pour le bouton fermer */
+.row-modal-box,
+.entity-docs-box,
+.profil-modal-box,
+.agenda-modal-box,
+.emp-mission-modal .row-modal-box{
+  position:relative !important;
+}
+.row-modal-head,
+.agenda-modal-head,
+.tb-panel-head,
+.profil-modal-header{
+  position:relative !important;
+  padding-right:52px !important;
+}
+
+/* Bouton fermer : toujours en haut à droite, plus visible */
+.row-modal-head .modal-close-btn,
+.row-modal-head > button.icon-btn,
+.gp-drawer-close,
+.drawer-close,
+.modal-close,
+.close-btn,
+.profil-modal-close,
+.agenda-modal-head button,
+.tb-panel-close{
+  position:absolute !important;
+  top:12px !important;
+  right:12px !important;
+  width:40px !important;
+  height:40px !important;
+  min-width:40px !important;
+  border-radius:12px !important;
+  border:1px solid #fecaca !important;
+  background:#fff7f7 !important;
+  color:#dc2626 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  box-shadow:0 4px 14px rgba(220,38,38,.16) !important;
+  opacity:1 !important;
+  z-index:20 !important;
+  cursor:pointer !important;
+  padding:0 !important;
+}
+.row-modal-head .modal-close-btn .material-symbols-rounded,
+.row-modal-head > button.icon-btn .material-symbols-rounded,
+.gp-drawer-close .material-symbols-rounded,
+.drawer-close .material-symbols-rounded,
+.modal-close .material-symbols-rounded,
+.close-btn .material-symbols-rounded,
+.profil-modal-close .material-symbols-rounded,
+.agenda-modal-head button .material-symbols-rounded,
+.tb-panel-close .material-symbols-rounded{
+  font-size:24px !important;
+  font-weight:800 !important;
+  line-height:1 !important;
+}
+.row-modal-head .modal-close-btn:hover,
+.row-modal-head > button.icon-btn:hover,
+.gp-drawer-close:hover,
+.drawer-close:hover,
+.modal-close:hover,
+.close-btn:hover,
+.profil-modal-close:hover,
+.agenda-modal-head button:hover,
+.tb-panel-close:hover{
+  background:#fee2e2 !important;
+  border-color:#f87171 !important;
+  color:#b91c1c !important;
+  transform:scale(1.05) !important;
+}
+.entity-docs-box .row-modal-head{align-items:flex-start !important;}
+.entity-docs-box .row-modal-head h3{margin-right:42px !important;}
+
+/* Skeleton global désactivé pour éviter le blocage après login/navigation */
+#gp-skeleton-wrap,
+#gp-skeleton-wrap.visible{
+  display:none !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+  visibility:hidden !important;
+}
+
+/* GP fix — icône Documents harmonisée avec les autres actions */
+.prop-actions .prop-action-btn.docs,
+.prop-actions .prop-action-btn.gp-doc-folder-btn,
+.loc-actions .loc-action.docs,
+.gpi-actions .gpi-action.docs,
+.actions .icon-btn.icon-doc,
+.icon-btn.icon-doc.docs,
+.emp-action-btn.docs,
+button[data-gp-doc-action]{
+  width:32px !important;
+  height:32px !important;
+  min-width:32px !important;
+  max-width:32px !important;
+  min-height:32px !important;
+  max-height:32px !important;
+  border-radius:7px !important;
+  border:1px solid #e5e7eb !important;
+  background:#fff !important;
+  color:#D4AF37 !important;
+  box-shadow:none !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 !important;
+  vertical-align:middle !important;
+}
+.prop-actions .prop-action-btn.docs > .material-symbols-rounded,
+.prop-actions .prop-action-btn.gp-doc-folder-btn > .material-symbols-rounded,
+.loc-actions .loc-action.docs > .material-symbols-rounded,
+.gpi-actions .gpi-action.docs > .material-symbols-rounded,
+.actions .icon-btn.icon-doc > .material-symbols-rounded,
+.icon-btn.icon-doc.docs > .material-symbols-rounded,
+.emp-action-btn.docs > .material-symbols-rounded,
+button[data-gp-doc-action] > .material-symbols-rounded{
+  display:none !important;
+}
+.prop-actions .prop-action-btn.docs::before,
+.prop-actions .prop-action-btn.gp-doc-folder-btn::before,
+.loc-actions .loc-action.docs::before,
+.gpi-actions .gpi-action.docs::before,
+.actions .icon-btn.icon-doc::before,
+.icon-btn.icon-doc.docs::before,
+.emp-action-btn.docs::before,
+button[data-gp-doc-action]::before{
+  content:"" !important;
+  width:18px !important;
+  height:18px !important;
+  display:block !important;
+  background-repeat:no-repeat !important;
+  background-position:center !important;
+  background-size:18px 18px !important;
+  background-image:url("data:image/svg+xml,%3Csvg width='22' height='22' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3.75 7.25C3.75 6.42157 4.42157 5.75 5.25 5.75H9.15C9.62 5.75 10.063 5.97041 10.346 6.346L11.35 7.68C11.633 8.05559 12.076 8.276 12.546 8.276H18.75C19.5784 8.276 20.25 8.94757 20.25 9.776V17.75C20.25 18.5784 19.5784 19.25 18.75 19.25H5.25C4.42157 19.25 3.75 18.5784 3.75 17.75V7.25Z' stroke='%23D4AF37' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M3.9 10.25H20.1' stroke='%23D4AF37' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+}
+.prop-actions .prop-action-btn.docs:hover,
+.prop-actions .prop-action-btn.gp-doc-folder-btn:hover,
+.loc-actions .loc-action.docs:hover,
+.gpi-actions .gpi-action.docs:hover,
+.actions .icon-btn.icon-doc:hover,
+.icon-btn.icon-doc.docs:hover,
+.emp-action-btn.docs:hover,
+button[data-gp-doc-action]:hover{
+  background:#fffbeb !important;
+  border-color:#f1d97a !important;
+  color:#D4AF37 !important;
+  transform:none !important;
+}

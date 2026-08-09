@@ -1,0 +1,11 @@
+{
+  "source_zip": "genius-property-v21-beta-program.zip",
+  "added": [
+    "support.v21.html",
+    "js/v21/support/help-content.ts",
+    "js/v21/support/support.view.ts",
+    "USER_GUIDE_V21.md",
+    "BETA_CLIENT_LAUNCH_CHECKLIST_V21.md",
+    "SUPPORT_CENTER_V21.md"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "source_zip": "genius-property-v21-transactional-emails.zip",
+  "added_or_changed": [
+    "api/billing/email-notifications.js",
+    "api/billing/server.example.mjs",
+    "api/billing/README.md",
+    "STRIPE_EMAIL_NOTIFICATIONS_V21.md"
+  ]
+}

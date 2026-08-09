@@ -1,0 +1,32 @@
+{
+  "version": "21.0.0-rc-production",
+  "createdAt": "2026-05-25T02:05:26.230723Z",
+  "status": "production-candidate",
+  "entrypoints": [
+    "index.v21-production.html",
+    "login.v21.html",
+    "dashboard.v21.html",
+    "properties.v21.html",
+    "tenants.v21.html",
+    "owners.v21.html",
+    "contracts.v21.html",
+    "documents.v21.html",
+    "firestore-test.v21.html",
+    "storage-test.v21.html",
+    "health.v21.html"
+  ],
+  "qualityCommands": [
+    "npm run production:ready",
+    "npm run quality:optimized",
+    "npm run build:production"
+  ],
+  "rollback": {
+    "strategy": "Restore previous hosting release and previous Firebase rules.",
+    "requires": [
+      "previous dist artifact",
+      "previous firestore rules",
+      "previous storage rules",
+      "database backup or export"
+    ]
+  }
+}

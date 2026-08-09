@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genius Property — SaaS Analytics V21</title>
+    <link rel="stylesheet" href="./styles/v21.css" />
+  </head>
+  <body>
+    <main class="v21-shell">
+      <nav class="v21-nav">
+        <a href="./dashboard.v21.html">Dashboard</a>
+        <a href="./billing.v21.html">Billing</a>
+        <a href="./upgrade.v21.html">Upgrade</a>
+        <a href="./health.v21.html">Health</a>
+      </nav>
+
+      <header class="v21-section-header">
+        <h1>Analytics SaaS</h1>
+        <p>MRR, ARR, agences actives, usage et marge estimée.</p>
+      </header>
+
+      <section id="saas-analytics-root"></section>
+
+      <section id="audit-dashboard-root"></section>
+
+          <section class="v21-form-card">
+        <h2>Détails JSON</h2>
+        <pre id="saas-analytics-json"></pre>
+      </section>
+    </main>
+
+    <script type="module" src="./js/v21/pages/saas-analytics.page.js"></script>
+  </body>
+</html>

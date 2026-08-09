@@ -1,0 +1,48 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function agencyMember(agencyId) {
+      return signedIn()
+        && firestore.get(/databases/(default)/documents/agencies/$(agencyId)/members/$(request.auth.uid)).exists;
+    }
+
+    function agencyRole(agencyId) {
+      return firestore.get(/databases/(default)/documents/agencies/$(agencyId)/members/$(request.auth.uid)).data.role;
+    }
+
+    function canReadAgency(agencyId) {
+      return agencyMember(agencyId);
+    }
+
+    function canWriteAgency(agencyId) {
+      return agencyMember(agencyId)
+        && agencyRole(agencyId) in ['owner', 'admin', 'agent'];
+    }
+
+    function canDeleteAgency(agencyId) {
+      return agencyMember(agencyId)
+        && agencyRole(agencyId) in ['owner', 'admin'];
+    }
+
+    function isSafeFile() {
+      return request.resource == null
+        || request.resource.size < 20 * 1024 * 1024;
+    }
+
+    match /agencies/{agencyId}/{allPaths=**} {
+      allow read: if canReadAgency(agencyId);
+      allow create, update: if canWriteAgency(agencyId) && isSafeFile();
+      allow delete: if canDeleteAgency(agencyId);
+    }
+
+    // Test-only namespace. Keep it disabled in the production ruleset.
+    match /test-uploads/{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

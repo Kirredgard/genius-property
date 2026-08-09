@@ -1,0 +1,14 @@
+{
+  "source_zip": "genius-property-v21-typescript-phase2-services.zip",
+  "converted_files": [
+    "js/v21/modules/dashboard/dashboard.module.ts",
+    "js/v21/modules/payments/payments.module.ts",
+    "js/v21/modules/auth/auth.module.ts",
+    "js/v21/modules/tenants/tenants.module.ts",
+    "js/v21/modules/properties/properties.module.ts",
+    "js/v21/modules/contracts/contracts.module.ts",
+    "js/v21/modules/notifications/notifications.module.ts",
+    "js/v21/types/module-types.ts"
+  ],
+  "strategy": "Convert V21 module bootstrap files after services."
+}

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genius Property — Test Firestore V21</title>
+    <link rel="stylesheet" href="./styles/v21.css" />
+  </head>
+  <body>
+    <main class="v21-shell">
+      <nav class="v21-nav">
+        <a href="./login.v21.html">Connexion</a>
+        <a href="./dashboard.v21.html">Dashboard</a>
+        <a href="./owners.v21.html">Propriétaires</a>
+      </nav>
+
+      <header class="v21-section-header">
+        <h1>Test Firestore V21</h1>
+        <p>Créer un propriétaire test et vérifier la lecture Firestore.</p>
+      </header>
+
+      <section class="v21-form-card">
+        <h2>Nouveau propriétaire test</h2>
+        <form id="firestore-test-form" class="v21-form">
+          <label class="v21-form-field">
+            <span>Prénom</span>
+            <input name="firstName" value="Test" required />
+          </label>
+
+          <label class="v21-form-field">
+            <span>Nom</span>
+            <input name="lastName" value="Firestore" required />
+          </label>
+
+          <label class="v21-form-field">
+            <span>Téléphone</span>
+            <input name="phone" value="770000000" />
+          </label>
+
+          <div class="v21-form-actions">
+            <button data-requires-permission="write" type="submit">Créer dans Firestore</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="v21-form-card">
+        <h2>Résultat lecture owners</h2>
+        <pre id="firestore-test-output">Chargement...</pre>
+      </section>
+    </main>
+
+    <script type="module" src="./js/v21/pages/firestore-test.page.js"></script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "source_zip": "genius-property-v21-dashboard-page.zip",
+  "created": [
+    "js/v21/pages/properties.page.ts",
+    "properties.v21.html",
+    "js/v21/pages/tenants.page.ts",
+    "tenants.v21.html",
+    "js/v21/pages/owners.page.ts",
+    "owners.v21.html",
+    "js/v21/pages/contracts.page.ts",
+    "contracts.v21.html",
+    "js/v21/pages/documents.page.ts",
+    "documents.v21.html",
+    "tests/v21/pages/properties.page.test.js",
+    "tests/v21/pages/tenants.page.test.js",
+    "tests/v21/pages/owners.page.test.js",
+    "tests/v21/pages/contracts.page.test.js",
+    "tests/v21/pages/documents.page.test.js"
+  ]
+}

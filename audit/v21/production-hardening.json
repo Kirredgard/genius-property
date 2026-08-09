@@ -1,0 +1,10 @@
+{
+  "source_zip": "genius-property-v21-production-ready.zip",
+  "added": [
+    "js/v21/monitoring/error-monitor.ts",
+    "js/v21/monitoring/health-report.ts",
+    "health.v21.html",
+    "js/v21/pages/health.page.ts",
+    "PRODUCTION_HARDENING_V21.md"
+  ]
+}

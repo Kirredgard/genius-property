@@ -1,0 +1,7 @@
+{
+  "source_zip": "genius-property-v21-owner-reporting.zip",
+  "added": [
+    "js/v21/modules/owner-payouts/owner-payouts.module.ts",
+    "js/v21/modules/owner-payouts/services/owner-payouts.service.ts"
+  ]
+}

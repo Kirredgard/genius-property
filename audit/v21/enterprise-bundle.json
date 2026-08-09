@@ -1,0 +1,12 @@
+{
+  "source_zip": "genius-property-v21-public-launch-bundle.zip",
+  "bundle_points": [
+    "pwa offline",
+    "global search",
+    "timeline",
+    "advanced rbac",
+    "gdpr",
+    "external webhooks",
+    "marketplace integrations"
+  ]
+}

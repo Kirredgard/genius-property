@@ -1,0 +1,9 @@
+{
+  "source_zip": "genius-property-v21-firestore-real-test.zip",
+  "added": [
+    "storage-test.v21.html",
+    "js/v21/pages/storage-test.page.ts",
+    "STORAGE_REAL_TEST_V21.md",
+    "tests/v21/pages/storage-test.page.test.js"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "source_zip": "genius-property-v21-owner-properties-link.zip",
+  "added": [
+    "js/v21/modules/reporting/services/owner-reporting.service.ts",
+    "js/v21/modules/reporting/ui/owner-reporting.view.ts"
+  ]
+}

@@ -1,0 +1,2744 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genius Property — Gestion Immobilière</title>
+<meta name="description" content="Genius Property — Plateforme SaaS de gestion immobilière">
+<meta name="theme-color" content="#D4AF37">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+  <link rel="stylesheet" href="styles/components/drawers-modals.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://flagcdn.com">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/theme.css">
+<link rel="stylesheet" href="styles/bundle.optimized.css?v=20260523">
+<link rel="stylesheet" href="styles/mobile.css?v=ultra-mobile-20260522">
+<link rel="stylesheet" href="styles/admin-saas.css?v=saas-v5">
+<link rel="stylesheet" href="styles/license-manager.css?v=license-v7">
+<link rel="stylesheet" href="styles/simple-license-dashboard.css?v=v16">
+<link rel="stylesheet" href="styles/ui-icons-close-enhanced.css?v=20260522-docgold">
+  <script src="js/components/drawers/gp-ui-manager.js" defer></script>
+  <script src="js/utils/date-utils.js" defer></script>
+  <script src="js/core/app-core-v20.js" defer></script>
+<script src="js/inline/inline-script-01.js?v=refactor-20260523"></script>
+<script type="module" src="js/inline/inline-script-02.module.js?v=refactor-20260523"></script>
+<script src="js/inline/inline-script-03.js?v=refactor-20260523" defer></script>
+<script src="js/core/lazy-libs.js" defer></script>
+<link rel="stylesheet" href="styles/dashboard.css?v=clean-v1">
+  <link rel="stylesheet" href="styles/v30-bureau-theme-pages.css?v=v30">
+<link rel="stylesheet" href="styles/gp-payments-table-compact-v5.css?v=20260523-v5">
+
+<style id="gp-splash-css">
+  #gpSplash{position:fixed;inset:0;z-index:999999;background:#060606;display:flex;align-items:center;justify-content:center;color:#f8fafc;font-family:Inter,Arial,sans-serif;transition:opacity .35s ease}
+  #gpSplash.gp-splash-hide{opacity:0;pointer-events:none}
+  .gp-splash-card{display:flex;flex-direction:column;align-items:center;gap:16px;padding:30px 34px;border:1px solid rgba(212,175,55,.25);border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.02));box-shadow:0 30px 80px rgba(0,0,0,.45)}
+  .gp-splash-logo{width:62px;height:62px;border-radius:999px;object-fit:contain;filter:drop-shadow(0 0 18px rgba(212,175,55,.45))}
+  .gp-splash-title{font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+  .gp-splash-line{width:90px;height:3px;border-radius:999px;background:linear-gradient(90deg,transparent,#d4af37,transparent);animation:gpSplashPulse 1.1s ease-in-out infinite}
+  @keyframes gpSplashPulse{0%,100%{opacity:.35;transform:scaleX(.75)}50%{opacity:1;transform:scaleX(1)}}
+</style>
+<link rel="stylesheet" href="styles/gp-restore-finance-drawers-v9.css">
+</head>
+<body>
+
+<div id="gpSplash"><div class="gp-splash-card"><img class="gp-splash-logo" src="assets/logo.svg" alt=""><div class="gp-splash-title">Genius Property</div><div class="gp-splash-line"></div></div></div>
+
+<!-- ==================== LOGIN ==================== -->
+<div id="loginPage" style="display:none">
+  <canvas id="particles"></canvas>
+  <div class="ln-blob ln-blob-1"></div>
+  <div class="ln-blob ln-blob-2"></div>
+  <div class="ln-blob ln-blob-3"></div>
+
+  <div class="login-left">
+    <div class="ln-brand">
+      <img class="ln-logo-img" src="assets/logo.svg" alt="Genius Property Logo" width="400" height="400" fetchpriority="high">
+      <div class="ln-brand-text">
+        <div class="ln-brand-name">GENIUS PROPERTY</div>
+        <div class="ln-brand-sub">Gestion Immobilière</div>
+      </div>
+    </div>
+    <div class="ln-headline">
+      <h1>Votre patrimoine,<br><span>géré avec excellence.</span></h1>
+      <p>Une plateforme complète, intelligente et sécurisée pour piloter vos biens, vos locataires et vos finances — en toute sérénité.</p>
+    </div>
+    <div class="ln-divider"></div>
+    <div class="ln-features">
+      <div class="ln-feat-pill"><span class="material-symbols-rounded">home_work</span> Gestion de biens</div>
+      <div class="ln-feat-pill"><span class="material-symbols-rounded">description</span> Contrats officiels</div>
+      <div class="ln-feat-pill"><span class="material-symbols-rounded">payments</span> Suivi paiements</div>
+      <div class="ln-feat-pill"><span class="material-symbols-rounded">bar_chart</span> Rapports & analyses</div>
+      <div class="ln-feat-pill"><span class="material-symbols-rounded">shield</span> 100% sécurisé</div>
+    </div>
+    <div class="ln-stats">
+      <div>
+        <div class="ln-stat-num">360°</div>
+        <div class="ln-stat-lbl">Vision complète</div>
+      </div>
+      <div style="width:1px;background:rgba(212,175,55,.12)"></div>
+      <div>
+        <div class="ln-stat-num">100%</div>
+        <div class="ln-stat-lbl">Local & sécurisé</div>
+      </div>
+      <div style="width:1px;background:rgba(212,175,55,.12)"></div>
+      <div>
+        <div class="ln-stat-num">Pro</div>
+        <div class="ln-stat-lbl">Qualité premium</div>
+      </div>
+    </div>
+    <!-- Signature discrète -->
+    <div class="ln-signature">by <span>Genius Immo & BTP</span></div>
+  </div>
+
+  <div class="login-right">
+    <div class="login-box">
+      <div class="lb-logo-wrap">
+        <img class="lb-logo" src="assets/logo.svg" alt="Logo">
+        <div class="lb-title">Accès Sécurisé</div>
+        <div class="lb-subtitle">Genius Property Platform</div>
+      </div>
+      <div class="lb-accent"></div>
+      <div class="lfield">
+        <span class="material-symbols-rounded mat">person</span>
+        <input type="email" id="lu" placeholder="Adresse email" autocomplete="email">
+      </div>
+      <div class="lfield">
+        <span class="material-symbols-rounded mat">lock</span>
+        <input type="password" id="lp" placeholder="Mot de passe" autocomplete="current-password">
+        <span class="material-symbols-rounded mat" style="font-size:18px;cursor:pointer;opacity:.5;transition:.2s" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=.5" onclick="tglPwd()">visibility</span>
+      </div>
+      <button class="login-btn-main" id="loginBtn" onclick="window.gpFirebaseLoginFromButton && window.gpFirebaseLoginFromButton(event)">Se connecter</button>
+      <div class="auth-error" id="authError"></div>
+      <!-- Mot de passe oublié — flow inline -->
+      <div id="forgotFlow" style="display:none;margin-top:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:16px">
+        <div style="font-size:13px;color:#e5e5e5;margin-bottom:10px;font-weight:500">
+          <span class="material-symbols-rounded" style="font-size:15px;vertical-align:middle;margin-right:4px">lock_reset</span>
+          Réinitialisation du mot de passe
+        </div>
+        <div style="font-size:11px;color:#9ca3af;margin-bottom:10px;line-height:1.5">
+          Entrez votre email ci-dessous. Vous recevrez un lien pour choisir un nouveau mot de passe.
+        </div>
+        <div style="display:flex;gap:8px">
+          <input id="forgotEmail" type="email" placeholder="votre@email.com"
+            style="flex:1;padding:8px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-size:12px">
+          <button onclick="sendResetEmail()"
+            style="padding:8px 14px;border-radius:7px;border:none;background:var(--gold);color:#fff;font-size:12px;cursor:pointer;font-weight:500;white-space:nowrap">
+            Envoyer
+          </button>
+        </div>
+        <div id="forgotMsg" style="font-size:11px;margin-top:8px;min-height:14px"></div>
+        <button onclick="toggleForgotFlow(false)"
+          style="margin-top:8px;background:none;border:none;color:#9ca3af;font-size:11px;cursor:pointer;padding:0">
+          ← Retour à la connexion
+        </button>
+      </div>
+      <div id="forgotLink" class="login-hint">
+        <a onclick="toggleForgotFlow(true)" style="cursor:pointer">
+          <span class="material-symbols-rounded" style="font-size:12px">lock_reset</span> Mot de passe oublié ?
+        </a>
+      </div>
+      <div class="lb-security">
+        <span class="material-symbols-rounded">shield</span>
+        Données chiffrées et stockées localement
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== APP ==================== -->
+<div class="app-wrap" id="app" style="display:none">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <img src="assets/extracted/inline-image-f07d7f26fa.png" onclick="navigate('dashboard')" title="Retour à l'accueil" alt="Genius Property" id="sidebar-logo">
+  <ul class="menu" id="sideMenu">
+    <li class="active" data-page="dashboard"><span class="material-symbols-rounded">home</span> Bureau</li>
+    <li data-page="employes"><span class="material-symbols-rounded">badge</span> Employés</li>
+    <li data-page="proprietaires"><span class="material-symbols-rounded">person</span> Propriétaires</li>
+    <li data-page="locataires"><span class="material-symbols-rounded">groups</span> Locataires</li>
+    <li data-page="biens"><span class="material-symbols-rounded">home_work</span> Biens</li>
+    <li data-page="locatives"><span class="material-symbols-rounded">door_front</span> Locations</li>
+    <li data-page="contrats"><span class="material-symbols-rounded">contract</span> Contrat</li>
+    <li data-page="paiements"><span class="material-symbols-rounded">payments</span> Paiements</li>
+    <li data-page="depenses"><span class="material-symbols-rounded">account_balance_wallet</span> Dépenses</li>
+    <li data-page="messages"><span class="material-symbols-rounded">mail</span> Messages</li>
+    <li data-page="journal" id="menuJournal"><span class="material-symbols-rounded">manage_search</span> Journal</li>
+    <li data-page="parametres"><span class="material-symbols-rounded">settings</span> Paramètres</li>
+    <li data-page="admin-saas" data-admin-only="true"><span class="material-symbols-rounded">admin_panel_settings</span> Admin Central</li>
+    <!-- Séparateur + badge abonnement -->
+    <li class="slb-separator" aria-hidden="true"></li>
+    <li id="gp-sidebar-licence-badge" class="gp-sidebar-licence-badge" data-page="abonnement" title="Voir abonnement"></li>
+  </ul>
+  <ul class="menu-logout">
+    <li class="logout" onclick="doLogout()"><span class="material-symbols-rounded">logout</span> Déconnexion</li>
+  </ul>
+</aside>
+
+<!-- MAIN -->
+<main class="content" id="mainContent">
+
+  <!-- TOPBAR (shared) -->
+  <header class="topbar" id="topbar">
+    <div id="globalBreadcrumb" class="topbar-breadcrumb gp-global-breadcrumb"></div>
+    <div class="top-icons">
+      <div id="syncIndicator" style="display:none;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;transition:.2s"></div>
+      <!-- Recherche -->
+      <div class="u-rel">
+        <button class="tb-icon-btn" title="Rechercher" onclick="toggleTopbarSearch(event)"><span class="material-symbols-rounded">search</span></button>
+        <div id="topbarSearchDrop" class="u-dropdown-popup" style="display:none;width:260px">
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #f5f5f5">
+            <span class="material-symbols-rounded" style="font-size:15px;color:#D4AF37;flex-shrink:0">search</span>
+            <input id="topbarSearchInput" type="text" placeholder="Rechercher…" autocomplete="off"
+              style="flex:1;border:none;outline:none;font-size:12.5px;font-family:'Inter',sans-serif;color:#111;background:transparent"
+              oninput="runTopbarSearch(this.value)"
+              onkeydown="if(event.key==='Escape')closeTopbarSearch()">
+          </div>
+          <div id="topbarSearchResults" style="max-height:220px;overflow-y:auto">
+            <div style="padding:16px;text-align:center;font-size:12px;color:#9ca3af">Tapez pour rechercher…</div>
+          </div>
+        </div>
+      </div>
+      <!-- Aide -->
+      <button class="tb-icon-btn" id="helpBtn" title="Aide" onclick="toggleHelpPanel(event)" style="position:relative"><span class="material-symbols-rounded">help</span></button>
+      <!-- Agenda -->
+      <button class="tb-icon-btn" id="topbarAgendaBtn" title="Agenda" onclick="if(window.openFullAgendaModal)openFullAgendaModal();" style="position:relative">
+        <span class="material-symbols-rounded">calendar_month</span>
+        <span id="agendaTopbarDot" style="display:none;position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:#16a34a;border:1.5px solid white"></span>
+      </button>
+      <!-- Messages -->
+      <button class="tb-icon-btn" title="Messages" onclick="navigate('messages')"><span class="material-symbols-rounded">mail</span></button>
+      <!-- Notifications -->
+      <button class="tb-icon-btn" title="Notifications" id="notifBtn" onclick="toggleNotifPanel(event)" style="position:relative"><span class="material-symbols-rounded">notifications</span><span class="tb-notif-dot" id="notifDot"></span><span class="tb-notif-count" id="notifCount" style="display:none"></span></button>
+      <!-- Thème -->
+      <button class="tb-icon-btn" title="Mode jour/nuit" id="themeIcon" onclick="toggleTheme()"><span class="material-symbols-rounded">dark_mode</span></button>
+      <div class="tb-sep"></div>
+      <!-- Profil utilisateur style card -->
+      <div class="user-box" onclick="toggleUM()">
+        <div class="user-avatar" id="topbarAvatar" style="background:linear-gradient(135deg,#D4AF37,#f5d56a)!important;border-radius:50%!important;width:30px!important;height:30px!important;min-width:30px!important;max-width:30px!important;flex:0 0 30px!important;aspect-ratio:1/1!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:0 4px 12px rgba(212,175,55,.30)!important"><span class="material-symbols-rounded" style="font-size:20px;color:#111;font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24">person</span></div>
+        <div class="user-info">
+          <span class="user-name"><script>document.write((localStorage.getItem('gp_session_name')||localStorage.getItem('gp_session_firstname')||'Chargement…'))</script></span>
+          <span class="user-role">Administrateur</span>
+        </div>
+        <span class="material-symbols-rounded user-chevron">expand_more</span>
+        <div class="user-menu" id="userMenu">
+          <div class="user-menu-header">
+            <div class="user-menu-avatar" id="menuAvatar">A</div>
+            <div class="user-menu-meta">
+              <span class="user-menu-name"><script>document.write((localStorage.getItem('gp_session_name')||localStorage.getItem('gp_session_firstname')||''))</script></span>
+              <span class="user-menu-email">admin@geniusproperty.com</span>
+            </div>
+          </div>
+          <div class="menu-item" onclick="openProfilModal();toggleUM()"><span class="material-symbols-rounded">person</span> Mon profil</div>
+          <div class="menu-divider"></div>
+          <div class="menu-item menu-item-danger" onclick="doLogout()"><span class="material-symbols-rounded">logout</span> Déconnexion</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Overlay et boites recherche (conservés vides pour compatibilité) -->
+  <div id="globalSearchOverlay" style="display:none"></div>
+  <div id="globalSearchBox" style="display:none"></div>
+
+  <!-- ====== DASHBOARD ====== -->
+  <div class="page active" id="page-dashboard">
+    <!-- Contenu injecté dynamiquement par le script bureau -->
+  </div>
+
+    <!-- ====== JOURNAL D'ACTIVITÉ ====== -->
+  <div class="page" id="page-journal">
+    <div class="page-hero" style="--hero-color:#D4AF37">
+      <div class="page-hero-icon"><span class="material-symbols-rounded">manage_search</span></div>
+      <div class="page-hero-text">
+        <h3>Journal</h3>
+        <p>Suivi compact des actions par employé</p>
+      </div>
+    </div>
+
+    <div class="journal-modern">
+      <div class="journal-modern-head">
+        <div class="journal-modern-title">
+          <div class="journal-modern-icon"><span class="material-symbols-rounded">history</span></div>
+          <div>
+            <h2>Activité des employés</h2>
+            <p>Journal compact des actions par employé</p>
+          </div>
+        </div>
+        <div class="journal-tools">
+          <div class="journal-search"><span class="material-symbols-rounded">search</span><input id="journalEmployeeSearch" type="search" placeholder="Rechercher un employé…" oninput="renderJournalEmployeGrid()"></div>
+          <button class="btn" style="background:#fee2e2;color:#991b1b;font-size:12px;padding:8px 12px;border-radius:12px" onclick="clearAuditLog()">
+            <span class="material-symbols-rounded" style="font-size:14px">delete_sweep</span> Vider
+          </button>
+        </div>
+      </div>
+      <div id="journalEmployeGrid"></div>
+    </div>
+
+    <select id="auditFilterUser" style="display:none"><option value=""></option></select>
+    <select id="auditFilterModule" style="display:none"><option value=""></option></select>
+    <select id="auditFilterAction" style="display:none"><option value=""></option></select>
+    <div id="auditKpis" style="display:none"></div>
+    <div id="auditEmpty" style="display:none"></div>
+    <span id="auditCount" style="display:none"></span>
+    <div id="auditPagination" style="display:none"></div>
+    <table id="auditTable" style="display:none"><thead><tr></tr></thead><tbody id="auditTbody"></tbody></table>
+  </div>
+
+  <div class="page" id="page-agenda">
+    <div class="page-hero" style="--hero-color:#D4AF37">
+      <div class="page-hero-icon"><span class="material-symbols-rounded">calendar_month</span></div>
+      <div class="page-hero-text">
+        <h3>Agenda</h3>
+        <p>Organisez vos rendez-vous et événements</p>
+      </div>
+    </div>
+    <div id="agendaPageMount" class="agenda-page-mount"></div>
+  </div>
+
+  <div class="page" id="page-agenda-employes">
+      <div class="journal-modern-head" style="margin-bottom:12px">
+        <div class="journal-modern-title">
+          <div class="journal-modern-icon"><span class="material-symbols-rounded">event_note</span></div>
+          <div>
+            <h2>Agenda employés</h2>
+            <p>Planifiez et suivez les missions de chaque employé</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div id="missionDoneCount" style="font-size:11px;color:#16a34a;font-weight:800;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:3px 10px;display:none"></div>
+          <button class="btn btn-primary" onclick="openEmpMissionModal()"><span class="material-symbols-rounded" style="font-size:16px">add_task</span> Nouvelle mission</button>
+        </div>
+      </div>
+      <div class="emp-agenda-page">
+        <aside class="emp-agenda-side">
+          <div class="emp-agenda-side-head">
+            <div class="emp-agenda-title"><span class="material-symbols-rounded">group</span><span>Employés</span></div>
+            <div class="journal-search" style="min-width:0"><span class="material-symbols-rounded">search</span><input id="empAgendaSearch" type="search" placeholder="Rechercher un employé…" oninput="renderEmployeeAgenda()"></div>
+          </div>
+          <div id="empAgendaEmployeeList" class="emp-agenda-employee-list"></div>
+        </aside>
+        <section class="emp-agenda-main">
+          <div class="emp-agenda-top">
+            <div class="emp-agenda-who">
+              <div id="empAgendaAvatar" class="emp-agenda-big-avatar">--</div>
+              <div><div id="empAgendaName" class="emp-agenda-name">Sélectionnez un employé</div><div id="empAgendaRole" class="emp-agenda-role">Planifiez et suivez les missions</div></div>
+            </div>
+          </div>
+          <div class="emp-agenda-body">
+            <div class="emp-calendar-zone">
+              <div class="emp-calendar-head">
+                <button class="msg-mail-icon-btn" onclick="empAgendaPrevMonth()"><span class="material-symbols-rounded">chevron_left</span></button>
+                <h3 id="empAgendaMonthLabel"></h3>
+                <button class="msg-mail-icon-btn" onclick="empAgendaNextMonth()"><span class="material-symbols-rounded">chevron_right</span></button>
+              </div>
+              <div class="emp-calendar-grid" id="empAgendaWeekdays"></div>
+              <div class="emp-calendar-grid" id="empAgendaGrid"></div>
+            </div>
+            <aside class="emp-list-zone">
+              <div class="emp-list-head"><h3 id="empAgendaDayTitle">Missions du jour</h3><p id="empAgendaDayDate"></p></div>
+              <div id="empAgendaMissions" class="emp-mission-list"></div>
+              <div id="missionDoneList" style="padding:0 10px 10px"></div>
+            </aside>
+          </div>
+        </section>
+      </div>
+    </div>
+
+  <!-- MODAL ACTIVITÉ EMPLOYÉ -->
+  <div id="empActivityModal" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:700;display:none;align-items:center;justify-content:center">
+    <div style="background:white;border-radius:16px;width:620px;max-width:95vw;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden">
+      <div style="padding:20px 22px 14px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:12px;flex-shrink:0">
+        <div id="empActAvatar" style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--gold),#c4a030);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#000;flex-shrink:0"></div>
+        <div style="flex:1">
+          <div id="empActName" style="font-size:14px;font-weight:700;color:#111"></div>
+          <div id="empActMeta" style="font-size:11px;color:#9ca3af"></div>
+        </div>
+        <button onclick="document.getElementById('empActivityModal').style.display='none'" style="width:30px;height:30px;border-radius:8px;border:none;background:#f3f4f6;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280">
+          <span class="material-symbols-rounded" style="font-size:17px">close</span>
+        </button>
+      </div>
+      <div style="padding:10px 22px;border-bottom:1px solid #f5f5f5;display:flex;gap:8px;flex-shrink:0">
+        <select id="empActFilterModule" onchange="renderEmpActivities()" style="font-size:11px;padding:5px 8px;border-radius:6px;border:1px solid #e5e7eb;background:white;flex:1">
+          <option value="">Tous les modules</option>
+          <option>Connexion</option><option>Employés</option><option>Locataires</option>
+          <option>Propriétaires</option><option>Biens</option><option>Locatives</option>
+          <option>Contrats</option><option>Paiements</option><option>Dépenses</option>
+          <option>Fichiers</option><option>Profil</option>
+        </select>
+        <select id="empActFilterAction" onchange="renderEmpActivities()" style="font-size:11px;padding:5px 8px;border-radius:6px;border:1px solid #e5e7eb;background:white;flex:1">
+          <option value="">Toutes les actions</option>
+          <option>Connexion</option><option>Déconnexion</option>
+          <option>Ajout</option><option>Modification</option><option>Suppression</option><option>Export</option>
+        </select>
+      </div>
+      <div style="overflow-y:auto;flex:1;padding:14px 22px" id="empActBody"></div>
+      <div style="padding:12px 22px;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <span id="empActCount" style="font-size:11px;color:#9ca3af"></span>
+        <div style="display:flex;gap:6px" id="empActPagination"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== MODAL IMPORT EXCEL ====== -->
+  <div id="importExcelModal" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:800;display:none;align-items:center;justify-content:center">
+    <div style="background:white;border-radius:16px;width:560px;max-width:96vw;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden">
+      <!-- Header -->
+      <div style="padding:20px 24px 14px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:12px">
+        <div style="width:38px;height:38px;border-radius:10px;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <span class="material-symbols-rounded" style="font-size:20px;color:#16a34a">upload_file</span>
+        </div>
+        <div style="flex:1">
+          <div id="importModalTitle" style="font-size:15px;font-weight:700;color:#111">Import Excel</div>
+          <div id="importModalSub" style="font-size:11px;color:#9ca3af">Importez vos données depuis un fichier .xlsx ou .csv</div>
+        </div>
+        <button onclick="closeImportModal()" style="width:30px;height:30px;border-radius:8px;border:none;background:#f3f4f6;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280">
+          <span class="material-symbols-rounded" style="font-size:17px">close</span>
+        </button>
+      </div>
+
+      <!-- Steps -->
+      <div style="padding:16px 24px;overflow-y:auto;flex:1">
+<div style="background:#fef9ec;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+          <span class="material-symbols-rounded" style="font-size:22px;color:#d97706;flex-shrink:0">info</span>
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:4px">Étape 1 — Télécharger le modèle</div>
+            <div style="font-size:11px;color:#a16207;line-height:1.5">Utilisez le modèle pré-formaté pour éviter les erreurs. Ne modifiez pas les en-têtes de colonnes.</div>
+          </div>
+          <button onclick="downloadTemplate()" style="flex-shrink:0;padding:7px 13px;border-radius:8px;border:none;background:#d97706;color:#fff;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px">
+            <span class="material-symbols-rounded" style="font-size:14px">download</span> Modèle
+          </button>
+        </div>
+
+        <!-- Step 2: Upload -->
+        <div style="margin-bottom:14px">
+          <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">Étape 2 — Choisir le fichier</div>
+          <label id="importDropZone" style="border:2px dashed #d1d5db;border-radius:10px;padding:28px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:.2s;text-align:center"
+            onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='#d1d5db'">
+            <span class="material-symbols-rounded" style="font-size:36px;color:#9ca3af">table_view</span>
+            <span style="font-size:13px;font-weight:600;color:#374151">Glissez votre fichier ici</span>
+            <span style="font-size:11px;color:#9ca3af">ou cliquez pour parcourir — .xlsx, .xls, .csv acceptés</span>
+            <input type="file" id="importFileInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="onImportFileSelected(this)">
+          </label>
+          <div id="importFileName" style="margin-top:8px;font-size:11px;color:#16a34a;font-weight:600;display:none"></div>
+        </div>
+
+        <!-- Preview -->
+        <div id="importPreview" style="display:none">
+          <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">Aperçu — <span id="importPreviewCount"></span></div>
+          <div style="overflow-x:auto;border-radius:8px;border:1px solid #e5e7eb;max-height:180px;overflow-y:auto">
+            <table id="importPreviewTable" style="width:100%;border-collapse:collapse;font-size:11px">
+              <thead id="importPreviewHead" style="position:sticky;top:0;background:#f9fafb"></thead>
+              <tbody id="importPreviewBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Options -->
+          <div style="margin-top:12px;padding:12px;background:#f9fafb;border-radius:8px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
+              <input type="radio" name="importMode" value="merge" checked style="accent-color:var(--gold)"> Fusionner (ajouter aux existants)
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
+              <input type="radio" name="importMode" value="replace" style="accent-color:var(--gold)"> Remplacer tout
+            </label>
+          </div>
+          <div id="importWarning" style="display:none;margin-top:8px;background:#fee2e2;border-radius:8px;padding:10px 12px;font-size:11px;color:#991b1b;display:flex;align-items:center;gap:6px">
+            <span class="material-symbols-rounded" style="font-size:15px">warning</span>
+            <span>"Remplacer tout" supprimera définitivement toutes les données existantes de cette table.</span>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div id="importError" style="display:none;background:#fee2e2;border-radius:8px;padding:10px 12px;font-size:12px;color:#991b1b;margin-top:10px"></div>
+      </div>
+
+      <!-- Footer -->
+      <div style="padding:14px 24px;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center">
+        <button onclick="closeImportModal()" style="padding:8px 16px;border-radius:8px;border:1px solid #e5e7eb;background:white;font-size:13px;cursor:pointer;color:#374151">Annuler</button>
+        <button id="importConfirmBtn" onclick="confirmImport()" style="padding:8px 18px;border-radius:8px;border:none;background:#16a34a;color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:none;align-items:center;gap:6px">
+          <span class="material-symbols-rounded" style="font-size:15px">check_circle</span> Importer les données
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="page" id="page-droits">
+    <div class="page-hero" style="--hero-color:#7c3aed">
+      <div class="page-hero-icon"><span class="material-symbols-rounded">admin_panel_settings</span></div>
+      <div class="page-hero-text">
+        <h3>Droits d'accès</h3>
+        <p>Gérez les permissions d'accès de vos employés aux différentes sections</p>
+      </div>
+      <div class="page-hero-actions">
+        <button class="btn btn-primary" onclick="navigate('employes')">
+          <span class="material-symbols-rounded" style="font-size:15px">badge</span> Gérer les employés
+        </button>
+      </div>
+    </div>
+    <div class="container" id="droitsContainer">
+      <p style="color:#9ca3af;font-size:13px;text-align:center;padding:30px">Chargement des employés...</p>
+    </div>
+  </div>
+
+  <!-- ====== EMPLOYÉS LIST ====== -->
+  <div class="page" id="page-employes">
+    <div id="gpEmployesModern" class="gp-modern-zone" style="padding:24px"></div>
+  </div>
+
+  <!-- ====== NOUVEAU EMPLOYÉ ====== -->
+  <div class="page" id="page-nv-employe">
+    <header class="page-header">
+      <div class="u-flex-center u-gap-10">
+        <button class="btn-back-lnk" onclick="navigate('employes')"><span class="material-symbols-rounded">arrow_back</span> Retour</button>
+        <h2>Nouvel employé</h2>
+      </div>
+    </header>
+    <div class="form-page-grid cols-3">
+      <!-- Identification -->
+      <div class="card">
+        <h3>Identification</h3>
+        <div class="photo-box" onclick="document.getElementById('e-photo-input').click()"><span class="material-symbols-rounded mat-big" id="e-photo-icon">person</span><small id="e-photo-label">Glissez ou cliquez pour ajouter</small><img id="e-photo-preview" class="photo-preview" loading="lazy" decoding="async"><input type="file" id="e-photo-input" accept="image/*" style="display:none" onchange="previewPhoto(this,'e-photo-preview','e-photo-icon','e-photo-label')"></div>
+        <div style="display:flex;gap:6px;margin-top:10px;justify-content:center">
+          <button type="button" onclick="document.getElementById('e-photo-input').click()" class="btn btn-blue" style="font-size:12px;padding:6px 12px"><span class="material-symbols-rounded" style="font-size:14px;vertical-align:middle">upload</span> Choisir photo</button>
+          <button type="button" onclick="clearEmployePhoto()" class="btn btn-danger" style="font-size:12px;padding:6px 12px"><span class="material-symbols-rounded" style="font-size:14px;vertical-align:middle">delete</span> Supprimer</button>
+        </div>
+      </div>
+      <!-- Informations -->
+      <div class="card">
+        <h3>Informations</h3>
+        <div class="fgrid g2">
+          <div class="fg"><label>Civilité <span>*</span></label><select id="e-civ"><option value="">Sélectionnez</option><option>Monsieur</option><option>Madame</option></select></div>
+          <div class="fg"><label>Nom <span>*</span></label><input id="e-nom" placeholder="Nom"></div>
+          <div class="fg"><label>Prénoms <span>*</span></label><input id="e-prenom" placeholder="Prénoms"></div>
+          <div class="fg"><label>Date de naissance</label><input id="e-naiss" type="date" placeholder="jj/mm/aaaa" lang="fr"></div>
+          <div class="fg"><label>Fonction <span>*</span></label><input id="e-fonction" placeholder="Gestionnaire..."></div>
+          <div class="fg"><label>Adresse <span>*</span></label><input id="e-adresse" placeholder="Adresse"></div>
+          <div class="fg"><label>Téléphone <span>*</span></label><input id="e-tel" placeholder="77 000 00 00"></div>
+          <div class="fg"><label>Nature pièce</label><select id="e-piece"><option>CNI</option><option>Passeport</option></select></div>
+          
+          <div class="fg"><label>Lieu délivrance <span>*</span></label><input id="e-lieu" placeholder="Lieu délivrance"></div>
+          <div class="fg"><label>Date délivrance</label><input id="e-deldeb" type="date" placeholder="jj/mm/aaaa" lang="fr"></div>
+          <div class="fg"><label>Date expiration</label><input id="e-delexp" type="date" placeholder="jj/mm/aaaa" lang="fr"></div>
+          <div class="fg"><label>Situation matrimoniale</label><select id="e-matri"><option>Célibataire</option><option>Marié</option></select></div>
+          <div class="fg"><label>Nombre d'enfants</label><input id="e-enfants" type="number" placeholder="0" min="0"></div>
+          <div class="fg full"><label>Type de contrat</label><select id="e-contrat"><option>CDI</option><option>CDD</option></select></div>
+        </div>
+      </div>
+      <!-- Connexion -->
+      <div class="card">
+        <h3>Connexion</h3>
+        <div class="fgrid g1">
+          <div class="fg">
+            <label>Email <span style="color:var(--red)">*</span> <small style="color:#9ca3af;font-weight:400">(identifiant de connexion)</small></label>
+            <input id="e-email" type="email" placeholder="prenom.nom@agence.com">
+          </div>
+          <div class="fg">
+            <label>Mot de passe <span style="color:var(--red)">*</span></label>
+            <div style="display:flex;gap:6px;align-items:center">
+              <div style="position:relative;flex:1">
+                <input id="e-pass" type="password" placeholder="••••••••" style="width:100%;padding-right:36px;box-sizing:border-box">
+                <span onclick="tglPassField('e-pass','e-pass-eye')" title="Voir/masquer" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);cursor:pointer;color:#9ca3af;font-size:16px">
+                  <span class="material-symbols-rounded" id="e-pass-eye" style="font-size:18px;vertical-align:middle">visibility</span>
+                </span>
+              </div>
+              <button type="button" onclick="suggestPassword()" title="Générer un mot de passe sécurisé"
+                style="padding:6px 10px;border-radius:6px;border:1px solid #e5e7eb;background:var(--gold);color:#fff;cursor:pointer;font-size:12px;white-space:nowrap;flex-shrink:0">
+                <span class="material-symbols-rounded" style="font-size:14px;vertical-align:middle">auto_fix_high</span> Générer
+              </button>
+            </div>
+            <div id="e-pass-strength" style="font-size:11px;margin-top:4px;min-height:16px;color:#9ca3af"></div>
+          </div>
+          <div id="e-pass-suggestion" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;font-size:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <span style="color:#166534">Mot de passe suggéré :</span>
+              <button type="button" onclick="copyAndUseSuggestion()" style="padding:4px 10px;border-radius:6px;border:none;background:#16a34a;color:#fff;cursor:pointer;font-size:11px">Utiliser</button>
+            </div>
+            <div id="e-pass-suggested-val" style="font-family:monospace;font-size:13px;font-weight:600;color:#166534;letter-spacing:1px;margin-top:4px"></div>
+          </div>
+        </div>
+        <h3 style="margin-top:16px">Droits d'accès</h3>
+        <p style="font-size:11px;color:#9ca3af;margin:-4px 0 10px">Sélectionnez les pages accessibles à cet employé</p>
+        <div id="droits-list" style="display:flex;flex-direction:column;gap:4px">
+          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">home</span>Bureau</span><label class="toggle-switch"><input type="checkbox" checked><span class="slider-s"></span></label></div>
+          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">badge</span>Employés</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
+          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">person</span>Propriétaires</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
+          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">groups</span>Locataires</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
+          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">home_work</span>Biens</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
+          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">door_front</span>Locations</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
+          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">contract</span>Contrat</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
+          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">payments</span>Paiements</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
+          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">account_balance_wallet</span>Dépenses</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
+          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">mail</span>Messages</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
+          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">manage_search</span>Journal</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
+          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">settings</span>Paramètres</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
+          <div class="switch-row" style="border-top:1px solid #fee2e2;margin-top:4px;padding-top:8px"><span style="display:flex;align-items:center;gap:7px;color:var(--red)"><span class="material-symbols-rounded" style="font-size:15px;color:var(--red)">admin_panel_settings</span>Super admin</span><label class="toggle-switch"><input type="checkbox" onchange="onSuperAdminToggle(this)"><span class="slider-s"></span></label></div>
+        </div>
+        <div class="form-actions"><button class="btn btn-primary" onclick="saveEmploye()" style="width:100%">Enregistrer</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== PROPRIÉTAIRES LIST — VUE CARTES ====== -->
+  <div class="page" id="page-proprietaires">
+    <div id="gpProprietairesModern" class="gp-modern-zone" style="padding:24px"></div>
+  </div>
+
+  <!-- ====== NOUVEAU PROPRIÉTAIRE ====== -->
+  <div class="page" id="page-nv-proprietaire">
+    <header class="page-header">
+      <div class="u-flex-center u-gap-10">
+        <button class="btn-back-lnk" onclick="navigate('proprietaires')"><span class="material-symbols-rounded">arrow_back</span> Retour</button>
+        <h2>Nouveau propriétaire</h2>
+      </div>
+    </header>
+    <div class="form-page-grid cols-2">
+      <div class="card">
+        <h3>Photo propriétaire</h3>
+        <div class="photo-box" onclick="document.getElementById('p-photo-input').click()"><span class="material-symbols-rounded mat-big" id="p-photo-icon">person</span><small id="p-photo-label">Glissez ou cliquez pour ajouter</small><img id="p-photo-preview" class="photo-preview" loading="lazy" decoding="async"><input type="file" id="p-photo-input" accept="image/*" style="display:none" onchange="previewPhoto(this,'p-photo-preview','p-photo-icon','p-photo-label')"></div>
+        <div style="display:flex;gap:6px;margin-top:10px;justify-content:center">
+          <button type="button" onclick="document.getElementById('p-photo-input').click()" class="btn btn-blue" style="font-size:11px;padding:5px 10px"><span class="material-symbols-rounded" style="font-size:13px;vertical-align:middle">upload</span> Choisir photo</button>
+          <button type="button" onclick="clearProprietairePhoto()" class="btn btn-danger" style="font-size:11px;padding:5px 10px"><span class="material-symbols-rounded" style="font-size:13px;vertical-align:middle">delete</span> Supprimer</button>
+        </div>
+        <div class="fgrid g1" style="margin-top:12px">
+          <div class="fg"><label>Nom <span>*</span></label><input id="p-nom" placeholder="Nom"></div>
+          <div class="fg"><label>Prénoms <span>*</span></label><input id="p-prenom" placeholder="Prénoms"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Informations</h3>
+        <div class="fgrid g2">
+          <div class="fg"><label>Téléphone <span>*</span></label><input id="p-tel" placeholder="77 000 00 00"></div>
+          <div class="fg"><label>Email <span>*</span></label><input id="p-email" type="email" placeholder="email@domaine.com"></div>
+          <div class="fg"><label>Date de naissance</label><input id="p-naiss" type="date" placeholder="jj/mm/aaaa" lang="fr"></div>
+          <div class="fg"><label>Statut matrimonial</label><select id="p-matri"><option value="">Statut</option><option>Célibataire</option><option>Marié</option></select></div>
+          <div class="fg full"><label>Adresse <span>*</span></label><input id="p-adresse" placeholder="Adresse"></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="saveProprietaire()">Enregistrer</button>
+          <button class="btn btn-danger" onclick="navigate('proprietaires')">Annuler</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== DÉTAIL PROPRIÉTAIRE ====== -->
+  <div class="page" id="page-proprietaire-detail">
+    <div class="page-header" style="margin-bottom:0">
+      <div class="u-flex-center u-gap-10">
+        <button class="btn-back-lnk" onclick="navigate('proprietaires')"><span class="material-symbols-rounded">arrow_back</span> Propriétaires</button>
+        <span style="color:#bbb;font-size:14px">/</span>
+        <h2 id="propDetailName" style="font-size:15px;font-weight:700;color:#111">—</h2>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="propDetailEditBtn" class="btn btn-blue" onclick="editProprietaireFromDetail()"><span class="material-symbols-rounded" style="font-size:14px">edit</span> Modifier</button>
+        <button id="propDetailDelBtn" class="btn btn-danger" onclick="deleteProprietaireFromDetail()"><span class="material-symbols-rounded" style="font-size:14px">delete</span> Supprimer</button>
+      </div>
+    </div>
+
+    <div class="prop-detail-card" style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px 20px;margin:12px 0 0;display:flex;align-items:center;gap:16px;box-shadow:0 1px 6px rgba(0,0,0,.04)">
+      <div id="propDetailPhotoWrap" style="flex-shrink:0;width:72px;height:72px;border-radius:12px;overflow:hidden;background:#f3f4f6;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center"><span class="material-symbols-rounded" style="font-size:32px;color:#d1d5db">person</span></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:16px;font-weight:800;color:#111;margin-bottom:2px" id="propDetailNameSub">—</div>
+        <div style="font-size:12px;color:#9ca3af;display:flex;align-items:center;gap:5px"><span class="material-symbols-rounded" style="font-size:13px">call</span><span id="propDetailContactSub">—</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,auto);gap:20px;flex-shrink:0">
+        <div style="text-align:center"><div style="font-size:9.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px">Biens</div><div id="propDetailBiensCount" style="font-size:16px;font-weight:900;color:#D4AF37">0</div></div>
+        <div style="text-align:center;border-left:1px solid #f0f0f0;padding-left:20px"><div style="font-size:9.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px">Statut</div><div style="font-size:12px;font-weight:600;color:#16a34a">Actif</div></div>
+      </div>
+    </div>
+
+    <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:0 20px;margin-top:10px;box-shadow:0 1px 6px rgba(0,0,0,.04);display:flex;align-items:flex-end;gap:0">
+      <button class="proprietaire-detail-tab" id="pdTab-infos" onclick="switchProprietaireTab(this,'infos')" class="u-tab-btn"><span class="material-symbols-rounded">info</span><span>Informations</span></button>
+      <button class="proprietaire-detail-tab" id="pdTab-biens" onclick="switchProprietaireTab(this,'biens')" class="u-tab-btn"><span class="material-symbols-rounded">home_work</span><span>Biens</span></button>
+      <button class="proprietaire-detail-tab" id="pdTab-docs" onclick="switchProprietaireTab(this,'docs')" class="u-tab-btn"><span class="material-symbols-rounded">description</span><span>Documents</span></button>
+    </div>
+
+    <div style="margin-top:12px">
+      <div id="proprietaireTabInfos">
+        <div class="prop-detail-card" style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.04)">
+          <h3 class="u-modal-section-title">Informations propriétaire</h3>
+          <div id="propDetailInfosGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px"></div>
+        </div>
+      </div>
+      <div id="proprietaireTabBiens" style="display:none">
+        <div class="prop-detail-card" style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.04)">
+          <h3 class="u-modal-section-title">Biens associés</h3>
+          <div id="propDetailBiensList"></div>
+        </div>
+      </div>
+      <div id="proprietaireTabDocs" style="display:none">
+        <div class="prop-detail-card" style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.04)">
+          <h3 class="u-modal-section-title">Documents</h3>
+          <div class="fgrid g3" style="margin-bottom:10px">
+            <div class="fg"><label>Nom du document</label><input id="propDocName" placeholder="Ex: CNI"></div>
+            <div class="fg"><label>Album</label><input id="propDocAlbum" placeholder="Ex: Identité, Contrats"></div>
+            <div class="fg"><label>Fichier</label><input id="propDocFile" type="file" accept="image/*,.pdf"></div>
+          </div>
+          <div id="propDocDrop" class="prop-doc-drop">Glissez un document ici ou choisissez un fichier</div>
+          <button class="btn btn-primary" style="margin-top:10px" onclick="addProprietaireDocument()"><span class="material-symbols-rounded" style="font-size:15px">upload_file</span> Ajouter</button>
+          <div id="propDocList" style="margin-top:14px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== LOCATAIRES LIST — MODERNE DISCRET ====== -->
+  <div class="page" id="page-locataires">
+    <div class="locataires-modern-header">
+      <div class="locataires-modern-title">
+        <h2>Locataires</h2>
+        <p>Vue moderne et discrète des occupants avec photo, contact et bien occupé</p>
+      </div>
+      <div class="locataires-modern-actions" style="display:flex;align-items:center;justify-content:space-between;width:100%">
+        <div></div><div style="display:flex;gap:10px;align-items:center"><div class="gp-export-wrap" id="exportWrap-locataires">
+          <button class="gp-export-btn" onclick="toggleExportMenu('locataires')"><span class="material-symbols-rounded" style="font-size:15px">file_download</span> Exporter <span class="material-symbols-rounded" style="font-size:14px">expand_more</span></button>
+          <div class="gp-export-menu" id="exportMenu-locataires">
+            <div class="gp-export-item" onclick="exportListePDF('locataires');toggleExportMenu('locataires')"><span class="material-symbols-rounded" class="u-icon-16 u-icon-danger">picture_as_pdf</span> Export PDF</div>
+            <div class="gp-export-sep"></div>
+            <div class="gp-export-item" onclick="exportExcel('locataires');toggleExportMenu('locataires')"><span class="material-symbols-rounded" class="u-icon-16 u-icon-success">table_view</span> Export Excel</div>
+          </div>
+        </div>
+        <button class="btn btn-import" onclick="openImportModal('locataires')"><span class="material-symbols-rounded">file_upload</span> Importer</button>
+<button class="btn btn-primary" style="background:#D4AF37;border-color:#D4AF37" onclick="navigate('nv-locataire')"><span class="material-symbols-rounded">person_add</span> Nouveau locataire</button></div>
+      </div>
+    </div>
+
+    <div class="locataires-kpis">
+      <div class="loc-kpi"><div class="loc-kpi-icon"><span class="material-symbols-rounded">groups</span></div><div><div class="loc-kpi-label">Locataires</div><div class="loc-kpi-val" id="locStatTotal">0</div></div></div>
+      <div class="loc-kpi"><div class="loc-kpi-icon"><span class="material-symbols-rounded">home_work</span></div><div><div class="loc-kpi-label">Avec bien</div><div class="loc-kpi-val" id="locStatBien">0</div></div></div>
+      <div class="loc-kpi"><div class="loc-kpi-icon"><span class="material-symbols-rounded">verified</span></div><div><div class="loc-kpi-label">Actifs</div><div class="loc-kpi-val" id="locStatActifs">0</div></div></div>
+    </div>
+
+    <div class="locataires-toolbar">
+      <div class="loc-search"><span class="material-symbols-rounded" style="font-size:16px;color:#D4AF37">search</span><input id="locatairesSearchModern" type="search" placeholder="Rechercher un locataire…" oninput="renderLocatairesModern(true)"></div>
+      <select id="locatairesTypeFilter" class="loc-filter" onchange="renderLocatairesModern(true)"><option value="">Tous les types</option><option>Particulier</option><option>Entreprise</option></select>
+      <select id="locatairesStatutFilter" class="loc-filter" onchange="renderLocatairesModern(true)"><option value="">Tous les statuts</option><option>Actif</option><option>Inactif</option></select>
+      <div class="loc-count" id="locatairesModernCount"></div>
+    </div>
+
+    <div id="locatairesCardsGrid" class="gp-compact-list locataires-compact-list"></div>
+    <div id="locatairesEmptyState" class="loc-empty" style="display:none"><span class="material-symbols-rounded">person_search</span><div style="font-size:14px;font-weight:700;margin-bottom:4px">Aucun locataire trouvé</div><div style="font-size:12px">Essayez une autre recherche ou ajoutez un nouveau locataire.</div></div>
+    <div id="locatairesPagination" style="display:none;align-items:center;justify-content:center;gap:6px;margin-top:14px;flex-wrap:wrap"></div>
+  </div>
+
+  <!-- ====== NOUVEAU LOCATAIRE ====== -->
+  <div class="page" id="page-nv-locataire"></div>
+
+  <!-- ====== BIENS LIST ====== -->
+  <!-- ====== BIENS — NOUVELLE VUE CARTES ====== -->
+  <div class="page" id="page-biens">
+    <div class="dash-breadcrumb biens-top-breadcrumb"><div class="dash-breadcrumb-home"><span class="material-symbols-rounded">home</span></div><div class="dash-breadcrumb-name">Biens</div></div>
+
+    <!-- HEADER BAR -->
+    <div class="biens-page-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap">
+      <div>
+        <h2 style="font-size:17px;font-weight:800;color:#111;margin-bottom:1px">Biens Immobiliers</h2>
+        <p style="font-size:11px;color:#9ca3af">Gérez votre patrimoine immobilier</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="navigate('nv-bien')" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--gold);color:#000;border:none;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(212,175,55,.35);transition:.15s" onmouseover="this.style.background='#c4a030'" onmouseout="this.style.background='var(--gold)'">
+          <span class="material-symbols-rounded" style="font-size:16px">add_home</span> Ajouter un bien
+        </button>
+        <div style="position:relative" id="biensExportWrap">
+          <button onclick="toggleBiensExport()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;color:#374151;border:1px solid #e5e7eb;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='#e5e7eb'">
+            <span class="material-symbols-rounded" style="font-size:15px">file_download</span> Exporter <span class="material-symbols-rounded" style="font-size:14px">expand_more</span>
+          </button>
+          <div id="biensExportMenu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:white;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.13);border:1px solid #f0f0f0;overflow:hidden;min-width:150px;z-index:50">
+            <div onclick="exportListePDF('biens');toggleBiensExport()" style="display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12.5px;cursor:pointer;color:#374151;transition:.12s" onmouseover="this.style.background='#fdf9ec'" onmouseout="this.style.background=''">
+              <span class="material-symbols-rounded" class="u-icon-16 u-icon-danger">picture_as_pdf</span> Export PDF
+            </div>
+            <div style="height:1px;background:#f5f5f5"></div>
+            <div onclick="exportExcel('biens');toggleBiensExport()" style="display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12.5px;cursor:pointer;color:#374151;transition:.12s" onmouseover="this.style.background='#fdf9ec'" onmouseout="this.style.background=''">
+              <span class="material-symbols-rounded" class="u-icon-16 u-icon-success">table_view</span> Export Excel
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px" id="biensStatCards">
+      <div style="background:white;border-radius:11px;padding:12px 14px;border-left:4px solid #16a34a;box-shadow:0 2px 8px rgba(0,0,0,.05);display:flex;align-items:center;gap:12px">
+        <div style="width:38px;height:38px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="material-symbols-rounded" style="font-size:20px;color:#16a34a">home</span></div>
+        <div><div style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;margin-bottom:2px">Loué</div><div style="font-size:22px;font-weight:900;color:#16a34a;line-height:1" id="biensStatLoue">0</div></div>
+      </div>
+      <div style="background:white;border-radius:11px;padding:12px 14px;border-left:4px solid #2563eb;box-shadow:0 2px 8px rgba(0,0,0,.05);display:flex;align-items:center;gap:12px">
+        <div style="width:38px;height:38px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="material-symbols-rounded" style="font-size:20px;color:#2563eb">door_open</span></div>
+        <div><div style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;margin-bottom:2px">Disponible</div><div style="font-size:22px;font-weight:900;color:#2563eb;line-height:1" id="biensStatDispo">0</div></div>
+      </div>
+      <div style="background:white;border-radius:11px;padding:12px 14px;border-left:4px solid #f59e0b;box-shadow:0 2px 8px rgba(0,0,0,.05);display:flex;align-items:center;gap:12px">
+        <div style="width:38px;height:38px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="material-symbols-rounded" style="font-size:20px;color:#f59e0b">schedule</span></div>
+        <div><div style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;margin-bottom:2px">En attente</div><div style="font-size:22px;font-weight:900;color:#f59e0b;line-height:1" id="biensStatAttente">0</div></div>
+      </div>
+    </div>
+
+    <!-- FILTERS BAR -->
+    <div style="background:white;border-radius:11px;padding:10px 14px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,.05);display:flex;align-items:center;gap:10px;flex-wrap:nowrap">
+      <div style="display:flex;align-items:center;gap:7px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:5px 10px;width:230px;max-width:100%">
+        <span class="material-symbols-rounded" style="font-size:16px;color:#D4AF37">search</span>
+        <input id="biensSearch" type="search" placeholder="Rechercher un bien…" oninput="renderBiensCards(true)" style="border:none;background:transparent;font-size:12.5px;outline:none;width:100%;color:#111">
+      </div>
+      <!-- Custom dropdown bouton "Choix du type de bien" -->
+      <div style="position:relative" id="biensTypeDropWrap">
+        <button id="biensTypeDropBtn" onclick="toggleBiensTypeDropdown(event)" style="display:inline-flex;align-items:center;gap:8px;padding:7px 12px;background:white;color:#374151;border:1px solid #e5e7eb;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s;min-width:190px;justify-content:space-between;white-space:nowrap" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="if(!document.getElementById('biensTypeDropMenu').style.display||document.getElementById('biensTypeDropMenu').style.display==='none')this.style.borderColor='#e5e7eb'">
+          <span id="biensTypeDropLabel">Choix du type de bien</span>
+          <span class="material-symbols-rounded" style="font-size:18px;color:#6b7280;flex-shrink:0">expand_more</span>
+        </button>
+        <div id="biensTypeDropMenu" style="display:none;position:absolute;left:0;top:calc(100% + 6px);background:white;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.13);border:1px solid #f0f0f0;overflow:hidden;min-width:190px;z-index:100">
+          <div onclick="setBiensTypeFilter('')" style="display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:12.5px;cursor:pointer;color:#374151;font-weight:500;transition:.12s" onmouseover="this.style.background='#fdf9ec'" onmouseout="this.style.background=''">
+            <span class="material-symbols-rounded" style="font-size:16px;color:#9ca3af">home_work</span> Tous les types
+          </div>
+        </div>
+        <!-- Select caché pour compatibilité JS -->
+        <select id="biensFilterType" onchange="renderBiensCards(true)" style="display:none">
+          <option value="">Tous les types</option>
+        </select>
+      </div>
+      <select id="biensFilterStatut" onchange="renderBiensCards(true)" style="padding:7px 10px;border-radius:8px;border:1px solid #e5e7eb;font-size:12px;background:white;color:#374151;cursor:pointer">
+        <option value="">Tous les statuts</option>
+        <option>Disponible</option><option>Loué</option><option>En attente</option>
+      </select>
+      <div id="biensCount" style="font-size:11px;color:#9ca3af;white-space:nowrap;margin-left:auto"></div>
+    </div>
+
+    <!-- CARDS GRID -->
+    <div id="biensCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px"></div>
+
+    <!-- PAGINATION BIENS -->
+    <div id="biensPagination" style="display:none;align-items:center;justify-content:center;gap:6px;margin-top:14px;flex-wrap:wrap"></div>
+
+    <!-- EMPTY STATE -->
+    <div id="biensEmptyState" style="display:none;text-align:center;padding:60px 20px;color:#9ca3af">
+      <span class="material-symbols-rounded" style="font-size:56px;opacity:.4;display:block;margin-bottom:10px">home_work</span>
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px">Aucun bien trouvé</div>
+      <div style="font-size:12px">Modifiez les filtres ou ajoutez un nouveau bien</div>
+    </div>
+  </div>
+
+  <!-- ====== PAGE DÉTAIL BIEN (pleine page, style Réglages) ====== -->
+  <div class="page" id="page-bien-detail">
+    <!-- Breadcrumb + actions -->
+    <div class="page-header" style="margin-bottom:0">
+      <div class="u-flex-center u-gap-10">
+        <button class="btn-back-lnk" onclick="navigate('biens')">
+          <span class="material-symbols-rounded">arrow_back</span> Biens
+        </button>
+        <span style="color:#bbb;font-size:14px">/</span>
+        <h2 id="bienDetailName" style="font-size:15px;font-weight:700;color:#111">—</h2>
+        <div id="bienDetailStatutBadge" style="margin-left:4px"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="bienDetailEditBtn" onclick="editBienFromDetail()" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;background:#dbeafe;color:#1e40af;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s" onmouseover="this.style.background='#bfdbfe'" onmouseout="this.style.background='#dbeafe'">
+          <span class="material-symbols-rounded" style="font-size:14px">edit</span> Modifier
+        </button>
+        <button id="bienDetailDelBtn" onclick="deleteBienFromDetail()" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">
+          <span class="material-symbols-rounded" style="font-size:14px">delete</span> Supprimer
+        </button>
+      </div>
+    </div>
+
+    <!-- Sub-header: photo + meta -->
+    <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px 20px;margin:12px 0 0;display:flex;align-items:center;gap:16px;box-shadow:0 1px 6px rgba(0,0,0,.04)">
+      <div id="bienDetailPhotoWrap" style="flex-shrink:0;width:72px;height:72px;border-radius:12px;overflow:hidden;background:#f3f4f6;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center">
+        <span class="material-symbols-rounded" style="font-size:32px;color:#d1d5db">home</span>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:16px;font-weight:800;color:#111;margin-bottom:2px" id="bienDetailNameSub">—</div>
+        <div id="bienDetailType" style="font-size:12px;color:#9ca3af;display:flex;align-items:center;gap:5px">
+          <span class="material-symbols-rounded" style="font-size:13px">location_on</span><span id="bienDetailTypeText">—</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,auto);gap:20px;flex-shrink:0">
+        <div style="text-align:center">
+          <div style="font-size:9.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px">Valeur</div>
+          <div id="bienDetailValeur" style="font-size:14px;font-weight:900;color:#D4AF37;white-space:nowrap"></div>
+        </div>
+        <div style="text-align:center;border-left:1px solid #f0f0f0;padding-left:20px">
+          <div style="font-size:9.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px">État</div>
+          <div id="bienDetailEtat" style="font-size:12px;font-weight:600;color:#374151"></div>
+        </div>
+        <div style="text-align:center;border-left:1px solid #f0f0f0;padding-left:20px">
+          <div style="font-size:9.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:3px">À vendre</div>
+          <div id="bienDetailVente" style="font-size:12px;font-weight:600;color:#374151"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab bar — same style as the screenshot (Réglages / Quittance / Rubriques / Notifications) -->
+    <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:0 20px;margin-top:10px;box-shadow:0 1px 6px rgba(0,0,0,.04);display:flex;align-items:flex-end;gap:0">
+      <button class="bien-detail-tab" id="bdTab-infos" onclick="switchBienTab(this,'infos')" class="u-tab-btn">
+        <span class="material-symbols-rounded">info</span><span>Informations</span>
+      </button>
+      <button class="bien-detail-tab" id="bdTab-locataires" onclick="switchBienTab(this,'locataires')" class="u-tab-btn">
+        <span class="material-symbols-rounded">groups</span><span>Locataires</span>
+      </button>
+      <button class="bien-detail-tab" id="bdTab-proprio" onclick="switchBienTab(this,'proprio')" class="u-tab-btn">
+        <span class="material-symbols-rounded">person</span><span>Propriétaire</span>
+      </button>
+      <button class="bien-detail-tab" id="bdTab-docs" onclick="switchBienTab(this,'docs')" class="u-tab-btn">
+        <span class="material-symbols-rounded">description</span><span>Documents</span>
+      </button>
+    </div>
+
+    <!-- Tab panels -->
+    <div style="margin-top:12px">
+
+      <!-- ===== Infos ===== -->
+      <div id="bienTabInfos">
+        <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px 20px;box-shadow:0 1px 6px rgba(0,0,0,.04)">
+          <h3 class="u-modal-section-title">Adresse &amp; localisation</h3>
+          <div id="bienDetailAdresse" style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:#374151">
+            <span class="material-symbols-rounded" style="font-size:16px;color:#D4AF37">location_on</span>
+            <span></span>
+          </div>
+        </div>
+        <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px 20px;margin-top:10px;box-shadow:0 1px 6px rgba(0,0,0,.04)">
+          <h3 class="u-modal-section-title">Caractéristiques du bien</h3>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <div style="background:#f9fafb;border-radius:9px;padding:12px 14px">
+              <div style="font-size:9.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:4px">Type</div>
+              <div id="bienDetailTypeCard" style="font-size:13px;font-weight:600;color:#374151">—</div>
+            </div>
+            <div style="background:#f9fafb;border-radius:9px;padding:12px 14px">
+              <div style="font-size:9.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:4px">Statut</div>
+              <div id="bienDetailStatutCard"></div>
+            </div>
+            <div style="background:#f9fafb;border-radius:9px;padding:12px 14px">
+              <div style="font-size:9.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:4px">À vendre</div>
+              <div id="bienDetailVenteCard" style="font-size:13px;font-weight:600;color:#374151">—</div>
+            </div>
+            <div style="background:#f9fafb;border-radius:9px;padding:12px 14px">
+              <div style="font-size:9.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:4px">État</div>
+              <div id="bienDetailEtatCard" style="font-size:13px;font-weight:600;color:#374151">—</div>
+            </div>
+            <div style="background:#fef9ec;border-radius:9px;padding:12px 14px;border:1px solid #fde68a">
+              <div style="font-size:9.5px;font-weight:700;color:#92400e;text-transform:uppercase;margin-bottom:4px">Valeur estimée</div>
+              <div id="bienDetailValeurCard" style="font-size:15px;font-weight:900;color:#D4AF37">—</div>
+            </div>
+            <div style="background:#f9fafb;border-radius:9px;padding:12px 14px">
+              <div style="font-size:9.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:4px">Propriétaire</div>
+              <div id="bienDetailProprioCard" style="font-size:13px;font-weight:600;color:#374151">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Locataires ===== -->
+      <div id="bienTabLocataires" style="display:none">
+        <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px 20px;box-shadow:0 1px 6px rgba(0,0,0,.04)">
+          <h3 class="u-modal-section-title">Locataires &amp; locations en cours</h3>
+          <div id="bienDetailLocataires"></div>
+        </div>
+      </div>
+
+      <!-- ===== Propriétaire ===== -->
+      <div id="bienTabProprio" style="display:none">
+        <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px 20px;box-shadow:0 1px 6px rgba(0,0,0,.04)">
+          <h3 class="u-modal-section-title">Informations propriétaire</h3>
+          <div id="bienDetailProprioContent"></div>
+        </div>
+      </div>
+
+      <!-- ===== Documents ===== -->
+      <div id="bienTabDocs" style="display:none">
+        <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px 20px;box-shadow:0 1px 6px rgba(0,0,0,.04)">
+          <h3 style="font-size:13px;font-weight:700;color:#111;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:6px"><span class="material-symbols-rounded" style="font-size:17px;color:var(--gold)">folder_managed</span>Documents</h3>
+          <div class="bien-doc-premium-drop" id="bienDocDropZone" onclick="document.getElementById('bienDocFile').click()">
+            <span class="material-symbols-rounded" style="font-size:34px;color:var(--gold);display:block;margin-bottom:5px">cloud_upload</span>
+            <div style="font-size:13px;font-weight:800;color:#111">Glissez un PDF, une image ou un fichier ici</div>
+            <div style="font-size:11px;color:#9ca3af;margin-top:3px">ou cliquez pour sélectionner un fichier</div>
+          </div>
+          <div class="bien-doc-form">
+            <div class="fg"><label>Nom du document</label><input id="bienDocName" placeholder="Ex : Titre foncier, Plan, Facture"></div>
+            <div class="fg"><label>Album</label><input id="bienDocAlbum" placeholder="Ex : Juridique, Photos, Plans"></div>
+            <button type="button" class="btn btn-primary" onclick="addDocumentToCurrentBien()"><span class="material-symbols-rounded">add</span> Ajouter</button>
+            <input type="file" id="bienDocFile" style="display:none" onchange="handleBienDocFile(this.files && this.files[0])">
+          </div>
+          <div id="bienDocSelected" style="display:none;margin-bottom:12px;font-size:11px;color:#6b7280;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:8px"></div>
+          <div id="bienDetailDocsContent"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ====== NOUVEAU BIEN ====== -->
+  <div class="page" id="page-nv-bien">
+    <header class="page-header">
+      <div class="u-flex-center u-gap-10">
+        <button class="btn-back-lnk" onclick="navigate('biens')"><span class="material-symbols-rounded">arrow_back</span> Retour liste</button>
+        <h2>Nouveau Bien</h2>
+      </div>
+    </header>
+    <div style="display:grid;grid-template-columns:240px 1fr;gap:12px;align-items:start">
+      <div class="card" style="padding:12px">
+        <h3 style="font-size:12px;margin-bottom:8px;padding-bottom:6px">Photo</h3>
+        <div class="photo-box" style="height:190px" onclick="document.getElementById('b-photo-input').click()">
+          <span class="material-symbols-rounded mat-big" id="b-photo-icon" style="font-size:42px">home</span>
+          <small id="b-photo-label" style="font-size:11px">Ajouter une photo</small>
+          <img id="b-photo-preview" class="photo-preview" loading="lazy" decoding="async">
+          <input type="file" id="b-photo-input" accept="image/*" style="display:none" onchange="previewPhoto(this,'b-photo-preview','b-photo-icon','b-photo-label')">
+        </div>
+        <div style="display:flex;gap:5px;margin-top:8px;justify-content:center">
+          <button type="button" onclick="document.getElementById('b-photo-input').click()" class="btn btn-blue" style="font-size:10px;padding:4px 8px;height:auto;min-height:0;border-radius:7px"><span class="material-symbols-rounded" style="font-size:12px;vertical-align:middle">upload</span> Choisir</button>
+          <button type="button" onclick="clearBienPhoto()" class="btn btn-danger" style="font-size:10px;padding:4px 8px;height:auto;min-height:0;border-radius:7px"><span class="material-symbols-rounded" style="font-size:12px;vertical-align:middle">delete</span> Supprimer</button>
+        </div>
+      </div>
+      <div class="card" style="padding:10px 12px">
+        <h3 style="font-size:12px;margin-bottom:8px;padding-bottom:6px">Informations</h3>
+        <div class="fgrid g3" style="gap:7px">
+          <div class="fg"><label>Nom du bien <span>*</span></label><input id="b-nom" placeholder="Ex : Palmiers"></div>
+          <div class="fg"><label>Destiné à la vente <span>*</span></label><select id="b-vente"><option value="">Sélectionnez</option><option>Oui</option><option>Non</option></select></div>
+          <div class="fg"><label>Type de bien <span>*</span></label>
+            <select id="b-type" onchange="onBienTypeChange()">
+              <option value="">Sélectionnez</option>
+              <option>Immeuble</option>
+              <option>Appartement</option>
+              <option>Maison</option>
+              <option>Villa</option>
+              <option>Terrain</option>
+              <option>Local commercial</option>
+              <option>Bureau</option>
+              <option>Studio</option>
+            </select>
+          </div>
+          <div class="fg"><label>Propriétaire <span>*</span></label><select id="b-proprio"><option value="">Sélectionnez</option></select></div>
+          <div class="fg" id="b-nb-appart-wrap" style="display:none">
+            <label>Nombre d'appartements <span>*</span></label>
+            <input id="b-nb-appart" type="number" min="1" placeholder="Ex : 12">
+          </div>
+          <div class="fg"><label>Valeur du bien <span>*</span></label><input id="b-valeur" type="number" placeholder="50000000"></div>
+          <div class="fg"><label>État du bien</label><select id="b-etat"><option>Neuf</option><option>Bon état</option><option>À rénover</option><option>En travaux</option></select></div>
+          <div class="fg"><label>Statut <span>*</span></label><select id="b-statut"><option>Disponible</option><option>Loué</option><option>En attente</option></select></div>
+          <div class="fg"><label>Adresse</label><input id="b-adresse" placeholder="Adresse courte"></div>
+        </div>
+
+        <div class="form-actions" style="margin-top:10px">
+          <button class="btn btn-primary" onclick="saveBien()">Enregistrer</button>
+          <button class="btn btn-danger" onclick="navigate('biens')">Annuler</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== LOCATIVES LIST ====== -->
+  <div class="page" id="page-locatives">
+    <div class="page-hero" style="--hero-color:#d97706">
+      <div class="page-hero-icon"><span class="material-symbols-rounded">door_front</span></div>
+      <div class="page-hero-text">
+        <h3>Locations</h3>
+        <p>Unités locatives, disponibilités et occupants</p>
+      </div>
+      <div class="page-hero-actions">
+        <button class="btn btn-primary" onclick="navigate('nv-locative')"><span class="material-symbols-rounded">add</span> Nouvelle location</button>
+        <div class="gp-export-wrap" id="exportWrap-locatives">
+          <button class="gp-export-btn" onclick="toggleExportMenu('locatives')"><span class="material-symbols-rounded" style="font-size:15px">file_download</span> Exporter <span class="material-symbols-rounded" style="font-size:14px">expand_more</span></button>
+          <div class="gp-export-menu" id="exportMenu-locatives">
+            <div class="gp-export-item" onclick="exportListePDF('locatives');toggleExportMenu('locatives')"><span class="material-symbols-rounded" class="u-icon-16 u-icon-danger">picture_as_pdf</span> Export PDF</div>
+            <div class="gp-export-sep"></div>
+            <div class="gp-export-item" onclick="exportExcel('locatives');toggleExportMenu('locatives')"><span class="material-symbols-rounded" class="u-icon-16 u-icon-success">table_view</span> Export Excel</div>
+          </div>
+        </div>
+        <button class="btn btn-import" onclick="openImportModal('locatives')"><span class="material-symbols-rounded">file_upload</span> Importer</button>
+      </div>
+    </div>
+    <div class="container">
+      <div class="table-controls">
+        <div>Afficher <select onchange="changePS('locatives',this.value)"><option>10</option><option>25</option><option>50</option></select> lignes</div>
+        <div><input type="search" placeholder="🔍 Rechercher une locative…" oninput="searchTbl('locatives',this.value)"></div>
+      </div>
+      <table>
+        <thead><tr><th>Location</th><th>Bien</th><th>Occupant</th><th>Montant loyer</th><th>Date entrée</th><th>Actions</th></tr></thead>
+        <tbody id="tbl-locatives"></tbody>
+      </table>
+      <div class="table-footer"><span id="foot-locatives"></span><div class="pagination" id="pag-locatives"></div></div>
+    </div>
+  </div>
+
+  <!-- ====== NOUVELLE LOCATIVE ====== -->
+  <div class="page" id="page-nv-locative">
+    <header class="page-header">
+      <div class="u-flex-center u-gap-10">
+        <button class="btn-back-lnk" onclick="navigate('locatives')"><span class="material-symbols-rounded">arrow_back</span> Retour liste</button>
+        <h2>Nouvelle location</h2>
+      </div>
+    </header>
+    <div class="form-page-grid cols-2">
+      <div class="card">
+        <h3>Identification</h3>
+        <div class="photo-box" onclick="document.getElementById('lv-photo-input').click()"><span class="material-symbols-rounded mat-big" id="lv-photo-icon">door_front</span><small id="lv-photo-label">Ajouter une photo</small><img id="lv-photo-preview" class="photo-preview" loading="lazy" decoding="async"><input type="file" id="lv-photo-input" accept="image/*" style="display:none" onchange="previewPhoto(this,'lv-photo-preview','lv-photo-icon','lv-photo-label')"></div>
+        <div style="display:flex;gap:6px;margin-top:10px;justify-content:center">
+          <button type="button" onclick="document.getElementById('lv-photo-input').click()" class="btn btn-blue" style="font-size:11px;padding:5px 10px"><span class="material-symbols-rounded" style="font-size:13px;vertical-align:middle">upload</span> Choisir photo</button>
+          <button type="button" onclick="clearLocationPhoto()" class="btn btn-danger" style="font-size:11px;padding:5px 10px"><span class="material-symbols-rounded" style="font-size:13px;vertical-align:middle">delete</span> Supprimer</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Information</h3>
+        <div class="fgrid g2">
+          <div class="fg"><label>Locataire <span>*</span></label><select id="lv-locataire" onchange="syncLocativeFromLocataire()"><option value="">Sélectionner un locataire</option></select></div>
+          <div class="fg"><label>Bien <span>*</span></label><select id="lv-bien" onchange="syncLocativeFromBien()"><option value="">Sélectionner un bien</option></select></div>
+          <div class="fg"><label>Téléphone locataire</label><input id="lv-locataire-tel" type="text" readonly placeholder="Sélectionnez un locataire" style="background:#f8fafc"></div>
+          <div class="fg"><label>Loyer (FCFA) <span>*</span></label><input id="lv-loyer" type="number" placeholder="150 000"></div>
+          <div class="fg"><label>Charge (FCFA)</label><input id="lv-charge" type="number" placeholder="15 000"></div>
+          <div class="fg"><label>Date d’entrée <span>*</span></label><input id="lv-date-entree" type="date" placeholder="jj/mm/aaaa" lang="fr"></div>
+          <div class="fg"><label>Statut</label><select id="lv-statut"><option>Loué</option><option>Disponible</option><option>En attente</option></select></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="saveLocative()">Enregistrer</button>
+          <button class="btn btn-danger" onclick="navigate('locatives')">Annuler</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== CONTRATS LIST ====== -->
+  <div class="page" id="page-contrats">
+    <div class="page-hero" style="--hero-color:#2563eb">
+      <div class="page-hero-icon"><span class="material-symbols-rounded">description</span></div>
+      <div class="page-hero-text">
+        <h3>Contrats de location</h3>
+        <p>Gestion des baux, durées et statuts contractuels</p>
+      </div>
+      <div class="page-hero-actions">
+        <button class="btn btn-primary" onclick="navigate('nv-contrat')"><span class="material-symbols-rounded">note_add</span> Nouveau contrat</button>
+        <div class="gp-export-wrap" id="exportWrap-contrats">
+          <button class="gp-export-btn" onclick="toggleExportMenu('contrats')"><span class="material-symbols-rounded" style="font-size:15px">file_download</span> Exporter <span class="material-symbols-rounded" style="font-size:14px">expand_more</span></button>
+          <div class="gp-export-menu" id="exportMenu-contrats">
+            <div class="gp-export-item" onclick="exportListePDF('contrats');toggleExportMenu('contrats')"><span class="material-symbols-rounded" class="u-icon-16 u-icon-danger">picture_as_pdf</span> Export PDF</div>
+            <div class="gp-export-sep"></div>
+            <div class="gp-export-item" onclick="exportExcel('contrats');toggleExportMenu('contrats')"><span class="material-symbols-rounded" class="u-icon-16 u-icon-success">table_view</span> Export Excel</div>
+          </div>
+        </div>
+        <button class="btn btn-import" onclick="openImportModal('contrats')"><span class="material-symbols-rounded">file_upload</span> Importer</button>
+      </div>
+    </div>
+    <div class="container">
+      <div class="table-controls">
+        <div>Afficher <select onchange="changePS('contrats',this.value)"><option>10</option><option>25</option><option>50</option></select> lignes</div>
+        <div><input type="search" placeholder="🔍 Rechercher un contrat…" oninput="searchTbl('contrats',this.value)"></div>
+      </div>
+      <table>
+        <thead><tr><th>Locataire</th><th>Locative</th><th>Type contrat</th><th>Date début</th><th>Date fin</th><th>Statut</th><th>Prochain paiement</th><th>Actions</th></tr></thead>
+        <tbody id="tbl-contrats"></tbody>
+      </table>
+      <div class="table-footer"><span id="foot-contrats"></span><div class="pagination" id="pag-contrats"></div></div>
+    </div>
+  </div>
+
+  <!-- ====== NOUVEAU CONTRAT ====== -->
+  <div class="page" id="page-nv-contrat">
+    <header class="page-header">
+      <div class="u-flex-center u-gap-10">
+        <button class="btn-back-lnk" onclick="navigate('contrats')"><span class="material-symbols-rounded">arrow_back</span> Retour liste</button>
+        <h2>Nouveau Contrat</h2>
+      </div>
+    </header>
+    <div class="card">
+      <div class="fgrid g3">
+        <div class="fg full"><label>Numéro de contrat</label><input id="ct-num" readonly placeholder="Auto-généré"></div>
+        <div class="fg"><label>Locataire *</label><select id="ct-locataire" onchange="syncContratFromLocataire()"><option value="">Sélectionner un locataire existant</option></select></div>
+        <div class="fg"><label>Locative *</label><select id="ct-locative" onchange="syncContratFromLocative()"><option value="">Sélectionner une location existante</option></select></div>
+        <div class="fg"><label>Type de contrat *</label><select id="ct-type"><option>Habitation</option><option>Commercial</option><option>Bureau</option></select></div>
+        <div class="fg"><label>Date de signature *</label><input id="ct-sign" type="date" placeholder="jj/mm/aaaa" lang="fr"></div>
+        <div class="fg"><label>Date début *</label><input id="ct-debut" type="date" placeholder="jj/mm/aaaa" lang="fr"></div>
+        <div class="fg"><label>Date fin *</label><input id="ct-fin" type="date" placeholder="jj/mm/aaaa" lang="fr"></div>
+        <div class="fg"><label>Statut *</label><select id="ct-statut"><option>Actif</option><option>En attente</option><option>Résilié</option></select></div>
+        <div class="fg"><label>Loyer *</label><input id="ct-loyer" type="number" placeholder="FCFA"></div>
+        <div class="fg"><label>Charges *</label><input id="ct-charges" type="number" placeholder="FCFA"></div>
+        <div class="fg"><label>Caution *</label><input id="ct-caution" type="number" placeholder="FCFA"></div>
+        <div class="fg"><label>Honoraires</label><input id="ct-honor" type="number" placeholder="FCFA"></div>
+        <div class="fg"><label>Frais de dossier</label><input id="ct-frais" type="number" placeholder="FCFA"></div>
+        <div class="fg"><label>Prochain paiement *</label><input id="ct-prochain" type="date" placeholder="jj/mm/aaaa" lang="fr"></div>
+        <div class="fg full"><label>Observations</label><input id="ct-obs" placeholder="Observations..."></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px">
+        <input type="checkbox" id="ct-autoact" checked> <label for="ct-autoact">Activer automatiquement le contrat après création</label>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-blue" onclick="genererDOCX()"><span class="material-symbols-rounded" style="font-size:16px">description</span> Export Contrat</button>
+        <button class="btn btn-primary" onclick="saveContrat()">Enregistrer</button>
+        <button class="btn btn-danger" onclick="navigate('contrats')">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== PAIEMENTS ====== -->
+  <div class="page" id="page-paiements">
+    <div class="page-hero" style="--hero-color:#16a34a">
+      <div class="page-hero-icon"><span class="material-symbols-rounded">payments</span></div>
+      <div class="page-hero-text">
+        <h3>Paiements</h3>
+        <p>Suivez les encaissements et soldes de vos locataires</p>
+      </div>
+      <div class="page-hero-actions">
+        <button class="btn btn-primary" onclick="openPayModal()"><span class="material-symbols-rounded">add</span> Nouveau paiement</button>
+        <div class="gp-export-wrap" id="exportWrap-paiements">
+          <button class="gp-export-btn" onclick="toggleExportMenu('paiements')"><span class="material-symbols-rounded" style="font-size:15px">file_download</span> Exporter <span class="material-symbols-rounded" style="font-size:14px">expand_more</span></button>
+          <div class="gp-export-menu" id="exportMenu-paiements">
+            <div class="gp-export-item" onclick="exportListePDF('paiements');toggleExportMenu('paiements')"><span class="material-symbols-rounded" class="u-icon-16 u-icon-danger">picture_as_pdf</span> Export PDF</div>
+            <div class="gp-export-sep"></div>
+            <div class="gp-export-item" onclick="exportExcel('paiements');toggleExportMenu('paiements')"><span class="material-symbols-rounded" class="u-icon-16 u-icon-success">table_view</span> Export Excel</div>
+          </div>
+        </div>
+        <button class="btn btn-import" onclick="openImportModal('paiements')"><span class="material-symbols-rounded">file_upload</span> Importer</button>
+      </div>
+    </div>
+
+    <!-- Alertes paiements / retards automatiques -->
+    <div id="pay-alert-panel" class="pay-alert-compact" style="display:none;margin-bottom:8px;background:#fff;border-left:3px solid var(--red);border-radius:10px;padding:8px 10px;box-shadow:0 1px 6px rgba(0,0,0,.05)">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:7px;min-width:0">
+          <span class="material-symbols-rounded" style="color:var(--red);font-size:18px">notification_important</span>
+          <div style="min-width:0">
+            <div style="font-weight:800;font-size:12px;color:#991b1b;line-height:1.1">Alertes de paiement</div>
+            <div id="pay-alert-summary" style="font-size:10.5px;color:#6b7280;margin-top:1px;line-height:1.25"></div>
+          </div>
+        </div>
+        <button class="btn pay-all-late-btn" style="background:#fee2e2;color:#991b1b;padding:3px 6px;border-radius:5px;font-size:9.5px;font-weight:800;line-height:1;min-height:22px" onclick="navigate('avenir');setTimeout(()=>filterAvenir('retard'),0)">Tous les retards</button>
+      </div>
+      <div id="pay-alert-list" style="display:grid;gap:5px;margin-top:7px"></div>
+      <div class="pagination" id="pay-alert-pagination" style="display:none"></div>
+    </div>
+
+    <div class="pay-layout">
+      <div class="container">
+        <table>
+          <thead><tr><th>Locataire</th><th>Locative</th><th>Montant</th><th>Payé</th><th>Reste</th><th>Date paiement</th><th>Mode paiement</th><th>Action</th></tr></thead>
+          <tbody id="tbl-paiements"></tbody>
+        </table>
+        <div class="table-footer"><span id="foot-paiements"></span><div class="pagination" id="pag-paiements"></div></div>
+      </div>
+      <div class="pay-summary">
+        <h4>Total Montant</h4>
+        <p class="big-num" id="payTotal">0 FCFA</p>
+        <canvas id="payChart" style="max-height:130px;margin-top:12px"></canvas>
+        <div style="margin-top:10px;font-size:12px">
+          <p class="success-text">Payé : <strong id="payPaid">0 FCFA</strong></p>
+          <p class="danger-text" style="margin-top:4px">Reste : <strong id="payReste">0 FCFA</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== PAIEMENTS À VENIR ====== -->
+  <div class="page" id="page-avenir">
+    <div class="page-hero" style="--hero-color:#2563eb">
+      <div class="page-hero-icon"><span class="material-symbols-rounded">event_upcoming</span></div>
+      <div class="page-hero-text">
+        <h3>Paiements à venir</h3>
+        <p>Suivez les échéances, les loyers urgents et les retards de paiement</p>
+      </div>
+      <div class="page-hero-actions">
+        <button class="btn-back-lnk" onclick="navigate('paiements')"><span class="material-symbols-rounded">arrow_back</span> Retour</button>
+      </div>
+    </div>
+    <!-- KPIs -->
+    <div class="stats" style="margin-bottom:12px">
+      <div class="stat-card danger"><p>En retard 🔴</p><h3 id="av-retard-count" style="color:var(--red)">0</h3></div>
+      <div class="stat-card" style="border-color:orange"><p>Urgents (≤3j) 🟠</p><h3 id="av-urgent-count" style="color:orange">0</h3></div>
+      <div class="stat-card blue"><p>À venir (>3j) 🔵</p><h3 id="av-avenir-count" style="color:var(--blue)">0</h3></div>
+    </div>
+    <!-- Barre alerte retards -->
+    <div id="av-alert-banner" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:13px;color:#991b1b">
+      <span class="material-symbols-rounded" style="color:var(--red);font-size:20px">warning</span>
+      <span id="av-alert-msg"></span>
+    </div>
+    <div class="container">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="filterAvenir('tous')" id="av-btn-tous">Tous</button>
+          <button class="btn" id="av-btn-retard" style="background:#fee2e2;color:#991b1b" onclick="filterAvenir('retard')">🔴 Retards</button>
+          <button class="btn" id="av-btn-urgent" style="background:#ffedd5;color:#9a3412" onclick="filterAvenir('urgent')">🟠 Urgents</button>
+          <button class="btn btn-blue" type="button" id="av-btn-avenir" onclick="event.preventDefault();event.stopPropagation();filterAvenir('avenir');return false;" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:1px solid #fca5a5;box-shadow:0 4px 10px rgba(220,38,38,.25);font-weight:700;cursor:pointer">🔴 À venir</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="search" id="av-search" placeholder="Rechercher locataire…" oninput="avenirPage=1;renderAvenir()" style="font-size:12px">
+          <div class="gp-export-wrap" id="exportWrap-avenir">
+            <button class="gp-export-btn" onclick="toggleExportMenu('avenir')"><span class="material-symbols-rounded" style="font-size:15px">file_download</span> Exporter <span class="material-symbols-rounded" style="font-size:14px">expand_more</span></button>
+            <div class="gp-export-menu" id="exportMenu-avenir">
+              <div class="gp-export-item" onclick="exportListePDF_avenir();toggleExportMenu('avenir')"><span class="material-symbols-rounded" class="u-icon-16 u-icon-danger">picture_as_pdf</span> Export PDF</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>Locataire</th><th>Locative</th><th>Montant dû</th><th>Échéance</th><th>Retard / Délai</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody id="tbl-avenir"></tbody>
+      </table>
+      <div id="av-footer" class="table-footer" style="margin-top:10px;font-size:12px;color:#666;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <span id="av-foot-info"></span>
+        <div id="av-pagination" class="pagination" style="display:flex;gap:4px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== DÉPENSES ====== -->
+  <div class="page" id="page-depenses">
+    <div class="page-hero" style="--hero-color:#dc2626">
+      <div class="page-hero-icon"><span class="material-symbols-rounded">account_balance_wallet</span></div>
+      <div class="page-hero-text">
+        <h3>Dépenses</h3>
+        <p>Séparez les dépenses liées aux biens des charges internes de l’agence</p>
+      </div>
+      <div class="page-hero-actions">
+        <button class="btn btn-primary" onclick="openDepModal()"><span class="material-symbols-rounded">add</span> Nouvelle dépense</button>
+        <div class="gp-export-wrap" id="exportWrap-depenses">
+          <button class="gp-export-btn" onclick="toggleExportMenu('depenses')"><span class="material-symbols-rounded" style="font-size:15px">file_download</span> Exporter <span class="material-symbols-rounded" style="font-size:14px">expand_more</span></button>
+          <div class="gp-export-menu" id="exportMenu-depenses">
+            <div class="gp-export-item" onclick="exportListePDF('depenses');toggleExportMenu('depenses')"><span class="material-symbols-rounded" class="u-icon-16 u-icon-danger">picture_as_pdf</span> Export PDF</div>
+            <div class="gp-export-sep"></div>
+            <div class="gp-export-item" onclick="exportExcel('depenses');toggleExportMenu('depenses')"><span class="material-symbols-rounded" class="u-icon-16 u-icon-success">table_view</span> Export Excel</div>
+          </div>
+        </div>
+        <button class="btn btn-import" onclick="openImportModal('depenses')"><span class="material-symbols-rounded">file_upload</span> Importer</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 220px;gap:12px;align-items:start">
+      <!-- Table principale -->
+      <div class="container">
+        <div class="top-actions depenses-table-actions">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="dep-filter-type" onchange="renderDepenses()" style="font-size:12px">
+              <option value="">Tous types</option>
+              <option value="bien">Travaux / Réparations des biens</option>
+              <option value="agence">Dépenses agence</option>
+            </select>
+            <select id="dep-filter-cat" onchange="renderDepenses()" style="font-size:12px">
+              <option value="">Toutes catégories</option>
+              <option>Entretien</option><option>Réparation</option><option>Taxe</option><option>Assurance</option><option>Autre</option>
+            </select>
+            <select id="dep-filter-mois" onchange="renderDepenses()" style="font-size:12px">
+              <option value="">Tous les mois</option>
+              <option value="01">Janvier</option><option value="02">Février</option><option value="03">Mars</option>
+              <option value="04">Avril</option><option value="05">Mai</option><option value="06">Juin</option>
+              <option value="07">Juillet</option><option value="08">Août</option><option value="09">Septembre</option>
+              <option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option>
+            </select>
+            <input type="search" id="dep-search" placeholder="Rechercher…" oninput="renderDepenses()" style="font-size:12px">
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>#</th><th>Type</th><th>Catégorie</th><th>Montant (FCFA)</th><th>Date</th><th>Bien concerné</th><th>Actions</th></tr></thead>
+          <tbody id="tbl-depenses"></tbody>
+        </table>
+        <div id="dep-table-footer" style="margin-top:10px;font-size:12px;color:#666;display:flex;justify-content:space-between;align-items:center">
+          <span id="dep-foot-info"></span>
+          <div id="dep-pagination" style="display:flex;gap:4px"></div>
+        </div>
+      </div>
+      <!-- Panneau latéral totaux -->
+      <div style="display:flex;flex-direction:column;gap:10px;position:sticky;top:10px">
+        <!-- Total global -->
+        <div style="background:linear-gradient(135deg,#0F0F0F,#1a1a2e);border-radius:12px;padding:16px;color:#fff;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.15)">
+          <div style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.5);text-transform:uppercase;margin-bottom:6px">Total dépenses</div>
+          <div id="dep-total-global" style="font-size:22px;font-weight:900;color:#D4AF37">0 FCFA</div>
+          <div id="dep-total-count" style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">0 entrées</div>
+        </div>
+        <!-- Total filtré (si filtre actif) -->
+        <div id="dep-total-filtered-box" class="stat-card" style="text-align:center;display:none">
+          <div style="font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Sélection filtrée</div>
+          <div id="dep-total-filtered" style="font-size:17px;font-weight:800;color:var(--red)">0 FCFA</div>
+          <div id="dep-filtered-count" style="font-size:11px;color:#999;margin-top:2px">0 entrées</div>
+        </div>
+        <!-- Totaux par type -->
+        <div class="chart-box">
+          <div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;border-bottom:1px solid #f0f0f0;padding-bottom:6px">Totaux par type</div>
+          <div id="dep-by-type"></div>
+        </div>
+        <!-- Ce mois-ci -->
+        <div class="chart-box">
+          <div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;border-bottom:1px solid #f0f0f0;padding-bottom:6px">Ce mois-ci</div>
+          <div id="dep-this-month" style="font-size:17px;font-weight:800;color:var(--red);text-align:center"></div>
+          <canvas id="dep-chart" style="max-height:110px;margin-top:10px"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== FICHIERS ====== -->
+  <div class="page" id="page-fichiers">
+    <!-- Stats fichiers -->
+    <div class="stats small" style="margin-bottom:12px">
+      <div class="mini-card">Contrats PDF<strong id="fich-nb-contrats" style="color:var(--blue)">0</strong></div>
+      <div class="mini-card">Documents locataires<strong id="fich-nb-locataires" style="color:var(--green)">0</strong></div>
+      <div class="mini-card">Documents biens<strong id="fich-nb-biens" style="color:var(--gold)">0</strong></div>
+      <div class="mini-card">Autres fichiers<strong id="fich-nb-autres" style="color:#6d28d9">0</strong></div>
+    </div>
+    <div class="container">
+      <!-- Toolbar -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="openFichierModal()"><span class="material-symbols-rounded" style="font-size:15px">upload_file</span> Ajouter un fichier</button>
+          <button class="btn" style="background:#f3f4f6;color:#374151" onclick="filterFichiers('tous')" id="fich-btn-tous">Tous</button>
+          <button class="btn btn-blue" onclick="filterFichiers('Contrat')" id="fich-btn-contrat">Contrats</button>
+          <button class="btn" style="background:#dcfce7;color:#166534" onclick="filterFichiers('Locataire')" id="fich-btn-locataire">Locataires</button>
+          <button class="btn" style="background:#fef3c7;color:#92400e" onclick="filterFichiers('Bien')" id="fich-btn-bien">Biens</button>
+          <button class="btn" style="background:#ede9fe;color:#6d28d9" onclick="filterFichiers('Autre')" id="fich-btn-autre">Autres</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="search" id="fich-search" placeholder="Rechercher fichier…" oninput="renderFichiers()" style="font-size:12px">
+        </div>
+      </div>
+      <!-- Grid / Table toggle -->
+      <div id="fich-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px"></div>
+      <div id="fich-empty" style="display:none;text-align:center;padding:60px 20px;color:#999">
+        <span class="material-symbols-rounded" style="font-size:64px;color:#D4AF37;opacity:.4;display:block;margin-bottom:12px">folder_open</span>
+        <p style="font-size:15px;font-weight:600;color:#555;margin-bottom:6px">Aucun fichier trouvé</p>
+        <p style="font-size:13px">Ajoutez des documents PDF, images ou autres fichiers liés à vos biens, contrats et locataires.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== FICHIER MODAL ====== -->
+  <div id="fichierModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center">
+    <div class="card" style="width:480px;max-width:95vw">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0;border:none;padding:0;font-size:15px">Ajouter un fichier</h3>
+        <button onclick="closeFichierModal()" style="border:none;background:none;cursor:pointer;font-size:20px">✕</button>
+      </div>
+      <div class="fgrid g1">
+        <div class="fg"><label>Nom du fichier <span style="color:red">*</span></label><input id="fich-nom" placeholder="Ex: Contrat Jean Dupont Janv 2025"></div>
+        <div class="fg"><label>Catégorie</label>
+          <select id="fich-cat">
+            <option value="Contrat">Contrat</option>
+            <option value="Locataire">Document locataire</option>
+            <option value="Bien">Document bien</option>
+            <option value="Autre">Autre</option>
+          </select>
+        </div>
+        <div class="fg"><label>Lié à</label>
+          <select id="fich-lie">
+            <option value="">— Aucun —</option>
+          </select>
+        </div>
+        <div class="fg"><label>Description</label><input id="fich-desc" placeholder="Brève description..."></div>
+        <!-- Zone de dépôt de fichier -->
+        <div id="fich-drop-zone" onclick="document.getElementById('fich-file-input').click()" style="border:2px dashed #9aa0ff;border-radius:10px;padding:28px;text-align:center;cursor:pointer;color:#777;font-size:13px;transition:.2s;position:relative">
+          <span class="material-symbols-rounded" style="font-size:40px;color:#c0c0d0;display:block;margin-bottom:6px">cloud_upload</span>
+          <span id="fich-drop-label">Glissez un fichier ici ou cliquez pour parcourir</span>
+          <input type="file" id="fich-file-input" style="display:none" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx" onchange="onFichierSelected(this)">
+        </div>
+        <div id="fich-preview-bar" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;display:none;align-items:center;gap:10px;font-size:13px;color:#166534">
+          <span class="material-symbols-rounded" style="font-size:20px" id="fich-preview-icon">description</span>
+          <span id="fich-preview-name" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+          <span id="fich-preview-size" style="font-size:11px;color:#4ade80"></span>
+        </div>
+      </div>
+      <div class="form-actions" style="margin-top:14px">
+        <button class="btn btn-primary" onclick="saveFichier()">Enregistrer</button>
+        <button class="btn btn-danger" onclick="closeFichierModal()">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== MESSAGES — EMPLOYÉS / STYLE EMAIL ====== -->
+  <div class="page" id="page-messages">
+    <div class="msg-mail-app">
+      <aside class="msg-mail-sidebar">
+        <div class="msg-mail-side-head">
+          <div class="msg-mail-title-row">
+            <div class="msg-mail-title"><span class="material-symbols-rounded">alternate_email</span><span>Messagerie employés</span></div>
+            <button class="msg-compose-btn" onclick="openNewMsgModal()"><span class="material-symbols-rounded" style="font-size:16px">edit_square</span> Nouveau</button>
+          </div>
+          <div class="msg-search-wrap">
+            <span class="material-symbols-rounded">search</span>
+            <input type="search" id="msg-search-conv" placeholder="Rechercher un employé, objet…" oninput="renderConvList()">
+          </div>
+        </div>
+        <div class="msg-mail-tabs">
+          <button id="msg-tab-tous" class="msg-mail-tab active" onclick="setMsgTab('tous')">Tous</button>
+          <button id="msg-tab-non-lu" class="msg-mail-tab" onclick="setMsgTab('non-lu')">Non lus</button>
+          <button id="msg-tab-urgent" class="msg-mail-tab" onclick="setMsgTab('urgent')">Urgents</button>
+        </div>
+        <div id="msg-conv-list"></div>
+      </aside>
+      <section class="msg-mail-panel" id="msg-chat-panel">
+        <div id="msg-empty-state" class="msg-empty-modern">
+          <div>
+            <span class="material-symbols-rounded">mark_email_unread</span>
+            <h3>Aucune conversation sélectionnée</h3>
+            <p>Choisissez un employé à gauche ou créez un nouveau message interne.</p>
+            <button onclick="openNewMsgModal()" class="btn btn-primary"><span class="material-symbols-rounded" style="font-size:16px">edit_square</span> Nouveau message</button>
+          </div>
+        </div>
+        <div id="msg-chat-header" class="msg-mail-chat-head">
+          <div class="msg-mail-contact">
+            <div id="msg-chat-avatar" class="msg-avatar"></div>
+            <div>
+              <h3 id="msg-chat-name"></h3>
+              <p id="msg-chat-role"></p>
+            </div>
+          </div>
+          <div class="msg-mail-actions">
+            <button onclick="openNewMsgModal()" class="msg-mail-icon-btn" title="Nouveau message"><span class="material-symbols-rounded">edit_square</span></button>
+            <button onclick="sendRappelPaiement()" class="msg-mail-icon-btn" title="Envoyer rappel recouvrement" style="color:#f59e0b"><span class="material-symbols-rounded">payments</span></button>
+            <button onclick="simulerReponseEmploye()" class="msg-mail-icon-btn" title="Simuler réponse employé" style="color:#16a34a"><span class="material-symbols-rounded">reply</span></button>
+            <button onclick="deleteConversation()" class="msg-mail-icon-btn" title="Supprimer" style="color:#dc2626"><span class="material-symbols-rounded">delete</span></button>
+          </div>
+        </div>
+        <div id="msg-bubbles"></div>
+        <div id="msg-input-area" class="msg-input-modern">
+          <div class="msg-input-row">
+            <textarea id="msg-input-text" placeholder="Répondre à cet employé…" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,140)+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+            <button onclick="sendMessage()" class="msg-send-btn"><span class="material-symbols-rounded">send</span></button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ── MODAL NOUVEAU MESSAGE EMPLOYÉ ── -->
+  <div id="newMsgModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:600;align-items:center;justify-content:center">
+    <div class="card" style="width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;border-radius:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0;border:none;padding:0;font-size:16px;display:flex;align-items:center;gap:8px"><span class="material-symbols-rounded" style="color:var(--gold)">outgoing_mail</span> Nouveau message employé</h3>
+        <button onclick="closeNewMsgModal()" style="border:none;background:none;cursor:pointer;font-size:22px;color:#64748b">✕</button>
+      </div>
+      <div class="fgrid g1">
+        <div class="fg"><label>Employé destinataire <span style="color:red">*</span></label><select id="nm-destinataire" onchange="onNmDestChange()"><option value="">— Sélectionner un employé —</option></select></div>
+        <div class="fg"><label>Priorité</label><select id="nm-type" onchange="onNmTypeChange()"><option value="message">Message interne</option><option value="info">Information</option><option value="urgent">Urgent</option></select></div>
+        <div class="fg"><label>Objet <span style="color:red">*</span></label><input id="nm-objet" placeholder="Objet du message"></div>
+        <div class="fg"><label>Message <span style="color:red">*</span></label><textarea id="nm-corps" placeholder="Rédigez votre message…" style="width:100%;min-height:130px;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;resize:vertical"></textarea></div>
+      </div>
+      <div class="form-actions" style="margin-top:16px;justify-content:flex-end">
+        <button class="btn" onclick="closeNewMsgModal()" style="background:#f1f5f9;color:#334155">Annuler</button>
+        <button class="btn btn-primary" onclick="envoyerNouveauMsg()"><span class="material-symbols-rounded" style="font-size:15px">send</span> Envoyer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL MISSION EMPLOYÉ -->
+  <div id="empMissionModal" class="emp-mission-modal">
+    <div class="emp-mission-box">
+      <div class="agenda-modal-head"><h3><span class="material-symbols-rounded">assignment_add</span> Mission employé</h3><button onclick="closeEmpMissionModal()">✕</button></div>
+      <input type="hidden" id="em-id">
+      <div class="fgrid g2">
+        <div class="fg full"><label>Employé <span>*</span></label><select id="em-employee"></select></div>
+        <div class="fg full"><label>Mission <span>*</span></label><input id="em-title" placeholder="Ex: Faire visiter l'appartement, appeler le locataire…"></div>
+        <div class="fg"><label>Date <span>*</span></label><input type="date" placeholder="jj/mm/aaaa" lang="fr" id="em-date"></div>
+        <div class="fg"><label>Heure</label><input type="time" id="em-time"></div>
+        <div class="fg"><label>Priorité</label><select id="em-priority"><option value="normale">Normale</option><option value="haute">Haute</option><option value="basse">Basse</option></select></div>
+        <div class="fg"><label>Statut</label><select id="em-status"><option value="a_faire">À faire</option><option value="en_cours">En cours</option><option value="termine">Terminé</option></select></div>
+        <div class="fg full"><label>Détails</label><textarea id="em-note" placeholder="Consignes, adresse, documents à prendre…"></textarea></div>
+      </div>
+      <div class="form-actions" style="justify-content:space-between;margin-top:16px">
+        <button class="btn btn-danger" id="em-delete-btn" onclick="deleteEmpMission()" style="display:none">Supprimer</button>
+        <div style="display:flex;gap:8px;margin-left:auto"><button class="btn" onclick="closeEmpMissionModal()" style="background:#f1f5f9;color:#334155">Annuler</button><button class="btn btn-primary" onclick="saveEmpMission()">Enregistrer</button></div>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <!-- ====== ADMIN SAAS ====== -->
+
+  <div class="page" id="page-rapports">
+    <div class="page-hero" style="--hero-color:#2563eb">
+      <div class="page-hero-icon"><span class="material-symbols-rounded">bar_chart</span></div>
+      <div class="page-hero-text">
+        <h3>Rapports</h3>
+        <p>Synthèse financière, occupation et indicateurs clés</p>
+      </div>
+    </div>
+
+    <div id="rpt-content" class="gp-card" style="padding:18px;border-radius:18px;background:#fff;border:1px solid #e5e7eb">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+        <div>
+          <h2 style="margin:0;font-size:20px">Rapport d'activité</h2>
+          <p style="margin:4px 0 0;color:#64748b;font-size:13px">Vue globale des revenus, dépenses et locations</p>
+        </div>
+        <button class="btn btn-primary" onclick="exportRapportPDF()"><span class="material-symbols-rounded" style="font-size:16px">picture_as_pdf</span> Export PDF</button>
+      </div>
+
+      <div class="kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px">
+        <div class="kpi-card"><span>Revenus encaissés</span><strong id="rpt-rev">0 FCFA</strong></div>
+        <div class="kpi-card"><span>Dépenses</span><strong id="rpt-dep">0 FCFA</strong></div>
+        <div class="kpi-card"><span>Résultat net</span><strong id="rpt-net">0 FCFA</strong></div>
+        <div class="kpi-card"><span>Taux d'occupation</span><strong id="rpt-taux">0 %</strong></div>
+      </div>
+
+      <div class="kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px">
+        <div class="kpi-card"><span>Paiements</span><strong id="rpt-nb-pay">0</strong></div>
+        <div class="kpi-card"><span>Impayés</span><strong id="rpt-nb-imp">0</strong></div>
+        <div class="kpi-card"><span>Contrats actifs</span><strong id="rpt-nb-ct">0</strong></div>
+        <div class="kpi-card"><span>Locataires actifs</span><strong id="rpt-nb-lc">0</strong></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+        <div class="gp-card" style="padding:14px;border:1px solid #e5e7eb;border-radius:16px"><h3 style="margin:0 0 10px;font-size:15px">Revenus / dépenses</h3><canvas id="rptBar" height="180"></canvas></div>
+        <div class="gp-card" style="padding:14px;border:1px solid #e5e7eb;border-radius:16px"><h3 style="margin:0 0 10px;font-size:15px">Statut locatif</h3><canvas id="rptDonut" height="180"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-abonnement">
+    <div id="gp-client-subscription-root"></div>
+  </div>
+
+  <div class="page" id="page-admin-saas">
+    <div id="gp-admin-saas-root"></div>
+  </div>
+
+  <div class="page" id="page-license-manager">
+    <div id="gp-license-manager-root"></div>
+  </div>
+
+  <div class="page" id="page-license-activation">
+    <div id="gp-license-activation-root"></div>
+  </div>
+
+  <!-- ====== ADMINISTRATION STOCKAGE ====== -->
+  <div class="page" id="page-sync">
+    <div id="gp-sync-root"></div>
+  </div>
+
+  <div class="page" id="page-admin-stockage">
+    <div id="gp-admin-stockage-root"></div>
+  </div>
+
+  <!-- ====== PARAMÈTRES ====== -->
+  <div class="page" id="page-parametres">
+    <div class="cfg-wrap">
+      <!-- Bloc Logo & identité -->
+      <div class="cfg-logo-card">
+        <div class="cfg-logo-inner">
+          <div class="cfg-logo-badge">
+            <img src="assets/extracted/inline-image-f4502e2766.png" style="width:48px;height:48px;object-fit:contain;" loading="lazy" decoding="async">
+          </div>
+          <div class="cfg-logo-text">
+            <span class="cfg-logo-name">Genius Property</span>
+            <span class="cfg-logo-tagline">Gestion Immobilière</span>
+          </div>
+        </div>
+        <div class="cfg-version-tag">v3 · Local Storage</div>
+      </div>
+
+      <!-- Grille de paramètres -->
+      <div class="cfg-grid">
+        <!-- Logo -->
+        <div class="cfg-section">
+          <div class="cfg-section-icon" style="background:#f0fdf4;color:#16a34a"><span class="material-symbols-rounded">add_photo_alternate</span></div>
+          <div class="cfg-section-body">
+            <h4 class="cfg-section-title">Logo de l'entreprise</h4>
+            <p class="cfg-section-desc">Ce logo apparaîtra sur tous les documents officiels générés (contrats, reçus, etc.).</p>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+              <div id="cfg-logo-preview-wrap" style="width:90px;height:90px;border-radius:12px;border:2px dashed #d1d5db;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#f9fafb;cursor:pointer;transition:.2s;flex-shrink:0" onclick="document.getElementById('cfg-logo-input').click()" title="Cliquer pour changer le logo">
+                <img id="cfg-logo-preview" src="" style="display:none;width:100%;height:100%;object-fit:contain;border-radius:10px" loading="lazy" decoding="async">
+                <span id="cfg-logo-placeholder" class="material-symbols-rounded" style="font-size:36px;color:#d1d5db">add_photo_alternate</span>
+              </div>
+              <div style="flex:1;min-width:200px">
+                <input type="file" id="cfg-logo-input" accept="image/*" style="display:none" onchange="previewLogo(this)">
+                <button class="btn btn-primary" onclick="document.getElementById('cfg-logo-input').click()" style="margin-bottom:8px">
+                  <span class="material-symbols-rounded" style="font-size:15px">upload</span> Charger un logo
+                </button>
+                <button class="btn cfg-export-btn" onclick="removeLogo()" style="margin-bottom:8px">
+                  <span class="material-symbols-rounded" style="font-size:15px">delete</span> Supprimer
+                </button>
+                <p style="font-size:11px;color:#aaa;margin-top:4px">Formats acceptés : PNG, JPG, SVG — Max 2 Mo</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Agence -->
+        <div class="cfg-section">
+          <div class="cfg-section-icon"><span class="material-symbols-rounded">business</span></div>
+          <div class="cfg-section-body">
+            <h4 class="cfg-section-title">Informations de l'entreprise</h4>
+            <div class="fgrid g2">
+              <div class="fg"><label>Nom de l'agence <span>*</span></label><input id="cfg-agence" value="Genius Property" placeholder="Nom de l'agence"></div>
+              <div class="fg"><label>Email de contact</label><input type="email" id="cfg-email" value="contact@geniusproperty.com" placeholder="Email"></div>
+              <div class="fg"><label>Téléphone</label><input type="text" id="cfg-tel" placeholder="Ex: +221 33 XXX XX XX"></div>
+              <div class="fg"><label>Adresse</label><input type="text" id="cfg-adresse" placeholder="Ex: Dakar, Sénégal"></div>
+              <div class="fg"><label>RCCM</label><input type="text" id="cfg-rccm" placeholder="Numéro RCCM"></div>
+              <div class="fg"><label>NINEA</label><input type="text" id="cfg-ninea" placeholder="Numéro NINEA"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Préférences -->
+        <div class="cfg-section">
+          <div class="cfg-section-icon"><span class="material-symbols-rounded">tune</span></div>
+          <div class="cfg-section-body">
+            <h4 class="cfg-section-title">Préférences d'affichage</h4>
+            <div class="fgrid g2">
+              <div class="fg">
+                <label>Devise</label>
+                <select id="cfg-devise"><option selected>FCFA</option><option>EUR</option><option>USD</option></select>
+              </div>
+              <div class="fg">
+                <label>Thème</label>
+                <select id="cfg-theme" onchange="const _ti=document.querySelector('#themeIcon .material-symbols-rounded');if(this.value==='dark'){document.body.classList.add('dark');if(_ti)_ti.textContent='light_mode';}else{document.body.classList.remove('dark');if(_ti)_ti.textContent='dark_mode';}localStorage.setItem('geniusproperty_theme',this.value)">
+                  <option value="light">☀️ Clair</option>
+                  <option value="dark">🌙 Sombre</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions données -->
+        <div class="cfg-section">
+          <div class="cfg-section-icon" style="background:#fef3c7;color:#d97706"><span class="material-symbols-rounded">database</span></div>
+          <div class="cfg-section-body">
+            <h4 class="cfg-section-title">Gestion des données</h4>
+            <p class="cfg-section-desc">Exportez ou réinitialisez les données de l'application stockées dans votre navigateur.</p>
+            <div class="cfg-data-actions">
+              <button class="btn btn-primary" onclick="saveSettings()">
+                <span class="material-symbols-rounded" style="font-size:15px">save</span> Sauvegarder
+              </button>
+              <button class="btn cfg-export-btn" onclick="exportAllData()">
+                <span class="material-symbols-rounded" style="font-size:15px">file_download</span> Exporter tout
+              </button>
+              <button class="btn btn-danger" onclick="(async()=>{const ok=window.GPForms?await GPForms.confirm('Réinitialiser toutes les données ?', {title:'Réinitialisation', okText:'Réinitialiser'}):confirm('Réinitialiser toutes les données ?'); if(ok){localStorage.removeItem(GP_STORAGE_KEY);localStorage.removeItem('geniusproperty_db');location.reload();}})()">
+                <span class="material-symbols-rounded" style="font-size:15px">delete_forever</span> Réinitialiser
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer info -->
+      <!-- Bloc support -->
+      <div class="cfg-support-card">
+        <div class="cfg-support-left">
+          <div class="cfg-support-icon"><span class="material-symbols-rounded">headset_mic</span></div>
+          <div>
+            <div class="cfg-support-title">Besoin d'aide ?</div>
+            <div class="cfg-support-desc">Un problème ? Notre équipe vous répond rapidement.</div>
+            <div class="cfg-support-contacts">
+              <span class="cfg-support-contact-item">
+                <span class="material-symbols-rounded">call</span>
+                <span>🇸🇳 <a href="tel:+221775878004">+221 77 587 80 04</a> / <a href="tel:+221787781818">+221 78 778 18 18</a></span>
+              </span>
+              <span class="cfg-support-contact-item">
+                <span class="material-symbols-rounded">public</span>
+                <span>🌍 <a href="tel:+33661311802">+33 6 61 31 18 02</a></span>
+              </span>
+              <span class="cfg-support-contact-item">
+                <span class="material-symbols-rounded">mail</span>
+                <span><a href="mailto:support@geniusimmobtp.com">support@geniusimmobtp.com</a></span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <button class="cfg-support-btn" onclick="window.location.href='mailto:support@geniusimmobtp.com'">
+          <span class="material-symbols-rounded">mail</span> Contacter le support
+        </button>
+      </div>
+
+      <div class="cfg-footer">
+        <span class="material-symbols-rounded" style="font-size:14px;color:#aaa">info</span>
+        <span>Genius Property v14 — Les données sont stockées localement dans votre navigateur (localStorage). Aucune donnée n'est envoyée sur un serveur.</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div><!-- /app-wrap -->
+
+<!-- ====== PAIEMENT MODAL ====== -->
+<div id="payModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center">
+  <div class="card" style="width:480px;max-width:96vw;padding:20px!important">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div>
+        <h3 style="margin:0;border:none;padding:0;font-size:15px;font-weight:800">Nouveau paiement</h3>
+        <p style="margin:3px 0 0;font-size:11px;color:#9ca3af">Enregistrez un paiement de loyer</p>
+      </div>
+      <button onclick="closePayModal()" style="border:none;background:#f3f4f6;cursor:pointer;font-size:18px;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 12px;">
+      <div class="fg" style="padding-top:10px"><label>Locataire <span>*</span></label><select id="pay-locataire" onchange="syncPayModalFromLocataire()"><option value="">Sélectionner</option></select></div>
+      <div class="fg" style="padding-top:10px"><label>Locative <span>*</span></label><select id="pay-locative" onchange="syncPayModalFromLocative()"><option value="">Sélectionner</option></select></div>
+      <div class="fg" style="grid-column:1/-1;padding-top:10px"><label>Locative / Bien <span>*</span></label><select id="pay-bien" onchange="syncPayModalFromBien()"><option value="">Sélectionner un bien</option></select></div>
+      <div class="fg" style="padding-top:10px"><label>Montant dû (FCFA) <span>*</span></label><input id="pay-montant" type="number" placeholder="150 000"></div>
+      <div class="fg" style="padding-top:10px"><label>Montant payé (FCFA) <span>*</span></label><input id="pay-paye" type="number" placeholder="150 000" oninput="updatePayReste()"></div>
+      <div class="fg" style="padding-top:10px"><label>Reste (FCFA)</label><input id="pay-reste" type="number" placeholder="0" readonly style="background:#f5f5f5"></div>
+      <div class="fg" style="padding-top:10px"><label>Mode de paiement</label><select id="pay-mode"><option>Espèces</option><option>Virement</option><option>Chèque</option><option>Mobile Money</option></select></div>
+      <div class="fg" style="grid-column:1/-1;padding-top:10px"><label>Date de paiement <span>*</span></label><input id="pay-date" type="date" placeholder="jj/mm/aaaa" lang="fr"></div>
+    </div>
+    <div class="form-actions" style="margin-top:18px">
+      <button class="btn btn-primary" onclick="savePaiement()">Enregistrer</button>
+      <button class="btn btn-danger" onclick="closePayModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== DÉPENSE MODAL ====== -->
+<div id="depModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;flex-direction:column">
+  <div class="card dep-modal-card" style="width:540px;max-width:96vw;padding:20px!important">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div>
+        <h3 style="margin:0;border:none;padding:0;font-size:15px;font-weight:800">Nouvelle dépense</h3>
+        <p style="margin:3px 0 0;font-size:11px;color:#9ca3af">Renseignez les informations de la dépense</p>
+      </div>
+      <button onclick="closeDepModal()" style="border:none;background:#f3f4f6;cursor:pointer;font-size:18px;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+    </div>
+    <!-- Grille 2 colonnes forcée inline -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 12px;">
+      <!-- Type dépense — pleine largeur -->
+      <div class="fg" style="grid-column:1/-1;padding-top:10px"><label>Type de dépense</label><select id="d-type" onchange="toggleDepenseType()"><option value="bien">Travaux / Réparations des biens</option><option value="agence">Dépense agence</option></select></div>
+      <!-- Libellé — pleine largeur -->
+      <div class="fg" style="grid-column:1/-1;padding-top:10px"><label>Libellé <span>*</span></label><input id="d-lib" placeholder="Réparation toiture, transport agence..."></div>
+      <!-- Catégorie + Montant côte à côte -->
+      <div class="fg" style="padding-top:10px"><label>Catégorie</label><select id="d-cat"><option>Travaux</option><option>Réparation</option><option>Entretien</option><option>Transport</option><option>Facture agence</option><option>Fournitures</option><option>Taxe</option><option>Assurance</option><option>Autre</option></select></div>
+      <div class="fg" style="padding-top:10px"><label>Montant (FCFA) <span>*</span></label><input id="d-mnt" type="number" placeholder="50000"></div>
+      <!-- Date + Bien côte à côte -->
+      <div class="fg" style="padding-top:10px"><label>Date <span>*</span></label><input id="d-date" type="date" placeholder="jj/mm/aaaa" lang="fr"></div>
+      <div class="fg" id="dep-bien-wrap" style="padding-top:10px"><label>Bien concerné</label><select id="d-bien" onchange="updateDepenseProprietaireInfo()"><option value="">Sélectionnez un bien enregistré</option></select></div>
+      <!-- Info propriétaire — pleine largeur -->
+      <div style="grid-column:1/-1;margin-top:-8px"><small id="dep-proprietaire-info" style="font-size:11px;color:#9ca3af;display:block">Propriétaire récupéré automatiquement</small></div>
+      <!-- Facture + Facturable côte à côte -->
+      <div class="fg" style="padding-top:10px"><label>Facture / justificatif</label><input id="d-facture" type="file" accept="image/*,.pdf" onchange="handleDepFacture(this)"></div>
+      <div class="fg" style="padding-top:10px"><label>Facturable au propriétaire ?</label><select id="d-facturable"><option value="oui">Oui, inclure sur facture propriétaire</option><option value="non">Non</option></select></div>
+    </div>
+    <div class="form-actions" style="margin-top:18px">
+      <button class="btn btn-primary" onclick="saveDepense()">Enregistrer</button>
+      <button class="btn btn-danger" onclick="closeDepModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+<div id="pdfDoc" style="display:none;font-family:'Georgia',serif;color:#1a1a2e;background:#fff;max-width:794px;margin:0 auto">
+  <!-- En-tête agence -->
+  <div style="background:linear-gradient(135deg,#0F0F0F 0%,#1a1a2e 60%,#0F0F0F 100%);padding:36px 40px 28px;color:#fff;position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;right:0;width:200px;height:100%;background:linear-gradient(to left,rgba(212,175,55,.15),transparent)"></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div style="display:flex;align-items:flex-start;gap:16px">
+        <!-- Logo dynamique -->
+        <div id="pdf-logo-wrap" style="display:none;flex-shrink:0">
+          <img id="pdf-logo-img" src="" style="width:68px;height:68px;object-fit:contain;border-radius:8px;border:1px solid rgba(212,175,55,.3);background:rgba(255,255,255,.05);padding:4px" loading="lazy" decoding="async">
+        </div>
+        <div>
+          <div id="pdf-agence-nom" style="font-size:26px;font-weight:900;letter-spacing:2px;color:#D4AF37">GENIUS PROPERTY</div>
+          <div style="font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.6);margin-top:2px">GESTION IMMOBILIÈRE</div>
+          <div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,.7);line-height:1.8">
+            <span id="pdf-agence-adresse"></span><br id="pdf-agence-adresse-br">
+            <span id="pdf-agence-tel"></span><br id="pdf-agence-tel-br">
+            <span id="pdf-agence-email">contact@geniusproperty.com</span><br id="pdf-agence-email-br">
+            <span id="pdf-agence-rccm-wrap" style="display:none"><span style="color:rgba(255,255,255,.45);font-size:10px">RCCM&nbsp;</span><span id="pdf-agence-rccm"></span>&nbsp;&nbsp;</span>
+            <span id="pdf-agence-ninea-wrap" style="display:none"><span style="color:rgba(255,255,255,.45);font-size:10px">NINEA&nbsp;</span><span id="pdf-agence-ninea"></span></span>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="background:rgba(212,175,55,.2);border:1px solid rgba(212,175,55,.4);border-radius:8px;padding:10px 18px">
+          <div style="font-size:10px;letter-spacing:2px;color:#D4AF37;text-transform:uppercase">Contrat N°</div>
+          <div style="font-size:18px;font-weight:700;color:#fff;margin-top:4px" id="pdf-num">—</div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,.5)">Date de signature</div>
+        <div style="font-size:12px;color:#fff;font-weight:600" id="pdf-sign">—</div>
+      </div>
+    </div>
+<div style="margin-top:24px;height:2px;background:linear-gradient(to right,#D4AF37,rgba(212,175,55,.2),transparent)"></div>
+    <div style="margin-top:10px;font-size:14px;font-weight:700;letter-spacing:4px;color:#D4AF37;text-transform:uppercase;text-align:center">CONTRAT DE LOCATION</div>
+  </div>
+
+  <!-- Corps du contrat -->
+  <div style="padding:36px 40px">
+    <!-- Article 1 - Parties -->
+    <div style="margin-bottom:28px">
+      <div class="u-flex-center u-gap-12" style="margin-bottom:14px">
+        <div class="u-avatar-mini">1</div>
+        <div class="u-section-label">ENTRE LES SOUSSIGNÉS</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:#f8f9fa;border-left:3px solid #D4AF37;border-radius:0 8px 8px 0;padding:14px 16px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#888;text-transform:uppercase;margin-bottom:6px">Le Bailleur / L'Agence</div>
+          <div style="font-size:13px;font-weight:700;color:#0F0F0F" id="pdf-bailleur">Genius Property</div>
+          <div style="font-size:11px;color:#666;margin-top:3px" id="pdf-bailleur-email">contact@geniusproperty.com</div>
+          <div style="font-size:11px;color:#666;margin-top:2px" id="pdf-bailleur-tel"></div>
+          <div style="font-size:11px;color:#666;margin-top:2px" id="pdf-bailleur-adresse"></div>
+          <div style="font-size:10px;color:#999;margin-top:4px" id="pdf-bailleur-rccm-ninea"></div>
+        </div>
+        <div style="background:#f8f9fa;border-left:3px solid #1a1a2e;border-radius:0 8px 8px 0;padding:14px 16px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#888;text-transform:uppercase;margin-bottom:6px">Le Locataire</div>
+          <div style="font-size:13px;font-weight:700;color:#0F0F0F" id="pdf-loc">—</div>
+          <div style="font-size:11px;color:#666;margin-top:3px">Ci-après dénommé « LE LOCATAIRE »</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Article 2 - Bien loué -->
+    <div style="margin-bottom:28px">
+      <div class="u-flex-center u-gap-12" style="margin-bottom:14px">
+        <div class="u-avatar-mini">2</div>
+        <div class="u-section-label">BIEN LOUÉ</div>
+      </div>
+      <p style="font-size:13px;line-height:1.7;color:#333;background:#f8f9fa;padding:14px 16px;border-radius:8px">
+        Le présent contrat a pour objet la location du bien immobilier désigné ci-dessous : <strong id="pdf-lv"></strong>, de type <strong id="pdf-type"></strong>.
+        Ce bien est mis à disposition à titre de résidence principale / usage commercial conformément à la destination convenue entre les parties.
+      </p>
+    </div>
+
+    <!-- Article 3 - Conditions financières -->
+    <div style="margin-bottom:28px">
+      <div class="u-flex-center u-gap-12" style="margin-bottom:14px">
+        <div class="u-avatar-mini">3</div>
+        <div class="u-section-label">CONDITIONS FINANCIÈRES</div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <tr style="background:#0F0F0F;color:#fff">
+          <th style="padding:10px 14px;text-align:left;font-size:10px;letter-spacing:1px;text-transform:uppercase;border-radius:6px 0 0 0">Désignation</th>
+          <th style="padding:10px 14px;text-align:right;font-size:10px;letter-spacing:1px;text-transform:uppercase;border-radius:0 6px 0 0">Montant (FCFA)</th>
+        </tr>
+        <tr style="border-bottom:1px solid #e9ecef">
+          <td style="padding:11px 14px;color:#333">Loyer mensuel</td>
+          <td style="padding:11px 14px;text-align:right;font-weight:700;color:#0F0F0F" id="pdf-loyer">—</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e9ecef;background:#fafafa">
+          <td style="padding:11px 14px;color:#333">Charges mensuelles</td>
+          <td style="padding:11px 14px;text-align:right;font-weight:700;color:#0F0F0F" id="pdf-charges">—</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e9ecef">
+          <td style="padding:11px 14px;color:#333">Dépôt de garantie (caution)</td>
+          <td style="padding:11px 14px;text-align:right;font-weight:700;color:#0F0F0F" id="pdf-caution">—</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e9ecef;background:#fafafa">
+          <td style="padding:11px 14px;color:#333">Honoraires d'agence</td>
+          <td style="padding:11px 14px;text-align:right;font-weight:700;color:#0F0F0F" id="pdf-honor">—</td>
+        </tr>
+        <tr style="border-bottom:2px solid #D4AF37">
+          <td style="padding:11px 14px;color:#333">Frais de dossier</td>
+          <td style="padding:11px 14px;text-align:right;font-weight:700;color:#0F0F0F" id="pdf-frais">—</td>
+        </tr>
+      </table>
+      <div style="background:#fef9ec;border:1px solid #D4AF37;border-radius:0 0 8px 8px;padding:10px 14px;font-size:12px;color:#666">
+        Prochain paiement prévu le : <strong style="color:#0F0F0F" id="pdf-proch">—</strong>
+      </div>
+    </div>
+
+    <!-- Article 4 - Durée -->
+    <div style="margin-bottom:28px">
+      <div class="u-flex-center u-gap-12" style="margin-bottom:14px">
+        <div class="u-avatar-mini">4</div>
+        <div class="u-section-label">DURÉE DU CONTRAT</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div style="text-align:center;background:#f8f9fa;border-radius:8px;padding:14px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#888;text-transform:uppercase">Date de début</div>
+          <div style="font-size:15px;font-weight:700;color:#0F0F0F;margin-top:6px" id="pdf-debut">—</div>
+        </div>
+        <div style="text-align:center;background:#f8f9fa;border-radius:8px;padding:14px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#888;text-transform:uppercase">Date de fin</div>
+          <div style="font-size:15px;font-weight:700;color:#0F0F0F;margin-top:6px" id="pdf-fin">—</div>
+        </div>
+        <div style="text-align:center;background:#fef9ec;border:1px solid rgba(212,175,55,.4);border-radius:8px;padding:14px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#888;text-transform:uppercase">Statut</div>
+          <div style="font-size:15px;font-weight:700;color:#D4AF37;margin-top:6px" id="pdf-statut">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Article 5 - Observations -->
+    <div style="margin-bottom:36px">
+      <div class="u-flex-center u-gap-12" style="margin-bottom:14px">
+        <div class="u-avatar-mini">5</div>
+        <div class="u-section-label">CLAUSES PARTICULIÈRES & OBSERVATIONS</div>
+      </div>
+      <div style="background:#f8f9fa;border-radius:8px;padding:16px;min-height:60px;font-size:13px;color:#555;line-height:1.7" id="pdf-obs">Néant</div>
+    </div>
+
+    <!-- Article 6 - Obligations -->
+    <div style="margin-bottom:36px">
+      <div class="u-flex-center u-gap-12" style="margin-bottom:14px">
+        <div class="u-avatar-mini">6</div>
+        <div class="u-section-label">OBLIGATIONS DES PARTIES</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:12px;line-height:1.7;color:#555">
+        <div style="background:#f8f9fa;border-radius:8px;padding:14px">
+          <div style="font-weight:700;color:#0F0F0F;margin-bottom:8px">Le Bailleur s'engage à :</div>
+          <ul style="padding-left:16px;margin:0">
+            <li>Délivrer le bien en bon état d'usage</li>
+            <li>Assurer la jouissance paisible des lieux</li>
+            <li>Effectuer les réparations nécessaires hors entretien courant</li>
+          </ul>
+        </div>
+        <div style="background:#f8f9fa;border-radius:8px;padding:14px">
+          <div style="font-weight:700;color:#0F0F0F;margin-bottom:8px">Le Locataire s'engage à :</div>
+          <ul style="padding-left:16px;margin:0">
+            <li>Payer le loyer et les charges aux échéances convenues</li>
+            <li>User paisiblement des locaux loués</li>
+            <li>Ne pas sous-louer sans accord écrit du bailleur</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Signatures -->
+    <div style="background:#0F0F0F;border-radius:12px;padding:28px 32px;color:#fff">
+      <div style="text-align:center;font-size:12px;color:rgba(255,255,255,.5);margin-bottom:20px;letter-spacing:1px;text-transform:uppercase">Fait à Dakar, le <span id="pdf-sign-footer" style="color:#D4AF37;font-weight:700"></span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px">
+        <div style="text-align:center">
+          <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#D4AF37;text-transform:uppercase;margin-bottom:16px">Pour l'Agence</div>
+          <div style="border-bottom:1.5px solid rgba(255,255,255,.3);height:50px;margin-bottom:10px;position:relative">
+            <div style="position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:30px;height:2px;background:#D4AF37"></div>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5)">Signature & Cachet</div>
+          <div style="font-size:12px;font-weight:600;color:#fff;margin-top:4px" id="pdf-bailleur-sign">Genius Property</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#D4AF37;text-transform:uppercase;margin-bottom:16px">Le Locataire</div>
+          <div style="border-bottom:1.5px solid rgba(255,255,255,.3);height:50px;margin-bottom:10px;position:relative">
+            <div style="position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:30px;height:2px;background:#D4AF37"></div>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5)">Signature précédée de « Lu et approuvé »</div>
+          <div style="font-size:12px;font-weight:600;color:#fff;margin-top:4px" id="pdf-loc-sign">—</div>
+        </div>
+      </div>
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1);text-align:center;font-size:10px;color:rgba(255,255,255,.3)">
+        Ce contrat est établi en deux (2) exemplaires originaux, un pour chaque partie. — Genius Property — Gestion Immobilière
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== VIEW / EDIT MODAL ====== -->
+<div id="rowModal" class="row-modal">
+  <div class="row-modal-box">
+    <h3 id="rowModalTitle"><span class="material-symbols-rounded">info</span><span id="rowModalTitleText">Détails</span></h3>
+    <div id="rowModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="rowModalEditBtn" style="display:none" onclick="switchToEdit()"><span class="material-symbols-rounded" style="font-size:15px">edit</span> Modifier</button>
+      <button class="btn btn-danger"  id="rowModalDelBtn"  style="display:none" onclick="deleteFromModal()"><span class="material-symbols-rounded" style="font-size:15px">delete</span> Supprimer</button>
+      <button class="btn" style="background:#f3f4f6;color:#374151" onclick="closeRowModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toastEl">
+  <span id="toastIcon" style="font-size:18px">✅</span>
+  <span id="toastMsg">Succès</span>
+</div>
+
+<!-- ====== MODAL PROFIL ====== -->
+
+<div id="profilModal" style="display:none">
+  <div class="profil-modal-box">
+    <!-- Header gradient avec avatar -->
+    <div class="profil-modal-header">
+      <button class="profil-modal-close" onclick="closeProfilModal()"><span class="material-symbols-rounded" style="font-size:17px">close</span></button>
+      <h3><span class="material-symbols-rounded">manage_accounts</span> Mon profil</h3>
+      <div class="profil-avatar-wrap">
+        <div class="profil-avatar-big" id="profilAvatarBig" onclick="document.getElementById('profil-photo-inp').click()">
+          <span id="profilAvatarInitial" style="pointer-events:none">A</span>
+          <img id="profilAvatarImg" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:13px;position:absolute;inset:0" loading="lazy" decoding="async">
+          <div class="profil-avatar-overlay"><span class="material-symbols-rounded">photo_camera</span></div>
+        </div>
+        <input type="file" id="profil-photo-inp" accept="image/*" style="display:none" onchange="profilPhotoChange(this)">
+        <div class="profil-user-name" id="profilDisplayName">Admin</div>
+        <div class="profil-user-email" id="profilDisplayEmail">admin@geniusproperty.com</div>
+        <div class="profil-user-role" id="profilDisplayRole">Administrateur</div>
+      </div>
+    </div>
+    <!-- Body -->
+    <div class="profil-modal-body">
+      <!-- Informations personnelles -->
+      <div class="profil-section">
+        <div class="profil-section-title"><span class="material-symbols-rounded">person</span> Informations personnelles</div>
+        <div class="profil-grid">
+          <div class="profil-field"><label>Prénom</label><input id="profil-prenom" placeholder="Prénom"></div>
+          <div class="profil-field"><label>Nom</label><input id="profil-nom" placeholder="Nom"></div>
+          <div class="profil-field full"><label>Fonction / Rôle</label><input id="profil-fonction" placeholder="Ex: Gestionnaire immobilier" readonly style="background:#f9fafb;color:#888;cursor:not-allowed"></div>
+          <div class="profil-field full"><label>Email (identifiant)</label><input id="profil-email" type="email" placeholder="email@agence.com" readonly style="background:#f9fafb;color:#888;cursor:not-allowed"></div>
+          <div class="profil-field"><label>Téléphone</label><input id="profil-tel" placeholder="77 000 00 00"></div>
+          <div class="profil-field"><label>Adresse</label><input id="profil-adresse" placeholder="Adresse"></div>
+        </div>
+      </div>
+      <!-- Changer mot de passe -->
+      <div class="profil-section">
+        <div class="profil-section-title"><span class="material-symbols-rounded">lock</span> Changer le mot de passe</div>
+        <div class="profil-grid">
+          <div class="profil-field full">
+            <label>Nouveau mot de passe</label>
+            <div class="profil-pass-wrap">
+              <input id="profil-newpass" type="password" placeholder="Laisser vide pour ne pas changer">
+              <span class="profil-pass-eye" onclick="tglPassField('profil-newpass','profil-pass-eye-icon')"><span class="material-symbols-rounded" id="profil-pass-eye-icon" style="font-size:18px">visibility</span></span>
+            </div>
+          </div>
+        </div>
+        <div id="profil-pass-strength" style="font-size:11px;margin-top:4px;color:#9ca3af;min-height:14px"></div>
+      </div>
+      <!-- Mes droits d'accès (lecture seule) -->
+      <div class="profil-section" id="profil-droits-section">
+        <div class="profil-section-title"><span class="material-symbols-rounded">admin_panel_settings</span> Mes droits d'accès</div>
+        <div class="profil-droits" id="profil-droits-list"></div>
+      </div>
+    </div>
+    <div class="profil-modal-footer">
+      <button class="btn" style="background:#f3f4f6;color:#374151" onclick="closeProfilModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveProfilUser()"><span class="material-symbols-rounded" style="font-size:15px">save</span> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== PANNEAU NOTIFICATIONS ====== -->
+
+<!-- Panneau notifications -->
+<div class="tb-panel" id="notifPanel">
+  <div class="tb-panel-head">
+    <h4><span class="material-symbols-rounded">notifications</span> Notifications</h4>
+    <button class="tb-panel-close" onclick="closeNotifPanel()"><span class="material-symbols-rounded">close</span></button>
+  </div>
+  <div class="tb-panel-body" id="notifList">
+    <div class="notif-empty"><span class="material-symbols-rounded">notifications_off</span>Aucune notification</div>
+  </div>
+  <div class="tb-panel-foot">
+    <button onclick="markAllRead()"><span class="material-symbols-rounded" style="font-size:12px;vertical-align:middle">done_all</span> Tout marquer lu</button>
+    <button onclick="navigate('avenir');closeNotifPanel()">Voir les échéances →</button>
+  </div>
+</div>
+
+<!-- Panneau aide -->
+<div class="tb-panel" id="helpPanel" style="width:360px">
+  <div class="tb-panel-head">
+    <h4><span class="material-symbols-rounded">help</span> Centre d'aide</h4>
+    <button class="tb-panel-close" onclick="closeHelpPanel()"><span class="material-symbols-rounded">close</span></button>
+  </div>
+  <div class="help-tabs">
+    <button class="help-tab active" onclick="switchHelpTab('nav',this)">Navigation</button>
+    <button class="help-tab" onclick="switchHelpTab('faq',this)">FAQ</button>
+    <button class="help-tab" onclick="switchHelpTab('shortcuts',this)">Raccourcis</button>
+  </div>
+  <div class="tb-panel-body">
+    <!-- Navigation rapide -->
+    <div class="help-section active" id="help-nav">
+      <div style="padding:8px 16px 4px;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px">Aller vers</div>
+      <div class="help-nav-item" onclick="navigate('dashboard');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">dashboard</span></div> Tableau de bord</div>
+      <div class="help-nav-item" onclick="navigate('locataires');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">people</span></div> Locataires</div>
+      <div class="help-nav-item" onclick="navigate('contrats');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">description</span></div> Contrats</div>
+      <div class="help-nav-item" onclick="navigate('paiements');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">payments</span></div> Paiements</div>
+      <div class="help-nav-item" onclick="navigate('avenir');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">event</span></div> Paiements à venir</div>
+      <div class="help-nav-item" onclick="navigate('biens');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">home</span></div> Biens immobiliers</div>
+      <div class="help-nav-item" onclick="navigate('locatives');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">apartment</span></div> Locatives</div>
+      <div class="help-nav-item" onclick="navigate('rapports');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">bar_chart</span></div> Rapports</div>
+      <div class="help-nav-item" onclick="navigate('parametres');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">settings</span></div> Paramètres</div>
+    </div>
+    <!-- FAQ -->
+    <div class="help-section" id="help-faq">
+      <div class="help-faq-item" onclick="toggleFaq(this)">
+        <div class="help-faq-q">Comment ajouter un nouveau locataire ?<span class="material-symbols-rounded">expand_more</span></div>
+        <div class="help-faq-a">Allez dans <b>Locataires</b> depuis le menu latéral, puis cliquez sur <b>+ Nouveau locataire</b>. Remplissez le formulaire et enregistrez.</div>
+      </div>
+      <div class="help-faq-item" onclick="toggleFaq(this)">
+        <div class="help-faq-q">Comment enregistrer un paiement ?<span class="material-symbols-rounded">expand_more</span></div>
+        <div class="help-faq-a">Depuis la page <b>Paiements</b>, cliquez sur <b>+ Nouveau paiement</b>. Sélectionnez le contrat, saisissez le montant et la date, puis enregistrez.</div>
+      </div>
+      <div class="help-faq-item" onclick="toggleFaq(this)">
+        <div class="help-faq-q">Comment générer un rapport PDF ?<span class="material-symbols-rounded">expand_more</span></div>
+        <div class="help-faq-a">Accédez à la page <b>Rapports</b>, sélectionnez la période souhaitée, puis cliquez sur le bouton <b>Exporter PDF</b> en haut à droite.</div>
+      </div>
+      <div class="help-faq-item" onclick="toggleFaq(this)">
+        <div class="help-faq-q">Comment créer un contrat de location ?<span class="material-symbols-rounded">expand_more</span></div>
+        <div class="help-faq-a">Allez dans <b>Contrats</b> et cliquez sur <b>+ Nouveau contrat</b>. Associez un locataire, une locative, définissez les dates et le loyer, puis validez.</div>
+      </div>
+      <div class="help-faq-item" onclick="toggleFaq(this)">
+        <div class="help-faq-q">Comment activer le mode sombre ?<span class="material-symbols-rounded">expand_more</span></div>
+        <div class="help-faq-a">Cliquez sur l'icône <b>lune</b> dans la barre en haut à droite pour basculer entre le mode clair et le mode sombre.</div>
+      </div>
+      <div class="help-faq-item" onclick="toggleFaq(this)">
+        <div class="help-faq-q">Comment gérer les droits d'accès des employés ?<span class="material-symbols-rounded">expand_more</span></div>
+        <div class="help-faq-a">Dans <b>Employés</b>, ouvrez la fiche d'un employé et cochez les modules auxquels il doit avoir accès. Les restrictions s'appliquent immédiatement à la prochaine connexion.</div>
+      </div>
+      <div class="help-faq-item" onclick="toggleFaq(this)">
+        <div class="help-faq-q">Les données sont-elles sauvegardées automatiquement ?<span class="material-symbols-rounded">expand_more</span></div>
+        <div class="help-faq-a">Oui, toutes les modifications sont sauvegardées automatiquement en local (localStorage). Si Firebase est configuré dans les <b>Paramètres</b>, les données sont aussi synchronisées en cloud.</div>
+      </div>
+    </div>
+    <!-- Raccourcis -->
+    <div class="help-section" id="help-shortcuts">
+      <div style="padding:8px 16px 4px;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px">Navigation</div>
+      <div class="help-shortcut"><span class="help-shortcut-label">Tableau de bord</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">D</span></span></div>
+      <div class="help-shortcut"><span class="help-shortcut-label">Locataires</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">L</span></span></div>
+      <div class="help-shortcut"><span class="help-shortcut-label">Contrats</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">C</span></span></div>
+      <div class="help-shortcut"><span class="help-shortcut-label">Paiements</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">P</span></span></div>
+      <div class="help-shortcut"><span class="help-shortcut-label">Rapports</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">R</span></span></div>
+      <div style="padding:8px 16px 4px;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Interface</div>
+      <div class="help-shortcut"><span class="help-shortcut-label">Mode sombre</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">T</span></span></div>
+      <div class="help-shortcut"><span class="help-shortcut-label">Plein écran</span><span class="help-keys"><span class="kb">F11</span></span></div>
+      <div class="help-shortcut"><span class="help-shortcut-label">Notifications</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">N</span></span></div>
+      <div class="help-shortcut"><span class="help-shortcut-label">Centre d'aide</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">H</span></span></div>
+      <div class="help-shortcut"><span class="help-shortcut-label">Recherche globale</span><span class="help-keys"><span class="kb">Ctrl</span><span class="kb">K</span></span></div>
+    </div>
+  </div>
+  <div class="help-version">
+    <strong>Genius Property</strong> — v9.0 &nbsp;·&nbsp; Tous droits réservés<br>
+    <a href="mailto:support@geniusimmobtp.com" style="color:var(--gold);text-decoration:none">support@geniusimmobtp.com</a>
+    &nbsp;·&nbsp;
+    <a href="tel:+221775878004" style="color:var(--gold);text-decoration:none">+221 77 587 80 04</a>
+  </div>
+</div>
+
+<!-- ===== MODAL DOCUMENTS LOCATAIRE ===== -->
+<div id="locataireDocsModal" class="row-modal">
+  <div class="row-modal-box" style="width:760px">
+    <h3>
+      <span class="material-symbols-rounded">folder</span>
+      Documents du locataire
+    </h3>
+
+    <div id="locataireDocsTitle" style="font-size:13px;color:#777;margin:-8px 0 12px"></div>
+
+    <div class="loc-doc-form">
+      <div class="fg">
+        <label>Nom du document <span>*</span></label>
+        <input type="text" id="locDocName" placeholder="Ex: Pièce d’identité">
+      </div>
+      <div class="fg">
+        <label>Album</label>
+        <input type="text" id="locDocAlbum" placeholder="Ex: Identité, Contrat, Factures">
+      </div>
+    </div>
+
+    <div id="locDocDrop" class="loc-doc-drop" onclick="document.getElementById('locDocFile').click()">
+      <span class="material-symbols-rounded">cloud_upload</span>
+      <strong>Déposer un fichier ici</strong><br>
+      <small>ou cliquer pour sélectionner un PDF, une image ou un document</small>
+      <input type="file" id="locDocFile" style="display:none" onchange="handleLocDocFile(this.files[0])">
+    </div>
+
+    <div class="form-actions" style="margin-top:8px">
+      <button class="btn btn-primary" onclick="addLocataireDocument()"><span class="material-symbols-rounded" style="font-size:16px">add</span> Ajouter le document</button>
+      <button class="btn" onclick="clearLocataireDocForm()">Réinitialiser</button>
+    </div>
+
+    <div id="locDocList" class="loc-doc-list"></div>
+
+    <div class="modal-footer">
+      <button class="btn" onclick="closeLocataireDocs()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Correctif final Bureau : titre séparé, diagramme à droite, blocs compactés, agenda paramétré -->
+<!-- MODAL AGENDA PRINCIPAL -->
+<div id="gpAgendaModal">
+  <div class="gp-agenda-modal-box">
+    <div class="gp-am-header">
+      <div class="gp-am-header-left">
+        <div class="gp-am-header-icon"><span class="material-symbols-rounded">calendar_month</span></div>
+        <div>
+          <div class="gp-am-title">Agenda complet</div>
+          <div class="gp-am-sub" id="gpAmSub">Tous vos événements</div>
+        </div>
+      </div>
+      <button class="gp-am-close" onclick="closeFullAgendaModal()"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <div class="gp-am-toolbar">
+      <div class="gp-am-search">
+        <span class="material-symbols-rounded">search</span>
+        <input type="text" id="gpAmSearch" placeholder="Rechercher un événement…" oninput="gpAmRender()">
+      </div>
+      <select class="gp-am-filter" id="gpAmFilterType" onchange="gpAmRender()">
+        <option value="">Tous types</option>
+        <option value="rdv">Rendez-vous</option>
+        <option value="tache">Tâche</option>
+        <option value="rappel">Rappel</option>
+        <option value="autre">Autre</option>
+      </select>
+      <select class="gp-am-filter" id="gpAmFilterPriority" onchange="gpAmRender()">
+        <option value="">Toutes priorités</option>
+        <option value="haute">Haute priorité</option>
+        <option value="normale">Normale</option>
+      </select>
+      <select class="gp-am-filter" id="gpAmFilterStatus" onchange="gpAmRender()">
+        <option value="active">À faire</option>
+        <option value="done">Terminés</option>
+        <option value="">Tous</option>
+      </select>
+      <button class="gp-am-btn-add" onclick="openEventForm()">
+        <span class="material-symbols-rounded">add</span>Nouvel événement
+      </button>
+    </div>
+    <div class="gp-am-body">
+      <div class="gp-am-events" id="gpAmEventsList"></div>
+      <div class="gp-am-cal-panel">
+        <div class="gp-am-cal-nav">
+          <button class="gp-am-cal-nav-btn" onclick="gpAmCalMove(-1)"><span class="material-symbols-rounded">chevron_left</span></button>
+          <div class="gp-am-cal-label" id="gpAmCalLabel"></div>
+          <button class="gp-am-cal-nav-btn" onclick="gpAmCalMove(1)"><span class="material-symbols-rounded">chevron_right</span></button>
+        </div>
+        <div class="gp-am-cal-grid" id="gpAmCalGrid"></div>
+        <div class="gp-am-day-sel-label" id="gpAmDayLabel"></div>
+        <div class="gp-am-day-events" id="gpAmDayEvents"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FORMULAIRE ÉVÉNEMENT -->
+<div id="gpEventFormModal">
+  <div class="gp-ef-box">
+    <div class="gp-ef-header">
+      <div class="gp-ef-title">
+        <span class="material-symbols-rounded">event</span>
+        <span id="gpEfTitle">Nouvel événement</span>
+      </div>
+      <button class="gp-am-close" onclick="closeEventForm()"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <div class="gp-ef-body">
+      <input type="hidden" id="gpEfId">
+      <div class="gp-ef-field">
+        <label class="gp-ef-label">Titre *</label>
+        <input type="text" id="gpEfTitre" placeholder="Ex: Visite appartement, Appel client…">
+      </div>
+      <div class="gp-ef-row">
+        <div class="gp-ef-field">
+          <label class="gp-ef-label">Type</label>
+          <select id="gpEfType">
+            <option value="rdv">Rendez-vous</option>
+            <option value="tache">Tâche</option>
+            <option value="rappel">Rappel</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+        <div class="gp-ef-field">
+          <label class="gp-ef-label">Priorité</label>
+          <select id="gpEfPriority">
+            <option value="normale">Normale</option>
+            <option value="haute">Haute priorité</option>
+          </select>
+        </div>
+      </div>
+      <div class="gp-ef-row">
+        <div class="gp-ef-field">
+          <label class="gp-ef-label">Date *</label>
+          <input type="date" placeholder="jj/mm/aaaa" lang="fr" id="gpEfDate">
+        </div>
+        <div class="gp-ef-field">
+          <label class="gp-ef-label">Heure</label>
+          <input type="time" id="gpEfTime">
+        </div>
+      </div>
+      <div class="gp-ef-field">
+        <label class="gp-ef-label">Lieu / Bien concerné</label>
+        <input type="text" id="gpEfLieu" placeholder="Ex: Appartement Dakar Plateau…">
+      </div>
+      <div class="gp-ef-field">
+        <label class="gp-ef-label">Notes</label>
+        <textarea id="gpEfNote" placeholder="Détails, instructions…"></textarea>
+      </div>
+    </div>
+    <div class="gp-ef-footer">
+      <button class="gp-ef-btn danger" id="gpEfDeleteBtn" onclick="deleteAgendaEvent()" style="display:none">
+        <span class="material-symbols-rounded">delete</span>Supprimer
+      </button>
+      <div style="display:flex;gap:8px;margin-left:auto">
+        <button class="gp-ef-btn ghost" onclick="closeEventForm()">Annuler</button>
+        <button class="gp-ef-btn primary" onclick="saveAgendaEvent()">
+          <span class="material-symbols-rounded">check</span>Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PONT AGENDA ↔ JOURNAL EMPLOYÉS — Connexion bidirectionnelle ===== -->
+
+<!-- Picker employé pour le formulaire d'événement -->
+<div id="gpEfEmployeePicker">
+  <div class="gp-ep-box">
+    <div class="gp-ep-header">
+      <div class="gp-ep-title"><span class="material-symbols-rounded">group</span>Assigner à un employé</div>
+      <button class="gp-am-close" onclick="document.getElementById('gpEfEmployeePicker').classList.remove('open')"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <div class="gp-ep-search">
+      <span class="material-symbols-rounded" style="font-size:16px;color:#D4AF37">search</span>
+      <input type="text" id="gpEpSearch" placeholder="Rechercher un employé…" oninput="gpRenderEmployeePicker()">
+    </div>
+    <div class="gp-ep-list" id="gpEpList"></div>
+  </div>
+</div>
+<!-- =====================================================================
+     GENIUS PROPERTY — RESPONSIVE SYSTEM (toutes tailles d'écran)
+     XS:<360px | SM:360-480 | MD:481-768 | LG:769-1024 | XL:1025-1440 | 2XL:>1440
+====================================================================== -->
+<!-- ====== PAGINATION LOCATAIRES & BIENS ====== -->
+
+<!-- Barre de progression -->
+<div id="gp-progress-bar" aria-hidden="true">
+  <div id="gp-progress-fill"></div>
+</div>
+
+<!-- Conteneur skeleton (injecté dans .content) -->
+<div id="gp-skeleton-wrap" aria-hidden="true" aria-live="polite"></div>
+<script src="env.js"></script>
+<script type="module" src="js/inline/inline-script-02.module.js"></script>
+<script type="module" src="js/v21/main.js"></script>
+<script src="js/core/runtime.js" defer></script>
+<script src="js/core/storage-adapter.js" defer></script>
+<!-- Firebase adapter (remplace Firebase) -->
+<script src="js/inline/inline-script-04.js?v=refactor-20260523"></script>
+<script src="js/core/firebase-adapter.js?v=firebase-v13-20260519" defer></script>
+<script src="js/core/db.js" defer></script>
+<script src="js/core/auth.js" defer></script>
+<script src="js/core/permissions.js" defer></script>
+<script src="js/core/license-guard.js?v=license-v8" defer></script>
+<script src="js/core/super-admin-guard.js?v=v10" defer></script>
+<script src="js/core/firebase-auth.js" defer></script>
+<script src="js/core/username-lock.js" defer></script>
+<script src="js/app.legacy.bundle.js?v=20260522-bien-detail-restored-full-v1" defer data-legacy="true"></script>
+<script src="js/safe-bootstrap.js?v=firebase-v7-20260519" defer></script>
+<script src="js/core/renderers.js" defer></script>
+<script src="js/core/ui-functions.js" defer></script>
+<script src="js/core/navigation.js" defer></script>
+<script src="js/core/validation.js" defer></script>
+<script src="js/core/forms.js" defer></script>
+<script src="js/firebase.js?v=firebase-v13-20260519" defer></script>
+<script src="js/pages/proprietaires.js" defer></script>
+<script src="js/pages/rapports.js" defer></script>
+<script src="js/pages/dashboard.js" defer></script>
+<script src="js/pages/agenda.js" defer></script>
+<script src="js/pages/messagerie.js" defer></script>
+<script src="js/pages/sync.js" defer></script>
+<script src="js/pages/admin-stockage.js" defer></script>
+<script src="js/pages/admin-saas.js?v=v8" defer></script>
+<script src="js/pages/license-activation.js?v=v8" defer></script>
+<script src="js/core/mobile.js" defer></script>
+<script src="js/pages/mobile-pages.js?v=clean-v1" defer></script>
+<script src="js/core/legacy-bridge.js" defer></script>
+<script src="js/pages/dashboard-desktop.js?v=clean" defer></script>
+<script src="js/core/flicker-fix.js?v=20260524" defer></script>
+<script src="js/pages/client-subscription.js?v=v19" defer></script>
+<script src="js/core/simple-role-router.js?v=v19" defer></script>
+<script src="js/pages/compact-layout.js?v=clean" defer></script>
+<script src="js/inline/inline-script-05.js?v=refactor-20260523"></script>
+<script src="js/inline/inline-script-06.js?v=refactor-20260523"></script>
+
+<!-- ====== DRAWER NOUVEL EMPLOYÉ ====== -->
+<div id="nvEmpOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1200;transition:opacity .3s" onclick="closeNouvelEmployeDrawer()"></div>
+<div id="nvEmpDrawer" style="display:none;position:fixed;top:0;right:0;height:100vh;width:480px;max-width:100vw;background:#fff;z-index:1201;box-shadow:-8px 0 32px rgba(0,0,0,.15);transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column">
+  
+
+  <!-- Header -->
+  <div class="nde-header">
+    <div>
+      <div class="nde-title">Nouvel employé</div>
+      <div class="nde-sub">Ajoutez un nouvel employé à votre équipe</div>
+    </div>
+    <button class="nde-close" onclick="closeNouvelEmployeDrawer()">
+      <span class="material-symbols-rounded" style="font-size:20px">close</span>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="nde-body">
+
+    <!-- Informations personnelles -->
+    <div class="nde-section">
+      <div class="nde-section-title">Informations personnelles</div>
+
+      <div class="nde-row">
+        <div class="nde-field">
+          <label class="nde-label">Prénom <span>*</span></label>
+          <input class="nde-input" id="e-prenom" placeholder="Prénom">
+        </div>
+        <div class="nde-field">
+          <label class="nde-label">Nom <span>*</span></label>
+          <input class="nde-input" id="e-nom" placeholder="Nom">
+        </div>
+      </div>
+
+      <div class="nde-row full" style="margin-bottom:12px">
+        <div class="nde-field">
+          <label class="nde-label">Email <span>*</span></label>
+          <input class="nde-input" id="e-email" type="email" placeholder="email@exemple.com">
+        </div>
+      </div>
+
+      <div class="nde-row full" style="margin-bottom:0">
+        <div class="nde-field">
+          <label class="nde-label">Téléphone <span>*</span></label>
+          <div class="nde-phone-row" id="nde-phone-wrap">
+            <div class="nde-phone-flag" id="nde-country-btn" onclick="toggleCountryDropdown()">
+              <img id="nde-flag-emoji" class="nde-flag-img" src="https://flagcdn.com/w40/sn.png" alt="SN" loading="lazy" decoding="async">
+              <span id="nde-dial-code" style="font-size:12px;color:#374151;font-weight:500">+221</span>
+              <span class="material-symbols-rounded flag-chevron">expand_more</span>
+            </div>
+            <!-- Dropdown pays -->
+            <div class="nde-country-dropdown" id="nde-country-dropdown">
+              <div class="nde-country-search">
+                <span class="material-symbols-rounded">search</span>
+                <input type="text" id="nde-country-search-input" placeholder="Rechercher un pays…" oninput="filterCountries(this.value)">
+              </div>
+              <div class="nde-country-list" id="nde-country-list"></div>
+            </div>
+            <input class="nde-input" id="e-tel" placeholder="77 000 00 00" style="flex:1" onclick="closeCountryDropdown()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rôle et accès -->
+    <div class="nde-section">
+      <div class="nde-section-title">Rôle et accès</div>
+
+      <div class="nde-role-status">
+        <div class="nde-field">
+          <label class="nde-label">Rôle <span>*</span></label>
+          <select class="nde-select" id="e-civ">
+            <option value="">Sélectionner un rôle</option>
+            <option value="Administrateur">Administrateur</option>
+            <option value="Gestionnaire">Gestionnaire</option>
+            <option value="Agent">Agent</option>
+            <option value="Comptable">Comptable</option>
+            <option value="Assistante">Assistante</option>
+          </select>
+        </div>
+        <div class="nde-field">
+          <label class="nde-label">Statut <span>*</span></label>
+          <select class="nde-select" id="e-statut-drawer">
+            <option value="Actif">● Actif</option>
+            <option value="En attente">En attente</option>
+            <option value="Inactif">Inactif</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="nde-perm-box">
+        <div>
+          <div class="nde-perm-label">Permissions</div>
+          <div class="nde-perm-sub">Les permissions seront définies selon le rôle sélectionné</div>
+        </div>
+        <span class="material-symbols-rounded" style="font-size:20px;color:#d1d5db">lock</span>
+      </div>
+    </div>
+
+    <!-- Informations supplémentaires -->
+    <div class="nde-section">
+      <div class="nde-section-title">Informations supplémentaires</div>
+
+      <div class="nde-row">
+        <div class="nde-field">
+          <label class="nde-label">Fonction / Poste</label>
+          <input class="nde-input" id="e-fonction" placeholder="Ex: Responsable des locations">
+        </div>
+        <div class="nde-field">
+          <label class="nde-label">Date d'embauche</label>
+          <div style="position:relative">
+            <input class="nde-input" id="e-deldeb" type="date" placeholder="jj/mm/aaaa" lang="fr" style="padding-right:36px">
+            <span class="material-symbols-rounded" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:16px;color:#9ca3af;pointer-events:none">calendar_today</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="nde-row full">
+        <div class="nde-field">
+          <label class="nde-label">Notes (optionnel)</label>
+          <textarea class="nde-input" id="e-adresse" placeholder="Informations complémentaires..." style="height:80px;padding:10px 12px;resize:none;line-height:1.5"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mot de passe -->
+    <div class="nde-section">
+      <div class="nde-section-title">Accès / Mot de passe</div>
+      <div class="nde-row full">
+        <div class="nde-field">
+          <label class="nde-label">Mot de passe <span>*</span></label>
+          <div style="display:flex;gap:6px">
+            <div style="position:relative;flex:1">
+              <input class="nde-input" id="e-pass" type="password" placeholder="••••••••" style="padding-right:36px">
+              <span onclick="tglPassField('e-pass','e-pass-eye')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:#9ca3af">
+                <span class="material-symbols-rounded" id="e-pass-eye" style="font-size:18px;vertical-align:middle">visibility</span>
+              </span>
+            </div>
+            <button type="button" onclick="suggestPassword()" style="padding:0 12px;border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;color:#374151;cursor:pointer;font-size:12px;white-space:nowrap;height:38px;display:flex;align-items:center;gap:4px">
+              <span class="material-symbols-rounded" style="font-size:14px">auto_fix_high</span> Générer
+            </button>
+          </div>
+          <div id="e-pass-strength" style="font-size:11px;margin-top:4px;min-height:14px;color:#9ca3af"></div>
+        </div>
+      </div>
+      <div id="e-pass-suggestion" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;font-size:12px;margin-top:-4px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <span style="color:#166534">Mot de passe suggéré :</span>
+          <button type="button" onclick="copyAndUseSuggestion()" style="padding:4px 10px;border-radius:6px;border:none;background:#16a34a;color:#fff;cursor:pointer;font-size:11px">Utiliser</button>
+        </div>
+        <div id="e-pass-suggested-val" style="font-family:monospace;font-size:13px;font-weight:600;color:#166534;letter-spacing:1px;margin-top:4px"></div>
+      </div>
+    </div>
+
+    <!-- Photo -->
+    <div class="nde-section">
+      <div class="nde-section-title">Photo (optionnel)</div>
+      <div class="nde-upload-box" onclick="document.getElementById('e-photo-input').click()" id="nde-photo-dropzone">
+        <div style="display:flex;align-items:center;justify-content:center;flex-direction:column">
+          <span class="material-symbols-rounded nde-upload-icon">upload</span>
+          <div class="nde-upload-text"><b>Cliquez pour télécharger</b> ou glissez-déposez</div>
+          <div class="nde-upload-sub">PNG, JPG (max. 2MB)</div>
+          <img id="e-photo-preview" style="display:none;width:70px;height:70px;object-fit:cover;border-radius:50%;margin-top:10px" loading="lazy" decoding="async">
+        </div>
+        <input type="file" id="e-photo-input" accept="image/*" style="display:none"
+          onchange="previewPhoto(this,'e-photo-preview','e-photo-icon','e-photo-label');document.getElementById('e-photo-preview').style.display=this.files&&this.files[0]?'block':'none'">
+      </div>
+    </div>
+
+    <!-- Hidden fields for compatibility -->
+    <input type="hidden" id="e-photo-icon">
+    <input type="hidden" id="e-photo-label">
+    <input type="hidden" id="e-naiss">
+    <input type="hidden" id="e-piece" value="CNI">
+    <input type="hidden" id="e-numpiece">
+    <input type="hidden" id="e-lieu">
+    <input type="hidden" id="e-delexp">
+    <input type="hidden" id="e-matri">
+    <input type="hidden" id="e-enfants">
+    <input type="hidden" id="e-contrat" value="CDI">
+    <div id="droits-list" style="display:none">
+      <label class="toggle-switch"><input type="checkbox" checked><span class="slider-s"></span></label>
+    </div>
+
+  </div><!-- /nde-body -->
+
+  <!-- Footer -->
+  <div class="nde-footer">
+    <button class="nde-btn-cancel" onclick="closeNouvelEmployeDrawer()">Annuler</button>
+    <button class="nde-btn-save" id="nde-save-btn" onclick="saveEmployeFromDrawer()">Enregistrer</button>
+  </div>
+</div>
+
+<script src="js/inline/inline-script-07.js?v=refactor-20260523"></script>
+<script src="js/inline/inline-script-08.js?v=refactor-20260523"></script>
+
+<script src="js/inline/inline-script-09.js?v=refactor-20260523"></script>
+
+<!-- ====== DRAWER NOUVEAU PROPRIÉTAIRE ====== -->
+<div id="nvPropOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1200;transition:opacity .3s" onclick="closeNouvelProprietaireDrawer()"></div>
+<div id="nvPropDrawer" style="display:none;position:fixed;top:0;right:0;height:100vh;width:480px;max-width:100vw;background:#fff;z-index:1201;box-shadow:-8px 0 32px rgba(0,0,0,.15);transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column">
+  
+
+  <!-- Header -->
+  <div class="nde-header">
+    <div>
+      <div class="nde-title">Nouveau propriétaire</div>
+      <div class="nde-sub">Ajoutez un nouveau propriétaire à votre portefeuille</div>
+    </div>
+    <button class="nde-close" onclick="closeNouvelProprietaireDrawer()">
+      <span class="material-symbols-rounded" style="font-size:20px">close</span>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="nde-body">
+
+    <!-- Photo -->
+    <div class="nde-section">
+      <div class="nde-section-title">Photo</div>
+      <div class="nde-photo-box" onclick="document.getElementById('nvp-photo-input').click()">
+        <span class="material-symbols-rounded nde-photo-icon" id="nvp-photo-icon">person</span>
+        <img id="nvp-photo-preview" class="nde-photo-preview" loading="lazy" decoding="async">
+        <small style="font-size:12px;color:#9ca3af">Cliquez pour ajouter une photo</small>
+        <input type="file" id="nvp-photo-input" accept="image/*" style="display:none" onchange="nvpPreviewPhoto(this)">
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px;justify-content:center">
+        <button type="button" onclick="document.getElementById('nvp-photo-input').click()" style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 14px;background:#eff6ff;color:#3b82f6;border:1px solid #bfdbfe;border-radius:7px;font-size:12px;cursor:pointer"><span class="material-symbols-rounded" style="font-size:14px">upload</span> Choisir</button>
+        <button type="button" onclick="nvpClearPhoto()" style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 14px;background:#fef2f2;color:#ef4444;border:1px solid #fecaca;border-radius:7px;font-size:12px;cursor:pointer"><span class="material-symbols-rounded" style="font-size:14px">delete</span> Supprimer</button>
+      </div>
+    </div>
+
+    <!-- Identité -->
+    <div class="nde-section">
+      <div class="nde-section-title">Identité</div>
+      <div class="nde-row">
+        <div class="nde-field">
+          <label class="nde-label">Prénom <span>*</span></label>
+          <input class="nde-input" id="nvp-prenom" placeholder="Prénom">
+        </div>
+        <div class="nde-field">
+          <label class="nde-label">Nom <span>*</span></label>
+          <input class="nde-input" id="nvp-nom" placeholder="Nom">
+        </div>
+      </div>
+      <div class="nde-row">
+        <div class="nde-field">
+          <label class="nde-label">Date de naissance</label>
+          <input class="nde-input" id="nvp-naiss" type="date" placeholder="jj/mm/aaaa" lang="fr">
+        </div>
+        <div class="nde-field">
+          <label class="nde-label">Statut matrimonial</label>
+          <select class="nde-select" id="nvp-matri">
+            <option value="">Sélectionnez</option>
+            <option>Célibataire</option>
+            <option>Marié</option>
+            <option>Divorcé</option>
+            <option>Veuf</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="nde-section">
+      <div class="nde-section-title">Contact</div>
+      <div class="nde-row">
+        <div class="nde-field">
+          <label class="nde-label">Téléphone <span>*</span></label>
+          <div class="nde-phone-row" id="nvp-phone-wrap">
+            <div class="nde-phone-flag" id="nvp-country-btn" onclick="nvpToggleCountryDropdown()">
+              <img id="nvp-flag-emoji" class="nde-flag-img" src="https://flagcdn.com/w40/sn.png" alt="SN" loading="lazy" decoding="async">
+              <span id="nvp-dial-code" style="font-size:12px;color:#374151;font-weight:500">+221</span>
+              <span class="material-symbols-rounded flag-chevron">expand_more</span>
+            </div>
+            <div class="nde-country-dropdown" id="nvp-country-dropdown">
+              <div class="nde-country-search">
+                <span class="material-symbols-rounded">search</span>
+                <input type="text" id="nvp-country-search-input" placeholder="Rechercher un pays…" oninput="nvpFilterCountries(this.value)">
+              </div>
+              <div class="nde-country-list" id="nvp-country-list"></div>
+            </div>
+            <input class="nde-input" id="nvp-tel" placeholder="77 000 00 00" style="flex:1" onclick="nvpCloseCountryDropdown()">
+          </div>
+        </div>
+        <div class="nde-field">
+          <label class="nde-label">Email <span>*</span></label>
+          <input class="nde-input" id="nvp-email" type="email" placeholder="email@domaine.com">
+        </div>
+      </div>
+      <div class="nde-row full">
+        <div class="nde-field">
+          <label class="nde-label">Adresse <span>*</span></label>
+          <input class="nde-input" id="nvp-adresse" placeholder="Adresse complète">
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /nde-body -->
+
+  <!-- Footer -->
+  <div class="nde-footer">
+    <button class="nde-btn-cancel" onclick="closeNouvelProprietaireDrawer()">Annuler</button>
+    <button class="nde-btn-save" id="nvp-save-btn" onclick="saveProprietaireFromDrawer()">Enregistrer</button>
+  </div>
+</div>
+
+<script src="js/inline/inline-script-10.js?v=refactor-20260523"></script>
+
+<script src="js/inline/inline-script-11.js?v=refactor-20260523"></script>
+<script src="js/pages/locatives.js" defer></script>
+<script src="js/pages/depenses.js" defer></script>
+<script src="js/pages/contrats.js" defer></script>
+<script src="js/pages/paiements.js" defer></script>
+<script src="js/pages/locataires.js" defer></script>
+<script src="js/pages/biens.js?v=20260522-selects-v3" defer></script>
+<script src="js/core/consolidated-hotfixes.js?v=20260523-consolidated" defer></script>
+
+<script src="js/inline/inline-script-12.js?v=refactor-20260523"></script>
+
+<script src="js/core/doc-actions-ensure.js?v=20260522" defer></script>
+<script src="js/core/owner-select-edit.js?v=20260523-clean" defer></script>
+<script src="js/core/dashboard-actions-fix.js?v=20260523-final" defer></script>
+<script src="js/core/avenir-kpi-fix.js?v=20260523-v48" defer></script>
+<script src="js/core/paiements-avenir-button-final-fix.js?v=20260523-final" defer></script>
+<script src="js/core/finance-sidecards-restore.js?v=20260523-sidecards-restore" defer></script>
+<script src="js/core/finance-pages-sidecards-final.js?v=20260523-final-sidecards" defer></script>
+<script src="js/core/force-finance-right-column.js?v=20260523-force-right" defer></script>
+
+<link rel="stylesheet" href="styles/gp-payments-date-compact-v3.css?v=20260523-v3">
+<script src="js/core/gp-date-format-global-v3.js?v=20260523-v3" defer></script>
+</body>
+</html>

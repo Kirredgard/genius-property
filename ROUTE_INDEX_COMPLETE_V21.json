@@ -1,0 +1,216 @@
+{
+  "generatedAt": "2026-05-25",
+  "count": 42,
+  "routes": [
+    {
+      "page": "beta-hub.v21.html",
+      "url": "./beta-hub.v21.html",
+      "critical": false
+    },
+    {
+      "page": "beta.v21.html",
+      "url": "./beta.v21.html",
+      "critical": false
+    },
+    {
+      "page": "billing-cancel.v21.html",
+      "url": "./billing-cancel.v21.html",
+      "critical": false
+    },
+    {
+      "page": "billing-success.v21.html",
+      "url": "./billing-success.v21.html",
+      "critical": false
+    },
+    {
+      "page": "billing.v21.html",
+      "url": "./billing.v21.html",
+      "critical": true
+    },
+    {
+      "page": "command-center.v21.html",
+      "url": "./command-center.v21.html",
+      "critical": false
+    },
+    {
+      "page": "context.v21.html",
+      "url": "./context.v21.html",
+      "critical": false
+    },
+    {
+      "page": "contract-detail.v21.html",
+      "url": "./contract-detail.v21.html",
+      "critical": false
+    },
+    {
+      "page": "contracts.v21.html",
+      "url": "./contracts.v21.html",
+      "critical": true
+    },
+    {
+      "page": "dashboard.v21.html",
+      "url": "./dashboard.v21.html",
+      "critical": true
+    },
+    {
+      "page": "documents.v21.html",
+      "url": "./documents.v21.html",
+      "critical": true
+    },
+    {
+      "page": "enterprise.v21.html",
+      "url": "./enterprise.v21.html",
+      "critical": false
+    },
+    {
+      "page": "feedback.v21.html",
+      "url": "./feedback.v21.html",
+      "critical": true
+    },
+    {
+      "page": "final-stabilization.v21.html",
+      "url": "./final-stabilization.v21.html",
+      "critical": true
+    },
+    {
+      "page": "firestore-test.v21.html",
+      "url": "./firestore-test.v21.html",
+      "critical": false
+    },
+    {
+      "page": "go-live.v21.html",
+      "url": "./go-live.v21.html",
+      "critical": true
+    },
+    {
+      "page": "health.v21.html",
+      "url": "./health.v21.html",
+      "critical": true
+    },
+    {
+      "page": "incidents.v21.html",
+      "url": "./incidents.v21.html",
+      "critical": false
+    },
+    {
+      "page": "index.v21.html",
+      "url": "./index.v21.html",
+      "critical": false
+    },
+    {
+      "page": "invite.v21.html",
+      "url": "./invite.v21.html",
+      "critical": false
+    },
+    {
+      "page": "launch-readiness.v21.html",
+      "url": "./launch-readiness.v21.html",
+      "critical": false
+    },
+    {
+      "page": "login.v21.html",
+      "url": "./login.v21.html",
+      "critical": true
+    },
+    {
+      "page": "observability.v21.html",
+      "url": "./observability.v21.html",
+      "critical": false
+    },
+    {
+      "page": "onboarding.v21.html",
+      "url": "./onboarding.v21.html",
+      "critical": true
+    },
+    {
+      "page": "owner-detail.v21.html",
+      "url": "./owner-detail.v21.html",
+      "critical": false
+    },
+    {
+      "page": "owners.v21.html",
+      "url": "./owners.v21.html",
+      "critical": true
+    },
+    {
+      "page": "profile.v21.html",
+      "url": "./profile.v21.html",
+      "critical": false
+    },
+    {
+      "page": "propertie-detail.v21.html",
+      "url": "./propertie-detail.v21.html",
+      "critical": false
+    },
+    {
+      "page": "properties.v21.html",
+      "url": "./properties.v21.html",
+      "critical": true
+    },
+    {
+      "page": "rollout.v21.html",
+      "url": "./rollout.v21.html",
+      "critical": false
+    },
+    {
+      "page": "saas-analytics.v21.html",
+      "url": "./saas-analytics.v21.html",
+      "critical": false
+    },
+    {
+      "page": "scale-ops.v21.html",
+      "url": "./scale-ops.v21.html",
+      "critical": false
+    },
+    {
+      "page": "status.v21.html",
+      "url": "./status.v21.html",
+      "critical": true
+    },
+    {
+      "page": "storage-test.v21.html",
+      "url": "./storage-test.v21.html",
+      "critical": false
+    },
+    {
+      "page": "super-admin.v21.html",
+      "url": "./super-admin.v21.html",
+      "critical": false
+    },
+    {
+      "page": "support-admin.v21.html",
+      "url": "./support-admin.v21.html",
+      "critical": false
+    },
+    {
+      "page": "support.v21.html",
+      "url": "./support.v21.html",
+      "critical": true
+    },
+    {
+      "page": "team.v21.html",
+      "url": "./team.v21.html",
+      "critical": false
+    },
+    {
+      "page": "tenant-detail.v21.html",
+      "url": "./tenant-detail.v21.html",
+      "critical": false
+    },
+    {
+      "page": "tenants.v21.html",
+      "url": "./tenants.v21.html",
+      "critical": true
+    },
+    {
+      "page": "ultimate-saas.v21.html",
+      "url": "./ultimate-saas.v21.html",
+      "critical": false
+    },
+    {
+      "page": "upgrade.v21.html",
+      "url": "./upgrade.v21.html",
+      "critical": false
+    }
+  ]
+}

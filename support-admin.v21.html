@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genius Property — Support Admin V21</title>
+    <link rel="stylesheet" href="./styles/v21.css" />
+  </head>
+  <body>
+    <main class="v21-shell">
+      <nav class="v21-nav">
+        <a href="./support.v21.html">Support</a>
+        <a href="./feedback.v21.html">Feedback</a>
+        <a href="./beta.v21.html">Beta</a>
+      </nav>
+
+      <header class="v21-section-header">
+        <h1>Support Admin</h1>
+        <p>Ajouter des articles au centre d’aide.</p>
+      </header>
+
+      <section class="v21-form-card">
+        <form id="kb-form" class="v21-form">
+          <label class="v21-form-field"><span>Titre</span><input name="title" required /></label>
+          <label class="v21-form-field"><span>Catégorie</span><input name="category" value="Support" /></label>
+          <label class="v21-form-field"><span>Contenu</span><input name="content" required /></label>
+          <div class="v21-form-actions"><button type="submit">Ajouter article</button></div>
+        </form>
+      </section>
+
+      <section class="v21-form-card">
+        <h2>Articles</h2>
+        <pre id="kb-output"></pre>
+      </section>
+    </main>
+
+    <script type="module" src="./js/v21/pages/support-admin.page.js"></script>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "source_zip": "genius-property-v21-user-profile-firestore.zip",
+  "added": [
+    "js/v21/permissions/permission-ui.ts",
+    "tests/v21/permissions/permission-ui.test.js",
+    "PERMISSIONS_UI_V21.md"
+  ],
+  "changed": [
+    "js/v21/forms/form-utils.ts",
+    "js/v21/details/entity-detail.ts",
+    "js/v21/actions/list-actions.ts",
+    "firestore-test.v21.html",
+    "storage-test.v21.html"
+  ]
+}

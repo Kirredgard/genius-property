@@ -1,0 +1,167 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSuperAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/superAdmins/$(request.auth.uid));
+    }
+
+    function agencyMember(agencyId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/agencies/$(agencyId)/members/$(request.auth.uid));
+    }
+
+    function agencyRole(agencyId) {
+      return get(/databases/$(database)/documents/agencies/$(agencyId)/members/$(request.auth.uid)).data.role;
+    }
+
+    function canReadAgency(agencyId) {
+      return isSuperAdmin() || agencyMember(agencyId);
+    }
+
+    function canWriteAgency(agencyId) {
+      return isSuperAdmin()
+        || (agencyMember(agencyId)
+          && agencyRole(agencyId) in ['owner', 'admin', 'agent']);
+    }
+
+    function canAdminAgency(agencyId) {
+      return isSuperAdmin()
+        || (agencyMember(agencyId)
+          && agencyRole(agencyId) in ['owner', 'admin']);
+    }
+
+    match /agencies/{agencyId} {
+      allow read: if canReadAgency(agencyId);
+      allow create: if signedIn();
+      allow update, delete: if canAdminAgency(agencyId);
+
+      match /betaProgram/{agencyId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /knowledgeBase/{articleId} {
+      allow read: if signedIn();
+      allow write: if isSuperAdmin();
+    }
+
+    match /incidents/{incidentId} {
+      allow create: if signedIn();
+      allow read, update, delete: if isSuperAdmin();
+    }
+
+    match /feedback/{feedbackId} {
+      allow create: if signedIn();
+      allow read, update, delete: if isSuperAdmin();
+    }
+
+    match /settings/{settingId} {
+        allow read: if canReadAgency(agencyId);
+        allow write: if canAdminAgency(agencyId);
+      }
+
+      match /auditLogs/{logId} {
+        allow read: if canAdminAgency(agencyId);
+        allow create: if canReadAgency(agencyId);
+        allow update, delete: if false;
+      }
+
+      match /invitations/{inviteId} {
+        allow read: if canReadAgency(agencyId);
+        allow create, update, delete: if canAdminAgency(agencyId);
+      }
+
+      match /members/{userId} {
+        allow read: if canReadAgency(agencyId);
+        allow write: if canAdminAgency(agencyId);
+      }
+
+      match /owners/{docId} {
+        allow read: if canReadAgency(agencyId);
+        allow create, update: if canWriteAgency(agencyId);
+        allow delete: if canAdminAgency(agencyId);
+      }
+
+      match /properties/{docId} {
+        allow read: if canReadAgency(agencyId);
+        allow create, update: if canWriteAgency(agencyId);
+        allow delete: if canAdminAgency(agencyId);
+      }
+
+      match /tenants/{docId} {
+        allow read: if canReadAgency(agencyId);
+        allow create, update: if canWriteAgency(agencyId);
+        allow delete: if canAdminAgency(agencyId);
+      }
+
+      match /contracts/{docId} {
+        allow read: if canReadAgency(agencyId);
+        allow create, update: if canWriteAgency(agencyId);
+        allow delete: if canAdminAgency(agencyId);
+      }
+
+      match /payments/{docId} {
+        allow read: if canReadAgency(agencyId);
+        allow create, update: if canWriteAgency(agencyId);
+        allow delete: if canAdminAgency(agencyId);
+      }
+
+      match /expenses/{docId} {
+        allow read: if canReadAgency(agencyId);
+        allow create, update: if canWriteAgency(agencyId);
+        allow delete: if canAdminAgency(agencyId);
+      }
+
+      match /documents/{docId} {
+        allow read: if canReadAgency(agencyId);
+        allow create, update: if canWriteAgency(agencyId);
+        allow delete: if canAdminAgency(agencyId);
+      }
+
+      match /ownerPayouts/{docId} {
+        allow read: if canReadAgency(agencyId);
+        allow create, update: if canAdminAgency(agencyId);
+        allow delete: if canAdminAgency(agencyId);
+      }
+
+      match /notifications/{docId} {
+        allow read: if canReadAgency(agencyId);
+        allow create, update: if canWriteAgency(agencyId);
+        allow delete: if canAdminAgency(agencyId);
+      }
+    }
+
+    match /betaProgram/{agencyId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /knowledgeBase/{articleId} {
+      allow read: if signedIn();
+      allow write: if isSuperAdmin();
+    }
+
+    match /incidents/{incidentId} {
+      allow create: if signedIn();
+      allow read, update, delete: if isSuperAdmin();
+    }
+
+    match /feedback/{feedbackId} {
+      allow create: if signedIn();
+      allow read, update, delete: if isSuperAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if signedIn();
+      allow write: if isSuperAdmin();
+    }
+
+    match /superAdmins/{userId} {
+      allow read, write: if isSuperAdmin();
+    }
+  }
+}

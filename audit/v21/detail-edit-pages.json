@@ -1,0 +1,19 @@
+{
+  "source_zip": "genius-property-v21-list-actions.zip",
+  "created_or_changed": [
+    "js/v21/details/entity-detail.ts",
+    "js/v21/pages/propertie-detail.page.ts",
+    "propertie-detail.v21.html",
+    "js/v21/pages/tenant-detail.page.ts",
+    "tenant-detail.v21.html",
+    "js/v21/pages/owner-detail.page.ts",
+    "owner-detail.v21.html",
+    "js/v21/pages/contract-detail.page.ts",
+    "contract-detail.v21.html",
+    "js/v21/modules/properties/ui/properties.list.ts",
+    "js/v21/modules/tenants/ui/tenants.list.ts",
+    "js/v21/modules/owners/ui/owners.list.ts",
+    "js/v21/modules/contracts/ui/contracts.list.ts",
+    "tests/v21/details/entity-detail.test.js"
+  ]
+}

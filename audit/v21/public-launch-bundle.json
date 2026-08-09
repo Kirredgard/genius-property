@@ -1,0 +1,12 @@
+{
+  "source_zip": "genius-property-v21-platform-admin-bundle.zip",
+  "bundle_points": [
+    "i18n",
+    "white-label",
+    "onboarding wizard",
+    "notification center",
+    "adoption analytics",
+    "csv import",
+    "launch readiness"
+  ]
+}

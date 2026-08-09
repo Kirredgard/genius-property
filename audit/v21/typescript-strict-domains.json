@@ -1,0 +1,17 @@
+{
+  "source_zip": "genius-property-v21-build-readiness.zip",
+  "created_configs": [
+    "tsconfigs/tsconfig.tenants.json",
+    "tsconfigs/tsconfig.properties.json",
+    "tsconfigs/tsconfig.contracts.json",
+    "tsconfigs/tsconfig.notifications.json",
+    "tsconfigs/tsconfig.patches.json",
+    "tsconfigs/tsconfig.legacy.json"
+  ],
+  "strict_domains": [
+    "tenants",
+    "properties",
+    "contracts",
+    "notifications"
+  ]
+}

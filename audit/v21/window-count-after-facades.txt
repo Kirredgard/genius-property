@@ -1,0 +1,2 @@
+window.* occurrences after facade registry migration: 2875
+files with window.*: 79

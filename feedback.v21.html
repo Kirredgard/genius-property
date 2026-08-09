@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genius Property — Feedback V21</title>
+    <link rel="stylesheet" href="./styles/v21.css" />
+  </head>
+  <body>
+    <main class="v21-shell">
+      <nav class="v21-nav">
+        <a href="./dashboard.v21.html">Dashboard</a>
+        <a href="./health.v21.html">Health</a>
+      </nav>
+
+      <header class="v21-section-header">
+        <h1>Feedback V21</h1>
+        <p>Remonter bugs, idées ou questions pendant la beta.</p>
+      </header>
+
+      <section class="v21-form-card">
+        <form id="feedback-form" class="v21-form">
+          <label class="v21-form-field">
+            <span>Type</span>
+            <select name="type">
+              <option value="bug">bug</option>
+              <option value="idea">idea</option>
+              <option value="question">question</option>
+              <option value="praise">praise</option>
+            </select>
+          </label>
+          <label class="v21-form-field">
+            <span>Severity</span>
+            <select name="severity">
+              <option value="low">low</option>
+              <option value="medium">medium</option>
+              <option value="high">high</option>
+              <option value="critical">critical</option>
+            </select>
+          </label>
+          <label class="v21-form-field">
+            <span>Page</span>
+            <input name="page" />
+          </label>
+          <label class="v21-form-field">
+            <span>Message</span>
+            <input name="message" required />
+          </label>
+          <div class="v21-form-actions">
+            <button type="submit">Envoyer feedback</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="v21-form-card">
+        <h2>Feedback local</h2>
+        <pre id="feedback-output"></pre>
+      </section>
+    </main>
+
+    <script type="module" src="./js/v21/pages/feedback.page.js"></script>
+  </body>
+</html>

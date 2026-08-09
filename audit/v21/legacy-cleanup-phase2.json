@@ -1,0 +1,71 @@
+{
+  "source_zip": "genius-property-v21-storage-real-test.zip",
+  "legacy_findings_count": 15,
+  "legacy_findings": [
+    {
+      "file": "js/app.legacy.bundle.js",
+      "sizeBytes": 596316
+    },
+    {
+      "file": "js/inline/inline-script-06.js",
+      "sizeBytes": 3111
+    },
+    {
+      "file": "js/inline/inline-script-04.js",
+      "sizeBytes": 69
+    },
+    {
+      "file": "js/inline/inline-script-03.js",
+      "sizeBytes": 520
+    },
+    {
+      "file": "js/inline/inline-script-01.js",
+      "sizeBytes": 46
+    },
+    {
+      "file": "js/inline/inline-script-05.js",
+      "sizeBytes": 2289
+    },
+    {
+      "file": "js/inline/inline-script-02.module.js",
+      "sizeBytes": 2093
+    },
+    {
+      "file": "js/inline/inline-script-11.js",
+      "sizeBytes": 8722
+    },
+    {
+      "file": "js/inline/inline-script-10.js",
+      "sizeBytes": 5357
+    },
+    {
+      "file": "js/inline/inline-script-08.js",
+      "sizeBytes": 2729
+    },
+    {
+      "file": "js/inline/inline-script-09.js",
+      "sizeBytes": 3111
+    },
+    {
+      "file": "js/inline/inline-script-07.js",
+      "sizeBytes": 5477
+    },
+    {
+      "file": "js/inline/inline-script-12.js",
+      "sizeBytes": 2532
+    },
+    {
+      "file": "js/core/legacy-bridge.js",
+      "sizeBytes": 1926
+    },
+    {
+      "file": "js/core/consolidated-hotfixes.js",
+      "sizeBytes": 122399
+    }
+  ],
+  "added": [
+    "index.v21-production.html",
+    "scripts/audit-legacy-strict.mjs",
+    "LEGACY_CLEANUP_PHASE2_V21.md"
+  ]
+}

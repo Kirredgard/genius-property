@@ -1,0 +1,15 @@
+{
+  "source_zip": "genius-property-v21-optimization.zip",
+  "added": [
+    "firestore.rules.v21",
+    "storage.rules.v21",
+    "firebase.v21.json",
+    "scripts/production-go-no-go.mjs",
+    "PRODUCTION_GUIDE_V21.md",
+    "FIREBASE_RULES_V21.md"
+  ],
+  "scripts": [
+    "production:check",
+    "production:ready"
+  ]
+}

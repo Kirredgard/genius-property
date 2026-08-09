@@ -1,0 +1,18 @@
+{
+  "source_zip": "genius-property-v21-support-center.zip",
+  "bundle_points": [
+    "knowledge base firestore",
+    "support admin page",
+    "beta welcome email",
+    "incident management",
+    "beta hub",
+    "firestore rules",
+    "operations docs"
+  ],
+  "added": [
+    "support-admin.v21.html",
+    "incidents.v21.html",
+    "beta-hub.v21.html",
+    "BETA_OPERATIONS_BUNDLE_V21.md"
+  ]
+}
