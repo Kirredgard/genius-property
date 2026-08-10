@@ -30,17 +30,21 @@ export async function initTenantsModule(options = {}) {
   };
 }
 
-export async function saveTenant(payload, options = {
+export async function saveTenant(payload, options = {}) {
+  if (!payload.id) {
+    const usage = requireUsageCapacity(
+      'tenants',
+      countStateItems(state, 'tenants')
+    );
 
-if (!payload.id) {
-  const usage = requireUsageCapacity('tenants', countStateItems(state, 'tenants'));
-  if (!usage.ok) return usage;
-}
+    if (!usage.ok) return usage;
+  }
 
-      const permission = requireWritePermission();
-      if (!permission.ok) return permission;
-}) {
+  const permission = requireWritePermission();
+  if (!permission.ok) return permission;
+
   const validation = validateTenant(payload);
+
   if (!validation.valid) {
     return { ok: false, errors: validation.errors };
   }
@@ -52,15 +56,16 @@ if (!payload.id) {
   return { ok: true, tenant: result };
 }
 
-export async function removeTenant(tenantId, options = {
-      const permission = requireAdminPermission();
-      if (!permission.ok) return permission;
-}) {
+export async function removeTenant(tenantId, options = {}) {
+  const permission = requireAdminPermission();
+  if (!permission.ok) return permission;
+
   if (!tenantId) {
     return { ok: false, errors: ['tenantId requis'] };
   }
 
   const result = await archiveTenant(tenantId, options);
+
   return { ok: true, tenant: result };
 }
 
@@ -68,5 +73,9 @@ export function getTenantsState() {
   return { ...state, tenants: [...state.tenants] };
 }
 
-
-registerLegacyGlobal('GPV21Tenants', { init: initTenantsModule, save: saveTenant, archive: removeTenant, state: getTenantsState });
+registerLegacyGlobal('GPV21Tenants', {
+  init: initTenantsModule,
+  save: saveTenant,
+  archive: removeTenant,
+  state: getTenantsState
+});
