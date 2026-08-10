@@ -31,16 +31,19 @@ export async function initOwnersModule(options = {}) {
   };
 }
 
-export async function saveOwner(payload, options = {
+export async function saveOwner(payload, options = {}) {
+  if (!payload.id) {
+    const usage = requireUsageCapacity(
+      'owners',
+      countStateItems(state, 'owners')
+    );
 
-if (!payload.id) {
-  const usage = requireUsageCapacity('owners', countStateItems(state, 'owners'));
-  if (!usage.ok) return usage;
-}
+    if (!usage.ok) return usage;
+  }
 
-      const permission = requireWritePermission();
-      if (!permission.ok) return permission;
-}) {
+  const permission = requireWritePermission();
+  if (!permission.ok) return permission;
+
   const validation = validateOwner(payload);
 
   if (!validation.valid) {
@@ -54,13 +57,16 @@ if (!payload.id) {
   return { ok: true, owner: result };
 }
 
-export async function removeOwner(ownerId, options = {
-      const permission = requireAdminPermission();
-      if (!permission.ok) return permission;
-}) {
-  if (!ownerId) return { ok: false, errors: ['ownerId requis'] };
+export async function removeOwner(ownerId, options = {}) {
+  const permission = requireAdminPermission();
+  if (!permission.ok) return permission;
+
+  if (!ownerId) {
+    return { ok: false, errors: ['ownerId requis'] };
+  }
 
   const result = await archiveOwner(ownerId, options);
+
   return { ok: true, owner: result };
 }
 
