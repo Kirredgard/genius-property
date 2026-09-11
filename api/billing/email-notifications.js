@@ -5,12 +5,7 @@ export async function notifyBillingStatus({ emailApiUrl, to, agencyName, status,
 
   const response = await fetch(`${emailApiUrl}/send-billing-status`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(process.env.EMAIL_API_INTERNAL_SECRET
-        ? { 'X-Internal-API-Key': process.env.EMAIL_API_INTERNAL_SECRET }
-        : {})
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ to, agencyName, status, plan })
   });
 

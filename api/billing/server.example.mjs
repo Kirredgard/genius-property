@@ -1,7 +1,7 @@
 import express from 'express';
 import Stripe from 'stripe';
+import admin from 'firebase-admin';
 import { notifyBillingStatus, resolveBillingRecipient } from './email-notifications.js';
-import { requireFirebaseUser, requireAgencyRole, db, sendApiError } from '../shared/firebase-auth.mjs';
 import {
   mapStripeStatus,
   extractPlanFromSubscription,
@@ -12,6 +12,11 @@ import {
 const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
+
+const db = admin.firestore();
 
 const priceByPlan = {
   starter: process.env.STRIPE_PRICE_STARTER,
@@ -73,9 +78,7 @@ async function updateSubscriptionByStripeSubscription(subscriptionId, payload) {
 
 app.post('/api/billing/create-checkout-session', express.json(), async (req, res) => {
   try {
-    const user = await requireFirebaseUser(req);
-    const { agencyId, plan, successUrl, cancelUrl } = req.body || {};
-    await requireAgencyRole(user.uid, agencyId, ['owner', 'admin']);
+    const { agencyId, plan, successUrl, cancelUrl, email } = req.body || {};
     const price = priceByPlan[plan];
 
     if (!agencyId || !plan || !price) {
@@ -84,7 +87,7 @@ app.post('/api/billing/create-checkout-session', express.json(), async (req, res
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
-      customer_email: user.email || undefined,
+      customer_email: email || undefined,
       line_items: [{ price, quantity: 1 }],
       success_url: successUrl,
       cancel_url: cancelUrl,
@@ -97,15 +100,13 @@ app.post('/api/billing/create-checkout-session', express.json(), async (req, res
     res.json({ checkoutUrl: session.url });
   } catch (error) {
     console.error('[Billing API] checkout failed:', error);
-    sendApiError(res, error, 'checkout_failed');
+    res.status(500).json({ error: 'checkout_failed' });
   }
 });
 
 app.post('/api/billing/create-portal-session', express.json(), async (req, res) => {
   try {
-    const user = await requireFirebaseUser(req);
     const { agencyId, returnUrl } = req.body || {};
-    await requireAgencyRole(user.uid, agencyId, ['owner', 'admin']);
     const snap = await subscriptionRef(agencyId).get();
     const customerId = snap.data()?.customerId;
 
@@ -121,7 +122,7 @@ app.post('/api/billing/create-portal-session', express.json(), async (req, res) 
     res.json({ portalUrl: portal.url });
   } catch (error) {
     console.error('[Billing API] portal failed:', error);
-    sendApiError(res, error, 'portal_failed');
+    res.status(500).json({ error: 'portal_failed' });
   }
 });
 

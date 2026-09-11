@@ -27,7 +27,6 @@ Optionnel :
 
 ```bash
 EMAIL_API_URL=http://localhost:8788/api/emails
-EMAIL_API_INTERNAL_SECRET=replace-with-a-long-random-secret
 ```
 
 Quand renseigné, le webhook Stripe peut envoyer des emails pour :
