@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genius Property — Onboarding V21</title>
+    <link rel="stylesheet" href="./styles/v21.css" />
+  </head>
+  <body>
+    <main class="v21-shell">
+      <header class="v21-section-header">
+        <h1>Créer ton agence</h1>
+        <p>Première étape pour utiliser Genius Property en multi-agence.</p>
+      </header>
+
+      <section class="v21-form-card">
+        <form id="agency-onboarding-form" class="v21-form">
+          <label class="v21-form-field">
+            <span>Nom agence</span>
+            <input name="name" required />
+          </label>
+          <label class="v21-form-field">
+            <span>Pays</span>
+            <input name="country" value="Sénégal" />
+          </label>
+          <label class="v21-form-field">
+            <span>Ville</span>
+            <input name="city" value="Dakar" />
+          </label>
+          <div class="v21-form-actions">
+            <button type="submit">Créer agence</button>
+          </div>
+        </form>
+      </section>
+
+      <pre id="onboarding-output"></pre>
+    </main>
+
+    <script type="module" src="./js/v21/pages/onboarding.page.js"></script>
+  </body>
+</html>

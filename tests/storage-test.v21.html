@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genius Property — Test Storage V21</title>
+    <link rel="stylesheet" href="./styles/v21.css" />
+  </head>
+  <body>
+    <main class="v21-shell">
+      <nav class="v21-nav">
+        <a href="./login.v21.html">Connexion</a>
+        <a href="./dashboard.v21.html">Dashboard</a>
+        <a href="./firestore-test.v21.html">Test Firestore</a>
+        <a href="./documents.v21.html">Documents</a>
+      </nav>
+
+      <header class="v21-section-header">
+        <h1>Test Storage V21</h1>
+        <p>Uploader un fichier réel dans Firebase Storage.</p>
+      </header>
+
+      <section class="v21-form-card">
+        <h2>Upload test</h2>
+        <form id="storage-test-form" class="v21-form">
+          <label class="v21-form-field">
+            <span>Fichier</span>
+            <input id="storage-file" name="file" type="file" required />
+          </label>
+
+          <div class="v21-form-actions">
+            <button data-requires-permission="write" type="submit">Uploader dans Storage</button>
+            <button data-requires-permission="write" id="storage-delete-last" type="button">Supprimer le dernier upload</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="v21-form-card">
+        <h2>Résultat Storage</h2>
+        <pre id="storage-test-output">En attente d’un upload...</pre>
+      </section>
+    </main>
+
+    <script type="module" src="./js/v21/pages/storage-test.page.js"></script>
+  </body>
+</html>
