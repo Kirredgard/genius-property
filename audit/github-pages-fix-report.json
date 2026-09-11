@@ -1,0 +1,8 @@
+{
+  "github_pages_workflow": ".github/workflows/pages.yml",
+  "ovh_workflow_preserved": true,
+  "missing_local_script_refs": [],
+  "env_uses_firebase": true,
+  "index_uses_firebase_adapters": true,
+  "supabase_login_reference": false
+}
