@@ -1,19 +1,10 @@
-name: Deploy Genius Property to GitHub Pages
+name: Deploy Genius Property to OVH
 
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
   build:
@@ -62,7 +53,7 @@ jobs:
 
       - name: Build
         env:
-          VITE_BASE_PATH: /genius-property/
+          VITE_BASE_PATH: /
           VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_FIREBASE_AUTH_DOMAIN }}
           VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
@@ -72,20 +63,26 @@ jobs:
           VITE_FIREBASE_MEASUREMENT_ID: ${{ vars.VITE_FIREBASE_MEASUREMENT_ID }}
         run: npm run build
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: ./dist
+      - name: Installer lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Déployer vers OVH
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_USER: ${{ secrets.SFTP_USER }}
+          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+        run: |
+          lftp -u "$SFTP_USER","$SFTP_PASSWORD" "sftp://$SFTP_HOST:22" <<'EOF'
+          set sftp:auto-confirm yes
+          set net:max-retries 2
+          set net:timeout 20
+          cd /home/klopyit/genius-property
+          mirror --reverse --verbose \
+            --exclude-glob .git/** \
+            --exclude-glob .github/** \
+            --exclude-glob README.md \
+            ./dist/ .
+          bye
+          EOF
