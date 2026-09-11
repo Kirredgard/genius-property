@@ -1,7 +1,12 @@
-// Genius Property V22 — Supabase configuration
-// Paste your Supabase Publishable key in supabasePublishableKey.
-// Never put a secret/service_role key here.
-window.GPV22_ENV = {
-  supabaseUrl: "https://tpomnpzurgpvjkosvwpk.supabase.co",
-  supabasePublishableKey: ""
+// Genius Property — Firebase runtime configuration
+// Safe to expose in the browser: Firebase Web API keys are not server secrets.
+// GitHub Actions generates the real values during deployment.
+window.__GP_FIREBASE_CONFIG__ = {
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: "",
+  measurementId: ""
 };

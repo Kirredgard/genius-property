@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   root: '.',
+  base: process.env.VITE_BASE_PATH || '/',
   server: {
     port: 5173,
     strictPort: false
