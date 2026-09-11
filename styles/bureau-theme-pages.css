@@ -1,0 +1,700 @@
+/* Genius Property — V30 harmonisation thème Bureau
+   Scope: couleurs, icônes, messagerie, compte compact. Aucune donnée modifiée. */
+:root{
+  --gp-v30-bg:#f7f9fc;
+  --gp-v30-card:#ffffff;
+  --gp-v30-text:#0f172a;
+  --gp-v30-muted:#64748b;
+  --gp-v30-line:rgba(15,23,42,.08);
+  --gp-v30-gold:var(--gold,#d4af37);
+  --gp-v30-gold2:#f5d56a;
+  --gp-v30-dark:#0b0f16;
+  --gp-v30-blue:#2563eb;
+  --gp-v30-green:#16a34a;
+  --gp-v30-red:#dc2626;
+  --gp-v30-radius:14px;
+}
+body.dark{
+  --gp-v30-bg:#0b0f16;
+  --gp-v30-card:rgba(15,18,28,.92);
+  --gp-v30-text:#f8fafc;
+  --gp-v30-muted:rgba(248,250,252,.66);
+  --gp-v30-line:rgba(212,175,55,.14);
+}
+
+/* Harmonisation globale des pages avec le style Bureau */
+.content .page:not(#page-dashboard) .card,
+.content .page:not(#page-dashboard) .stat-card,
+.content .page:not(#page-dashboard) .box,
+.content .page:not(#page-dashboard) .panel{
+  background:var(--gp-v30-card)!important;
+  border:1px solid var(--gp-v30-line)!important;
+  border-radius:var(--gp-v30-radius)!important;
+  box-shadow:0 10px 28px rgba(2,8,23,.07)!important;
+}
+body.dark .content .page:not(#page-dashboard) .card,
+body.dark .content .page:not(#page-dashboard) .stat-card,
+body.dark .content .page:not(#page-dashboard) .box,
+body.dark .content .page:not(#page-dashboard) .panel{
+  box-shadow:0 12px 30px rgba(0,0,0,.24)!important;
+}
+.content .page h1,.content .page h2,.content .page h3{
+  color:var(--gp-v30-text)!important;
+  letter-spacing:-.02em;
+}
+.content .page label,
+.content .page small,
+.content .page .muted,
+.content .page .text-muted{
+  color:var(--gp-v30-muted)!important;
+}
+.content .page .material-symbols-rounded{
+  color:var(--gp-v30-gold);
+  font-variation-settings:'FILL' 0,'wght' 550,'GRAD' 0,'opsz' 24;
+}
+.content .page .btn,
+.content .page button.btn{
+  border-radius:10px!important;
+  font-weight:800!important;
+  border:1px solid var(--gp-v30-line)!important;
+}
+.content .page .btn-primary,
+.content .page .btn-gold{
+  background:linear-gradient(135deg,var(--gp-v30-gold),var(--gp-v30-gold2))!important;
+  color:#111!important;
+  border-color:rgba(212,175,55,.28)!important;
+  box-shadow:0 8px 18px rgba(212,175,55,.18)!important;
+}
+.content .page input,
+.content .page select,
+.content .page textarea{
+  border:1px solid var(--gp-v30-line)!important;
+  border-radius:10px!important;
+  background:var(--bg-input,#fff)!important;
+  color:var(--gp-v30-text)!important;
+}
+.content .page input:focus,
+.content .page select:focus,
+.content .page textarea:focus{
+  outline:none!important;
+  border-color:rgba(212,175,55,.55)!important;
+  box-shadow:0 0 0 3px rgba(212,175,55,.12)!important;
+}
+.content .page table th{
+  background:rgba(212,175,55,.08)!important;
+  color:var(--gp-v30-text)!important;
+  font-weight:900!important;
+}
+.content .page table td,
+.content .page table th{
+  border-color:var(--gp-v30-line)!important;
+}
+
+/* Compte topbar plus petit et propre */
+.topbar .user-box,
+#topbar .user-box,
+.gd-user-topbar{
+  min-height:34px!important;
+  height:34px!important;
+  padding:3px 8px!important;
+  gap:6px!important;
+  border-radius:999px!important;
+}
+.topbar .user-avatar,
+#topbar .user-avatar,
+.gd-user-topbar .user-avatar,
+#topbarAvatar{
+  width:26px!important;height:26px!important;min-width:26px!important;max-width:26px!important;flex:0 0 26px!important;
+}
+.topbar .user-avatar .material-symbols-rounded,
+#topbarAvatar .material-symbols-rounded{font-size:17px!important;}
+.topbar .user-name,.user-box .user-name{font-size:12px!important;font-weight:800!important;max-width:120px!important;line-height:1.05!important;}
+.topbar .user-role,.user-box .user-role{font-size:9.5px!important;line-height:1!important;display:block!important;color:var(--gp-v30-muted)!important;}
+.topbar .user-chevron{font-size:15px!important;}
+.user-menu{border-radius:14px!important;border:1px solid var(--gp-v30-line)!important;box-shadow:0 16px 35px rgba(2,8,23,.16)!important;}
+
+/* Messagerie professionnelle compacte */
+#page-messages{padding:10px 0!important;}
+#page-messages .msg-mail-app{
+  height:calc(100vh - 98px)!important;
+  min-height:520px!important;
+  display:grid!important;
+  grid-template-columns:300px minmax(0,1fr)!important;
+  gap:12px!important;
+}
+#page-messages .msg-mail-sidebar,
+#page-messages .msg-mail-panel{
+  background:var(--gp-v30-card)!important;
+  border:1px solid var(--gp-v30-line)!important;
+  border-radius:16px!important;
+  box-shadow:0 12px 30px rgba(2,8,23,.08)!important;
+  overflow:hidden!important;
+}
+#page-messages .msg-mail-side-head{
+  padding:12px!important;
+  border-bottom:1px solid var(--gp-v30-line)!important;
+  background:linear-gradient(135deg,rgba(212,175,55,.10),rgba(212,175,55,.02))!important;
+}
+#page-messages .msg-mail-title-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;}
+#page-messages .msg-mail-title{display:flex!important;align-items:center!important;gap:7px!important;font-size:13px!important;font-weight:900!important;color:var(--gp-v30-text)!important;white-space:nowrap!important;}
+#page-messages .msg-mail-title .material-symbols-rounded{font-size:18px!important;}
+#page-messages .msg-compose-btn{
+  display:inline-flex!important;align-items:center!important;gap:5px!important;height:30px!important;padding:0 9px!important;border:0!important;border-radius:9px!important;
+  background:linear-gradient(135deg,var(--gp-v30-gold),var(--gp-v30-gold2))!important;color:#111!important;font-size:11px!important;font-weight:900!important;cursor:pointer!important;
+}
+#page-messages .msg-search-wrap{height:34px!important;margin-top:10px!important;background:rgba(148,163,184,.10)!important;border:1px solid var(--gp-v30-line)!important;border-radius:10px!important;display:flex!important;align-items:center!important;gap:6px!important;padding:0 9px!important;}
+#page-messages .msg-search-wrap .material-symbols-rounded{font-size:17px!important;color:var(--gp-v30-muted)!important;}
+#page-messages .msg-search-wrap input{height:30px!important;border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;font-size:12px!important;}
+#page-messages .msg-mail-tabs{padding:8px 10px!important;gap:6px!important;border-bottom:1px solid var(--gp-v30-line)!important;background:transparent!important;}
+#page-messages .msg-mail-tab{height:27px!important;padding:0 9px!important;border-radius:999px!important;border:1px solid var(--gp-v30-line)!important;background:transparent!important;color:var(--gp-v30-muted)!important;font-size:11px!important;font-weight:800!important;}
+#page-messages .msg-mail-tab.active{background:#111827!important;color:#fff!important;border-color:#111827!important;}
+body.dark #page-messages .msg-mail-tab.active{background:linear-gradient(135deg,var(--gp-v30-gold),var(--gp-v30-gold2))!important;color:#111!important;border-color:transparent!important;}
+#page-messages #msg-conv-list{height:calc(100% - 113px)!important;overflow:auto!important;padding:8px!important;}
+#page-messages .msg-mail-item{border:1px solid transparent!important;border-radius:12px!important;margin-bottom:6px!important;padding:9px!important;background:transparent!important;cursor:pointer!important;transition:.15s ease!important;}
+#page-messages .msg-mail-item:hover{background:rgba(212,175,55,.07)!important;border-color:rgba(212,175,55,.16)!important;}
+#page-messages .msg-mail-item.active{background:rgba(212,175,55,.13)!important;border-color:rgba(212,175,55,.35)!important;}
+#page-messages .msg-mail-item-top{display:flex!important;gap:9px!important;align-items:flex-start!important;}
+#page-messages .msg-avatar{width:32px!important;height:32px!important;min-width:32px!important;border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:12px!important;font-weight:900!important;color:#111!important;background:linear-gradient(135deg,var(--gp-v30-gold),var(--gp-v30-gold2))!important;position:relative!important;}
+#page-messages .msg-mail-meta{min-width:0!important;flex:1!important;}
+#page-messages .msg-mail-line{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;}
+#page-messages .msg-mail-name{font-size:12.5px!important;font-weight:900!important;color:var(--gp-v30-text)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+#page-messages .msg-mail-time{font-size:10px!important;color:var(--gp-v30-muted)!important;white-space:nowrap!important;}
+#page-messages .msg-mail-subject{font-size:11.5px!important;font-weight:800!important;color:var(--gp-v30-text)!important;margin-top:2px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+#page-messages .msg-mail-preview{font-size:10.8px!important;color:var(--gp-v30-muted)!important;line-height:1.25!important;margin-top:2px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+#page-messages .msg-mail-role{display:inline-flex!important;margin-top:5px!important;font-size:9.5px!important;font-weight:800!important;color:#92400e!important;background:rgba(212,175,55,.17)!important;border-radius:999px!important;padding:2px 7px!important;}
+#page-messages .msg-unread{position:absolute!important;right:-3px!important;top:-3px!important;background:#dc2626!important;color:#fff!important;border-radius:999px!important;min-width:15px!important;height:15px!important;font-size:9px!important;display:flex!important;align-items:center!important;justify-content:center!important;border:2px solid var(--gp-v30-card)!important;}
+#page-messages .msg-mail-chat-head{height:58px!important;padding:10px 12px!important;border-bottom:1px solid var(--gp-v30-line)!important;align-items:center!important;justify-content:space-between!important;background:linear-gradient(135deg,rgba(212,175,55,.08),transparent)!important;}
+#page-messages .msg-mail-contact{display:flex!important;align-items:center!important;gap:9px!important;}
+#page-messages .msg-mail-contact h3{font-size:14px!important;margin:0!important;font-weight:900!important;}
+#page-messages .msg-mail-contact p{font-size:11px!important;margin:2px 0 0!important;color:var(--gp-v30-muted)!important;}
+#page-messages .msg-mail-actions{display:flex!important;align-items:center!important;gap:6px!important;}
+#page-messages .msg-mail-icon-btn{width:30px!important;height:30px!important;border-radius:9px!important;border:1px solid var(--gp-v30-line)!important;background:rgba(148,163,184,.08)!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;}
+#page-messages .msg-mail-icon-btn .material-symbols-rounded{font-size:17px!important;}
+#page-messages #msg-bubbles{height:calc(100% - 114px)!important;overflow:auto!important;padding:14px!important;background:linear-gradient(180deg,rgba(148,163,184,.04),transparent)!important;}
+#page-messages .msg-date-sep{text-align:center!important;margin:10px 0!important;}
+#page-messages .msg-date-sep span{font-size:10px!important;color:var(--gp-v30-muted)!important;background:var(--gp-v30-card)!important;border:1px solid var(--gp-v30-line)!important;border-radius:999px!important;padding:3px 9px!important;}
+#page-messages .msg-email-card{max-width:78%!important;margin:0 0 9px 0!important;border:1px solid var(--gp-v30-line)!important;border-radius:13px!important;background:var(--gp-v30-card)!important;padding:10px 11px!important;box-shadow:0 8px 18px rgba(2,8,23,.06)!important;}
+#page-messages .msg-email-card.mine{margin-left:auto!important;background:linear-gradient(135deg,rgba(212,175,55,.16),rgba(212,175,55,.06))!important;border-color:rgba(212,175,55,.25)!important;}
+#page-messages .msg-email-head{display:flex!important;justify-content:space-between!important;gap:10px!important;margin-bottom:5px!important;}
+#page-messages .msg-email-subject{font-size:12px!important;font-weight:900!important;color:var(--gp-v30-text)!important;}
+#page-messages .msg-email-date{font-size:10px!important;color:var(--gp-v30-muted)!important;white-space:nowrap!important;}
+#page-messages .msg-email-from{font-size:10.5px!important;color:var(--gp-v30-muted)!important;margin-bottom:7px!important;}
+#page-messages .msg-email-body{font-size:12px!important;line-height:1.45!important;color:var(--gp-v30-text)!important;white-space:pre-wrap!important;}
+#page-messages .msg-input-modern{height:56px!important;padding:8px 10px!important;border-top:1px solid var(--gp-v30-line)!important;background:var(--gp-v30-card)!important;}
+#page-messages .msg-input-row{height:40px!important;display:flex!important;gap:8px!important;align-items:flex-end!important;}
+#page-messages #msg-input-text{min-height:40px!important;height:40px!important;max-height:100px!important;border-radius:12px!important;font-size:12px!important;padding:10px 12px!important;resize:none!important;}
+#page-messages .msg-send-btn{width:40px!important;height:40px!important;border-radius:12px!important;border:0!important;background:linear-gradient(135deg,var(--gp-v30-gold),var(--gp-v30-gold2))!important;color:#111!important;display:flex!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;}
+#page-messages .msg-send-btn .material-symbols-rounded{color:#111!important;font-size:19px!important;}
+#page-messages .msg-empty-modern{height:100%!important;align-items:center!important;justify-content:center!important;color:var(--gp-v30-muted)!important;text-align:center!important;}
+#page-messages .msg-empty-modern .material-symbols-rounded{font-size:46px!important;margin-bottom:8px!important;}
+#page-messages .msg-empty-modern h3{font-size:16px!important;margin:0 0 6px!important;}
+#page-messages .msg-empty-modern p{font-size:12px!important;margin:0 0 12px!important;}
+
+/* Modal message compact pro */
+#newMsgModal .card{border-radius:16px!important;border:1px solid var(--gp-v30-line)!important;box-shadow:0 24px 70px rgba(2,8,23,.22)!important;}
+#newMsgModal .fg label{font-size:11px!important;font-weight:900!important;color:var(--gp-v30-muted)!important;text-transform:uppercase!important;letter-spacing:.03em!important;}
+#newMsgModal input,#newMsgModal select,#newMsgModal textarea{font-size:12px!important;border-radius:10px!important;}
+
+@media(max-width:820px){
+  #page-messages .msg-mail-app{grid-template-columns:1fr!important;height:auto!important;min-height:0!important;}
+  #page-messages .msg-mail-sidebar{height:320px!important;}
+  #page-messages .msg-mail-panel{height:520px!important;}
+  #page-messages .msg-email-card{max-width:94%!important;}
+}
+
+/* === FIX FINAL TOPBAR : titre + sous-titre alignés à gauche sur toutes les pages === */
+.topbar #globalBreadcrumb,
+.topbar .topbar-breadcrumb{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  text-align:left!important;
+  min-width:0!important;
+}
+.topbar #globalBreadcrumb .breadcrumb-box{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  gap:8px!important;
+  text-align:left!important;
+  line-height:1.1!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  padding:0!important;
+  margin:0!important;
+  width:auto!important;
+}
+.topbar #globalBreadcrumb .breadcrumb-box > .material-symbols-rounded:first-child{
+  flex:0 0 auto!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  height:18px!important;
+  line-height:18px!important;
+  margin-top:0!important;
+  font-size:20px!important;
+  color:var(--gold)!important;
+}
+.topbar #globalBreadcrumb .breadcrumb-title-wrap{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  gap:2px!important;
+  min-width:0!important;
+  text-align:left!important;
+}
+.topbar #globalBreadcrumb .breadcrumb-main{
+  display:block!important;
+  width:auto!important;
+  text-align:left!important;
+  font-size:16px!important;
+  font-weight:800!important;
+  line-height:18px!important;
+  color:#111827!important;
+}
+.topbar #globalBreadcrumb .breadcrumb-subtitle{
+  display:block!important;
+  width:auto!important;
+  padding-left:0!important;
+  margin-left:0!important;
+  margin-top:0!important;
+  text-align:left!important;
+  align-self:flex-start!important;
+  font-size:12px!important;
+  font-weight:500!important;
+  line-height:14px!important;
+  color:#6b7280!important;
+  white-space:nowrap!important;
+}
+body.dark .topbar #globalBreadcrumb .breadcrumb-main{color:#f9fafb!important;}
+body.dark .topbar #globalBreadcrumb .breadcrumb-subtitle{color:#9ca3af!important;}
+
+/* === PATCH FINAL DEMANDE — espace haut topbar sans casser alignement gauche === */
+#topbar.topbar,
+header#topbar.topbar,
+.topbar{
+  align-items:flex-start!important;
+  padding-top:8px!important;
+  padding-bottom:8px!important;
+}
+#topbar #globalBreadcrumb,
+.topbar #globalBreadcrumb,
+#topbar .topbar-breadcrumb,
+.topbar .topbar-breadcrumb{
+  margin-top:4px!important;
+  padding-top:0!important;
+  align-self:flex-start!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  text-align:left!important;
+}
+#topbar #globalBreadcrumb .breadcrumb-box,
+.topbar #globalBreadcrumb .breadcrumb-box{
+  margin-top:0!important;
+  padding-top:0!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  gap:8px!important;
+  text-align:left!important;
+}
+#topbar #globalBreadcrumb .breadcrumb-title-wrap,
+.topbar #globalBreadcrumb .breadcrumb-title-wrap{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  text-align:left!important;
+}
+#topbar #globalBreadcrumb .breadcrumb-subtitle,
+.topbar #globalBreadcrumb .breadcrumb-subtitle{
+  text-align:left!important;
+  align-self:flex-start!important;
+}
+#topbar #globalBreadcrumb .breadcrumb-box > .material-symbols-rounded:first-child,
+.topbar #globalBreadcrumb .breadcrumb-box > .material-symbols-rounded:first-child{
+  margin-top:0!important;
+  align-self:flex-start!important;
+}
+
+
+/* ============================================================
+   KPI HARMONISATION — toutes pages hors dashboard
+   Cible : .loc-kpi, #biensStatCards > div, .stat-card,
+           .kpi-card  →  même gabarit que .gd-kpi (bureau)
+   Couleurs NON modifiées (conservées par chaque page)
+   ============================================================ */
+
+/* ── Grille / conteneur ─────────────────────────────────────── */
+.content .page:not(#page-dashboard) .locataires-kpis,
+.content .page:not(#page-dashboard) #biensStatCards,
+.content .page:not(#page-dashboard) .kpi-grid {
+  display: grid !important;
+  gap: 10px !important;
+}
+/* kpi-grid : auto-fit identique au dashboard */
+.content .page:not(#page-dashboard) .kpi-grid {
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)) !important;
+}
+/* stat-cards avenir : 3 colonnes fixes */
+#page-avenir > div:has(.stat-card),
+#page-avenir > .stats {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(132px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+/* ── Carte commune ──────────────────────────────────────────── */
+.content .page:not(#page-dashboard) .loc-kpi,
+.content .page:not(#page-dashboard) #biensStatCards > div,
+.content .page:not(#page-dashboard) .stat-card,
+.content .page:not(#page-dashboard) .kpi-card {
+  /* structure flex identique à .gd-kpi */
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  /* gabarit */
+  min-height: 60px !important;
+  padding: 8px 10px !important;
+  border-radius: 13px !important;
+  /* fond & bordure harmonisés avec le thème bureau */
+  background: linear-gradient(145deg, var(--gp-v30-card), var(--gp-v30-card)) !important;
+  border: 1px solid var(--gp-v30-line) !important;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .10) !important;
+  overflow: hidden !important;
+  cursor: default;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.content .page:not(#page-dashboard) .loc-kpi:hover,
+.content .page:not(#page-dashboard) #biensStatCards > div:hover,
+.content .page:not(#page-dashboard) .stat-card:hover,
+.content .page:not(#page-dashboard) .kpi-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, .14) !important;
+}
+/* Neutralise la border-left colorée des .stat-card (remplacée par border uniforme) */
+.content .page:not(#page-dashboard) .stat-card {
+  border-left-width: 1px !important;
+}
+
+/* ── Icône ──────────────────────────────────────────────────── */
+/* loc-kpi */
+.content .page:not(#page-dashboard) .loc-kpi-icon,
+/* biensStatCards — premier enfant div = icône */
+.content .page:not(#page-dashboard) #biensStatCards > div > div:first-child {
+  width: 31px !important;
+  height: 31px !important;
+  min-width: 31px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+.content .page:not(#page-dashboard) .loc-kpi-icon .material-symbols-rounded,
+.content .page:not(#page-dashboard) #biensStatCards > div > div:first-child .material-symbols-rounded {
+  font-size: 18px !important;
+}
+
+/* ── Textes ─────────────────────────────────────────────────── */
+/* Titre / label */
+.content .page:not(#page-dashboard) .loc-kpi-label,
+.content .page:not(#page-dashboard) .kpi-card > span,
+.content .page:not(#page-dashboard) .stat-card p,
+.content .page:not(#page-dashboard) #biensStatCards > div > div:last-child > div:first-child {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  line-height: 1.05 !important;
+  margin: 0 0 3px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  color: var(--gp-v30-muted) !important;
+  display: block !important;
+}
+
+/* Valeur principale */
+.content .page:not(#page-dashboard) .loc-kpi-val,
+.content .page:not(#page-dashboard) .kpi-card > strong,
+.content .page:not(#page-dashboard) .stat-card h3,
+.content .page:not(#page-dashboard) #biensStatCards > div > div:last-child > div:last-child {
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: -.045em !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: inline !important;
+}
+
+/* Contenu texte dans kpi-card : colonne verticale */
+.content .page:not(#page-dashboard) .kpi-card {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+}
+
+/* ── Mode sombre ────────────────────────────────────────────── */
+body.dark .content .page:not(#page-dashboard) .loc-kpi,
+body.dark .content .page:not(#page-dashboard) #biensStatCards > div,
+body.dark .content .page:not(#page-dashboard) .stat-card,
+body.dark .content .page:not(#page-dashboard) .kpi-card {
+  box-shadow: 0 10px 22px rgba(0, 0, 0, .30) !important;
+}
+
+/* ── Mobile ─────────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .content .page:not(#page-dashboard) .loc-kpi,
+  .content .page:not(#page-dashboard) #biensStatCards > div,
+  .content .page:not(#page-dashboard) .stat-card,
+  .content .page:not(#page-dashboard) .kpi-card {
+    min-height: auto !important;
+    padding: 7px 8px !important;
+    border-radius: 11px !important;
+  }
+  .content .page:not(#page-dashboard) .loc-kpi-icon,
+  .content .page:not(#page-dashboard) #biensStatCards > div > div:first-child {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+  }
+  .content .page:not(#page-dashboard) .loc-kpi-icon .material-symbols-rounded,
+  .content .page:not(#page-dashboard) #biensStatCards > div > div:first-child .material-symbols-rounded {
+    font-size: 15px !important;
+  }
+  .content .page:not(#page-dashboard) .loc-kpi-val,
+  .content .page:not(#page-dashboard) .kpi-card > strong,
+  .content .page:not(#page-dashboard) .stat-card h3,
+  .content .page:not(#page-dashboard) #biensStatCards > div > div:last-child > div:last-child {
+    font-size: 14px !important;
+  }
+}
+
+
+/* ============================================================
+   PATCH KPI UNIFORMISATION — Toutes pages sauf dashboard
+   Applique EXACTEMENT les mêmes dimensions que .gd-kpi bureau
+   (couleurs conservées, structure copiée)
+   ============================================================ */
+
+/* --- Conteneurs grilles --- */
+.content .page:not(#page-dashboard) .locataires-kpis {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(118px, 1fr)) !important;
+  gap: 10px !important;
+  margin-bottom: 10px !important;
+}
+.content .page:not(#page-dashboard) #biensStatCards {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(118px, 1fr)) !important;
+  gap: 10px !important;
+  margin-bottom: 10px !important;
+}
+.content .page:not(#page-dashboard) .kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)) !important;
+  gap: 10px !important;
+  margin-bottom: 10px !important;
+}
+/* Avenir stat-cards row */
+#page-avenir .stats {
+  grid-template-columns: repeat(3, minmax(118px, 1fr)) !important;
+  gap: 10px !important;
+  margin-bottom: 10px !important;
+  max-width: none !important;
+}
+
+/* --- Carte KPI — dimensions identiques à .gd-kpi --- */
+.content .page:not(#page-dashboard) .loc-kpi,
+.content .page:not(#page-dashboard) #biensStatCards > div,
+.content .page:not(#page-dashboard) .stat-card,
+.content .page:not(#page-dashboard) .kpi-card {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-height: 60px !important;
+  padding: 8px 10px !important;
+  border-radius: 13px !important;
+  overflow: hidden !important;
+  transition: transform .18s ease, border-color .18s ease !important;
+}
+/* Retire la border-left épaisse des stat-card sans casser la couleur */
+.content .page:not(#page-dashboard) .stat-card {
+  border-left-width: 1px !important;
+}
+.content .page:not(#page-dashboard) .loc-kpi:hover,
+.content .page:not(#page-dashboard) #biensStatCards > div:hover,
+.content .page:not(#page-dashboard) .stat-card:hover,
+.content .page:not(#page-dashboard) .kpi-card:hover {
+  transform: translateY(-2px) !important;
+}
+
+/* kpi-card : colonne verticale (pas d'icône propre) */
+.content .page:not(#page-dashboard) .kpi-card {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+}
+
+/* --- Icônes --- */
+.content .page:not(#page-dashboard) .loc-kpi-icon,
+.content .page:not(#page-dashboard) #biensStatCards > div > div:first-child {
+  width: 31px !important;
+  height: 31px !important;
+  min-width: 31px !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.content .page:not(#page-dashboard) .loc-kpi-icon .material-symbols-rounded,
+.content .page:not(#page-dashboard) #biensStatCards > div > div:first-child .material-symbols-rounded {
+  font-size: 18px !important;
+}
+
+/* --- Titre / label --- */
+.content .page:not(#page-dashboard) .loc-kpi-label,
+.content .page:not(#page-dashboard) .kpi-card > span,
+.content .page:not(#page-dashboard) .stat-card p,
+.content .page:not(#page-dashboard) #biensStatCards > div > div:last-child > div:first-child {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  line-height: 1.05 !important;
+  margin: 0 0 3px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
+}
+
+/* --- Valeur principale --- */
+.content .page:not(#page-dashboard) .loc-kpi-val,
+.content .page:not(#page-dashboard) .kpi-card > strong,
+.content .page:not(#page-dashboard) .stat-card h3,
+.content .page:not(#page-dashboard) #biensStatCards > div > div:last-child > div:last-child,
+.content .page:not(#page-dashboard) #biensStatLoue,
+.content .page:not(#page-dashboard) #biensStatDispo,
+.content .page:not(#page-dashboard) #biensStatAttente {
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: -.045em !important;
+  white-space: nowrap !important;
+  display: inline !important;
+}
+
+/* --- Mobile --- */
+@media (max-width: 760px) {
+  .content .page:not(#page-dashboard) .loc-kpi,
+  .content .page:not(#page-dashboard) #biensStatCards > div,
+  .content .page:not(#page-dashboard) .stat-card,
+  .content .page:not(#page-dashboard) .kpi-card {
+    min-height: auto !important;
+    padding: 7px 8px !important;
+    border-radius: 11px !important;
+  }
+  .content .page:not(#page-dashboard) .loc-kpi-icon,
+  .content .page:not(#page-dashboard) #biensStatCards > div > div:first-child {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+  }
+  .content .page:not(#page-dashboard) .loc-kpi-icon .material-symbols-rounded,
+  .content .page:not(#page-dashboard) #biensStatCards > div > div:first-child .material-symbols-rounded {
+    font-size: 15px !important;
+  }
+  .content .page:not(#page-dashboard) .loc-kpi-val,
+  .content .page:not(#page-dashboard) .kpi-card > strong,
+  .content .page:not(#page-dashboard) .stat-card h3,
+  .content .page:not(#page-dashboard) #biensStatLoue,
+  .content .page:not(#page-dashboard) #biensStatDispo,
+  .content .page:not(#page-dashboard) #biensStatAttente {
+    font-size: 14px !important;
+  }
+}
+
+
+/* ============================================================
+   PATCH KPI — Page Employés (.emp-stat-card)
+   Aligne sur les dimensions exactes des KPI bureau
+   ============================================================ */
+
+#page-employes .emp-stat-card {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-height: 60px !important;
+  padding: 8px 10px !important;
+  border-radius: 13px !important;
+  overflow: hidden !important;
+  transition: transform .18s ease !important;
+}
+#page-employes .emp-stat-card:hover {
+  transform: translateY(-2px) !important;
+}
+
+/* Icône : 31×31px cercle, symbol 18px */
+#page-employes .emp-stat-icon {
+  width: 31px !important;
+  height: 31px !important;
+  min-width: 31px !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+}
+#page-employes .emp-stat-icon .material-symbols-rounded {
+  font-size: 18px !important;
+}
+
+/* Titre : 11px weight 800 */
+#page-employes .emp-stat-info span {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  line-height: 1.05 !important;
+  margin: 0 0 3px !important;
+}
+
+/* Sous-titre (ex: "Tous les employés") : 10px muted */
+#page-employes .emp-stat-info em {
+  font-size: 10px !important;
+  margin-top: 0 !important;
+}
+
+/* Valeur : 15px weight 900 letter-spacing -.045em */
+#page-employes .emp-stat-info strong {
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: -.045em !important;
+  white-space: nowrap !important;
+}
+
+/* Grille des cartes employés */
+#page-employes .emp-cards-action-row > div:first-child,
+#page-employes [class*="emp-stat-row"],
+#page-employes .gp-modern-stats {
+  gap: 10px !important;
+}
+
+/* Mobile */
+@media (max-width: 760px) {
+  #page-employes .emp-stat-card {
+    min-height: auto !important;
+    padding: 7px 8px !important;
+    border-radius: 11px !important;
+  }
+  #page-employes .emp-stat-icon {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+  }
+  #page-employes .emp-stat-icon .material-symbols-rounded {
+    font-size: 15px !important;
+  }
+  #page-employes .emp-stat-info strong {
+    font-size: 14px !important;
+  }
+}

@@ -3,13 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Genius Property — Gestion Immobilière</title>
-<meta name="description" content="Genius Property — Plateforme SaaS de gestion immobilière">
+<title>Genius Property — Gestion interne de l’agence</title>
+<meta name="description" content="Genius Property — Application interne de gestion immobilière pour une agence">
 <meta name="theme-color" content="#D4AF37">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="styles/components/drawers-modals.css">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,21 +16,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles/theme.css">
-<link rel="stylesheet" href="styles/bundle.optimized.css?v=20260523">
+<link rel="stylesheet" href="styles/app-shell.css?v=20260523">
 <link rel="stylesheet" href="styles/mobile.css?v=ultra-mobile-20260522">
-<link rel="stylesheet" href="styles/admin-saas.css?v=saas-v5">
-<link rel="stylesheet" href="styles/license-manager.css?v=license-v7">
-<link rel="stylesheet" href="styles/simple-license-dashboard.css?v=v16">
 <link rel="stylesheet" href="styles/ui-icons-close-enhanced.css?v=20260522-docgold">
-  <script src="js/components/drawers/gp-ui-manager.js" defer></script>
-  <script src="js/utils/date-utils.js" defer></script>
-  <script src="js/core/app-core-v20.js" defer></script>
-<script src="js/inline/inline-script-01.js?v=refactor-20260523"></script>
-<script type="module" src="js/inline/inline-script-02.module.js?v=refactor-20260523"></script>
-<script src="js/inline/inline-script-03.js?v=refactor-20260523" defer></script>
+<script src="env.js?v=supabase-v290"></script>
+<script src="js/core/single-agency-mode.js?v=1"></script>
+<script src="js/inline/inline-script-01.js?v=refactor-20260523-v25"></script>
+<script type="module" src="js/inline/inline-script-02.module.js?v=refactor-20260523-v25"></script>
+<script src="js/inline/inline-script-03.js?v=refactor-20260523-v25" defer></script>
 <script src="js/core/lazy-libs.js" defer></script>
 <link rel="stylesheet" href="styles/dashboard.css?v=clean-v1">
-  <link rel="stylesheet" href="styles/v30-bureau-theme-pages.css?v=v30">
+  <link rel="stylesheet" href="styles/bureau-theme-pages.css?v=20260523">
 <link rel="stylesheet" href="styles/gp-payments-table-compact-v5.css?v=20260523-v5">
 
 <style id="gp-splash-css">
@@ -44,12 +39,13 @@
   @keyframes gpSplashPulse{0%,100%{opacity:.35;transform:scaleX(.75)}50%{opacity:1;transform:scaleX(1)}}
 </style>
 <link rel="stylesheet" href="styles/gp-restore-finance-drawers-v9.css">
+  <link rel="stylesheet" href="styles/gp-maintenance-security.css?v=local-maintenance-v1">
 </head>
 <body>
 
 <div id="gpSplash"><div class="gp-splash-card"><img class="gp-splash-logo" src="assets/logo.svg" alt=""><div class="gp-splash-title">Genius Property</div><div class="gp-splash-line"></div></div></div>
 
-<!-- ==================== LOGIN ==================== -->
+<!-- ==================== CONNEXION — ESPACE INTERNE AGENCE ==================== -->
 <div id="loginPage" style="display:none">
   <canvas id="particles"></canvas>
   <div class="ln-blob ln-blob-1"></div>
@@ -66,7 +62,7 @@
     </div>
     <div class="ln-headline">
       <h1>Votre patrimoine,<br><span>géré avec excellence.</span></h1>
-      <p>Une plateforme complète, intelligente et sécurisée pour piloter vos biens, vos locataires et vos finances — en toute sérénité.</p>
+      <p>Un espace interne, sécurisé et complet pour gérer les biens, les propriétaires, les locataires et les finances de votre agence.</p>
     </div>
     <div class="ln-divider"></div>
     <div class="ln-features">
@@ -101,20 +97,24 @@
       <div class="lb-logo-wrap">
         <img class="lb-logo" src="assets/logo.svg" alt="Logo">
         <div class="lb-title">Accès Sécurisé</div>
-        <div class="lb-subtitle">Genius Property Platform</div>
+        <div class="lb-subtitle">Espace interne de l’agence</div>
       </div>
       <div class="lb-accent"></div>
       <div class="lfield">
         <span class="material-symbols-rounded mat">person</span>
-        <input type="email" id="lu" placeholder="Adresse email" autocomplete="email">
+        <input type="text" id="lu" placeholder="Identifiant" autocomplete="username" value="admin">
       </div>
       <div class="lfield">
         <span class="material-symbols-rounded mat">lock</span>
-        <input type="password" id="lp" placeholder="Mot de passe" autocomplete="current-password">
+        <input type="password" id="lp" placeholder="Mot de passe" autocomplete="current-password" value="admin123">
         <span class="material-symbols-rounded mat" style="font-size:18px;cursor:pointer;opacity:.5;transition:.2s" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=.5" onclick="tglPwd()">visibility</span>
       </div>
       <button class="login-btn-main" id="loginBtn" onclick="window.gpFirebaseLoginFromButton && window.gpFirebaseLoginFromButton(event)">Se connecter</button>
       <div class="auth-error" id="authError"></div>
+      <button type="button" onclick="GPLoginSupabaseConfig.open()" style="margin-top:10px;width:100%;border:1px solid rgba(212,175,55,.35);background:rgba(212,175,55,.08);color:#d4af37;border-radius:10px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer">
+        ⚙ Configurer Supabase
+      </button>
+
       <!-- Mot de passe oublié — flow inline -->
       <div id="forgotFlow" style="display:none;margin-top:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:16px">
         <div style="font-size:13px;color:#e5e5e5;margin-bottom:10px;font-weight:500">
@@ -170,10 +170,7 @@
     <li data-page="messages"><span class="material-symbols-rounded">mail</span> Messages</li>
     <li data-page="journal" id="menuJournal"><span class="material-symbols-rounded">manage_search</span> Journal</li>
     <li data-page="parametres"><span class="material-symbols-rounded">settings</span> Paramètres</li>
-    <li data-page="admin-saas" data-admin-only="true"><span class="material-symbols-rounded">admin_panel_settings</span> Admin Central</li>
-    <!-- Séparateur + badge abonnement -->
-    <li class="slb-separator" aria-hidden="true"></li>
-    <li id="gp-sidebar-licence-badge" class="gp-sidebar-licence-badge" data-page="abonnement" title="Voir abonnement"></li>
+    <li data-page="admin-stockage"><span class="material-symbols-rounded">build</span> Maintenance &amp; Sécurité</li>
   </ul>
   <ul class="menu-logout">
     <li class="logout" onclick="doLogout()"><span class="material-symbols-rounded">logout</span> Déconnexion</li>
@@ -487,99 +484,6 @@
   <!-- ====== EMPLOYÉS LIST ====== -->
   <div class="page" id="page-employes">
     <div id="gpEmployesModern" class="gp-modern-zone" style="padding:24px"></div>
-  </div>
-
-  <!-- ====== NOUVEAU EMPLOYÉ ====== -->
-  <div class="page" id="page-nv-employe">
-    <header class="page-header">
-      <div class="u-flex-center u-gap-10">
-        <button class="btn-back-lnk" onclick="navigate('employes')"><span class="material-symbols-rounded">arrow_back</span> Retour</button>
-        <h2>Nouvel employé</h2>
-      </div>
-    </header>
-    <div class="form-page-grid cols-3">
-      <!-- Identification -->
-      <div class="card">
-        <h3>Identification</h3>
-        <div class="photo-box" onclick="document.getElementById('e-photo-input').click()"><span class="material-symbols-rounded mat-big" id="e-photo-icon">person</span><small id="e-photo-label">Glissez ou cliquez pour ajouter</small><img id="e-photo-preview" class="photo-preview" loading="lazy" decoding="async"><input type="file" id="e-photo-input" accept="image/*" style="display:none" onchange="previewPhoto(this,'e-photo-preview','e-photo-icon','e-photo-label')"></div>
-        <div style="display:flex;gap:6px;margin-top:10px;justify-content:center">
-          <button type="button" onclick="document.getElementById('e-photo-input').click()" class="btn btn-blue" style="font-size:12px;padding:6px 12px"><span class="material-symbols-rounded" style="font-size:14px;vertical-align:middle">upload</span> Choisir photo</button>
-          <button type="button" onclick="clearEmployePhoto()" class="btn btn-danger" style="font-size:12px;padding:6px 12px"><span class="material-symbols-rounded" style="font-size:14px;vertical-align:middle">delete</span> Supprimer</button>
-        </div>
-      </div>
-      <!-- Informations -->
-      <div class="card">
-        <h3>Informations</h3>
-        <div class="fgrid g2">
-          <div class="fg"><label>Civilité <span>*</span></label><select id="e-civ"><option value="">Sélectionnez</option><option>Monsieur</option><option>Madame</option></select></div>
-          <div class="fg"><label>Nom <span>*</span></label><input id="e-nom" placeholder="Nom"></div>
-          <div class="fg"><label>Prénoms <span>*</span></label><input id="e-prenom" placeholder="Prénoms"></div>
-          <div class="fg"><label>Date de naissance</label><input id="e-naiss" type="date" placeholder="jj/mm/aaaa" lang="fr"></div>
-          <div class="fg"><label>Fonction <span>*</span></label><input id="e-fonction" placeholder="Gestionnaire..."></div>
-          <div class="fg"><label>Adresse <span>*</span></label><input id="e-adresse" placeholder="Adresse"></div>
-          <div class="fg"><label>Téléphone <span>*</span></label><input id="e-tel" placeholder="77 000 00 00"></div>
-          <div class="fg"><label>Nature pièce</label><select id="e-piece"><option>CNI</option><option>Passeport</option></select></div>
-          
-          <div class="fg"><label>Lieu délivrance <span>*</span></label><input id="e-lieu" placeholder="Lieu délivrance"></div>
-          <div class="fg"><label>Date délivrance</label><input id="e-deldeb" type="date" placeholder="jj/mm/aaaa" lang="fr"></div>
-          <div class="fg"><label>Date expiration</label><input id="e-delexp" type="date" placeholder="jj/mm/aaaa" lang="fr"></div>
-          <div class="fg"><label>Situation matrimoniale</label><select id="e-matri"><option>Célibataire</option><option>Marié</option></select></div>
-          <div class="fg"><label>Nombre d'enfants</label><input id="e-enfants" type="number" placeholder="0" min="0"></div>
-          <div class="fg full"><label>Type de contrat</label><select id="e-contrat"><option>CDI</option><option>CDD</option></select></div>
-        </div>
-      </div>
-      <!-- Connexion -->
-      <div class="card">
-        <h3>Connexion</h3>
-        <div class="fgrid g1">
-          <div class="fg">
-            <label>Email <span style="color:var(--red)">*</span> <small style="color:#9ca3af;font-weight:400">(identifiant de connexion)</small></label>
-            <input id="e-email" type="email" placeholder="prenom.nom@agence.com">
-          </div>
-          <div class="fg">
-            <label>Mot de passe <span style="color:var(--red)">*</span></label>
-            <div style="display:flex;gap:6px;align-items:center">
-              <div style="position:relative;flex:1">
-                <input id="e-pass" type="password" placeholder="••••••••" style="width:100%;padding-right:36px;box-sizing:border-box">
-                <span onclick="tglPassField('e-pass','e-pass-eye')" title="Voir/masquer" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);cursor:pointer;color:#9ca3af;font-size:16px">
-                  <span class="material-symbols-rounded" id="e-pass-eye" style="font-size:18px;vertical-align:middle">visibility</span>
-                </span>
-              </div>
-              <button type="button" onclick="suggestPassword()" title="Générer un mot de passe sécurisé"
-                style="padding:6px 10px;border-radius:6px;border:1px solid #e5e7eb;background:var(--gold);color:#fff;cursor:pointer;font-size:12px;white-space:nowrap;flex-shrink:0">
-                <span class="material-symbols-rounded" style="font-size:14px;vertical-align:middle">auto_fix_high</span> Générer
-              </button>
-            </div>
-            <div id="e-pass-strength" style="font-size:11px;margin-top:4px;min-height:16px;color:#9ca3af"></div>
-          </div>
-          <div id="e-pass-suggestion" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;font-size:12px">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-              <span style="color:#166534">Mot de passe suggéré :</span>
-              <button type="button" onclick="copyAndUseSuggestion()" style="padding:4px 10px;border-radius:6px;border:none;background:#16a34a;color:#fff;cursor:pointer;font-size:11px">Utiliser</button>
-            </div>
-            <div id="e-pass-suggested-val" style="font-family:monospace;font-size:13px;font-weight:600;color:#166534;letter-spacing:1px;margin-top:4px"></div>
-          </div>
-        </div>
-        <h3 style="margin-top:16px">Droits d'accès</h3>
-        <p style="font-size:11px;color:#9ca3af;margin:-4px 0 10px">Sélectionnez les pages accessibles à cet employé</p>
-        <div id="droits-list" style="display:flex;flex-direction:column;gap:4px">
-          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">home</span>Bureau</span><label class="toggle-switch"><input type="checkbox" checked><span class="slider-s"></span></label></div>
-          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">badge</span>Employés</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
-          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">person</span>Propriétaires</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
-          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">groups</span>Locataires</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
-          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">home_work</span>Biens</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
-          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">door_front</span>Locations</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
-          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">contract</span>Contrat</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
-          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">payments</span>Paiements</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
-          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">account_balance_wallet</span>Dépenses</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
-          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">mail</span>Messages</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
-          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">manage_search</span>Journal</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
-          <div class="switch-row"><span class="u-flex-center u-gap-7"><span class="material-symbols-rounded" class="u-icon-15 u-icon-muted">settings</span>Paramètres</span><label class="toggle-switch"><input type="checkbox"><span class="slider-s"></span></label></div>
-          <div class="switch-row" style="border-top:1px solid #fee2e2;margin-top:4px;padding-top:8px"><span style="display:flex;align-items:center;gap:7px;color:var(--red)"><span class="material-symbols-rounded" style="font-size:15px;color:var(--red)">admin_panel_settings</span>Super admin</span><label class="toggle-switch"><input type="checkbox" onchange="onSuperAdminToggle(this)"><span class="slider-s"></span></label></div>
-        </div>
-        <div class="form-actions"><button class="btn btn-primary" onclick="saveEmploye()" style="width:100%">Enregistrer</button></div>
-      </div>
-    </div>
   </div>
 
   <!-- ====== PROPRIÉTAIRES LIST — VUE CARTES ====== -->
@@ -1575,23 +1479,7 @@
     </div>
   </div>
 
-  <div class="page" id="page-abonnement">
-    <div id="gp-client-subscription-root"></div>
-  </div>
-
-  <div class="page" id="page-admin-saas">
-    <div id="gp-admin-saas-root"></div>
-  </div>
-
-  <div class="page" id="page-license-manager">
-    <div id="gp-license-manager-root"></div>
-  </div>
-
-  <div class="page" id="page-license-activation">
-    <div id="gp-license-activation-root"></div>
-  </div>
-
-  <!-- ====== ADMINISTRATION STOCKAGE ====== -->
+  <!-- ====== MAINTENANCE & SÉCURITÉ ====== -->
   <div class="page" id="page-sync">
     <div id="gp-sync-root"></div>
   </div>
@@ -2146,7 +2034,7 @@
       </div>
       <div class="help-faq-item" onclick="toggleFaq(this)">
         <div class="help-faq-q">Les données sont-elles sauvegardées automatiquement ?<span class="material-symbols-rounded">expand_more</span></div>
-        <div class="help-faq-a">Oui, toutes les modifications sont sauvegardées automatiquement en local (localStorage). Si Firebase est configuré dans les <b>Paramètres</b>, les données sont aussi synchronisées en cloud.</div>
+        <div class="help-faq-a">Oui, toutes les modifications sont sauvegardées automatiquement en local (localStorage). Si Supabase est configuré dans les <b>Paramètres</b>, les données sont aussi synchronisées en cloud.</div>
       </div>
     </div>
     <!-- Raccourcis -->
@@ -2366,29 +2254,26 @@
 
 <!-- Conteneur skeleton (injecté dans .content) -->
 <div id="gp-skeleton-wrap" aria-hidden="true" aria-live="polite"></div>
-<script src="env.js"></script>
-<script type="module" src="js/inline/inline-script-02.module.js"></script>
-<script type="module" src="js/v21/main.js"></script>
 <script src="js/core/runtime.js" defer></script>
 <script src="js/core/storage-adapter.js" defer></script>
 <!-- Firebase adapter (remplace Firebase) -->
-<script src="js/inline/inline-script-04.js?v=refactor-20260523"></script>
-<script src="js/core/firebase-adapter.js?v=firebase-v13-20260519" defer></script>
-<script src="js/core/db.js" defer></script>
+<script src="js/inline/inline-script-04.js?v=refactor-20260523-v25"></script>
+<script src="js/core/supabase-adapter.js?v=supabase-v290" defer></script>
+<script src="js/core/db.js?v=db-v270" defer></script>
 <script src="js/core/auth.js" defer></script>
 <script src="js/core/permissions.js" defer></script>
-<script src="js/core/license-guard.js?v=license-v8" defer></script>
-<script src="js/core/super-admin-guard.js?v=v10" defer></script>
-<script src="js/core/firebase-auth.js" defer></script>
+<script src="js/core/supabase-auth.js?v=supabase-v290" defer></script>
 <script src="js/core/username-lock.js" defer></script>
-<script src="js/app.legacy.bundle.js?v=20260522-bien-detail-restored-full-v1" defer data-legacy="true"></script>
 <script src="js/safe-bootstrap.js?v=firebase-v7-20260519" defer></script>
 <script src="js/core/renderers.js" defer></script>
 <script src="js/core/ui-functions.js" defer></script>
+<script src="js/core/topbar-patch.js" defer></script>
+<script src="js/core/fallback-renderers.js?v=20260526" defer></script>
+<script src="js/pages/employes-modern.js?v=restore-v48" defer></script>
 <script src="js/core/navigation.js" defer></script>
 <script src="js/core/validation.js" defer></script>
 <script src="js/core/forms.js" defer></script>
-<script src="js/firebase.js?v=firebase-v13-20260519" defer></script>
+<script src="js/firebase.js?v=supabase-v290" defer></script>
 <script src="js/pages/proprietaires.js" defer></script>
 <script src="js/pages/rapports.js" defer></script>
 <script src="js/pages/dashboard.js" defer></script>
@@ -2396,18 +2281,14 @@
 <script src="js/pages/messagerie.js" defer></script>
 <script src="js/pages/sync.js" defer></script>
 <script src="js/pages/admin-stockage.js" defer></script>
-<script src="js/pages/admin-saas.js?v=v8" defer></script>
-<script src="js/pages/license-activation.js?v=v8" defer></script>
 <script src="js/core/mobile.js" defer></script>
 <script src="js/pages/mobile-pages.js?v=clean-v1" defer></script>
 <script src="js/core/legacy-bridge.js" defer></script>
 <script src="js/pages/dashboard-desktop.js?v=clean" defer></script>
-<script src="js/core/flicker-fix.js?v=20260524" defer></script>
-<script src="js/pages/client-subscription.js?v=v19" defer></script>
-<script src="js/core/simple-role-router.js?v=v19" defer></script>
+<script src="js/v21/ui/ui-stability.service.js?v=20260526" defer></script>
 <script src="js/pages/compact-layout.js?v=clean" defer></script>
-<script src="js/inline/inline-script-05.js?v=refactor-20260523"></script>
-<script src="js/inline/inline-script-06.js?v=refactor-20260523"></script>
+<script src="js/core/form-stability-fixes.js?v=local-lite-1" defer></script>
+<script src="js/inline/inline-script-06.js?v=refactor-20260523-v25"></script>
 
 <!-- ====== DRAWER NOUVEL EMPLOYÉ ====== -->
 <div id="nvEmpOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1200;transition:opacity .3s" onclick="closeNouvelEmployeDrawer()"></div>
@@ -2602,10 +2483,10 @@
   </div>
 </div>
 
-<script src="js/inline/inline-script-07.js?v=refactor-20260523"></script>
-<script src="js/inline/inline-script-08.js?v=refactor-20260523"></script>
+<script src="js/inline/inline-script-07.js?v=refactor-20260523-v25"></script>
+<script src="js/inline/inline-script-08.js?v=refactor-20260523-v25"></script>
 
-<script src="js/inline/inline-script-09.js?v=refactor-20260523"></script>
+<script src="js/inline/inline-script-09.js?v=refactor-20260523-v25"></script>
 
 <!-- ====== DRAWER NOUVEAU PROPRIÉTAIRE ====== -->
 <div id="nvPropOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1200;transition:opacity .3s" onclick="closeNouvelProprietaireDrawer()"></div>
@@ -2716,29 +2597,166 @@
   </div>
 </div>
 
-<script src="js/inline/inline-script-10.js?v=refactor-20260523"></script>
+<script src="js/inline/inline-script-10.js?v=refactor-20260523-v25"></script>
 
-<script src="js/inline/inline-script-11.js?v=refactor-20260523"></script>
+<script src="js/inline/inline-script-11.js?v=refactor-20260523-v25"></script>
 <script src="js/pages/locatives.js" defer></script>
 <script src="js/pages/depenses.js" defer></script>
 <script src="js/pages/contrats.js" defer></script>
 <script src="js/pages/paiements.js" defer></script>
 <script src="js/pages/locataires.js" defer></script>
-<script src="js/pages/biens.js?v=20260522-selects-v3" defer></script>
-<script src="js/core/consolidated-hotfixes.js?v=20260523-consolidated" defer></script>
+<script src="js/pages/biens.js?v=20260522-selects-v3-v229" defer></script>
+<script src="js/core/missing-actions.js?v=20260527" defer></script>
+<script src="js/core/locations-page-restorer.js?v=20260526" defer></script>
+<script src="js/core/locative-drawer-router-fix.js?v=20260527" defer></script>
+<!-- désactivé nettoyage final: <script src="js/core/consolidated-hotfixes.js?v=20260523-consolidated" defer></script> -->
+<script src="js/core/parametres-restore.js" defer></script>
+<script src="js/core/sidebar-badge-restore.js" defer></script>
 
-<script src="js/inline/inline-script-12.js?v=refactor-20260523"></script>
+<script src="js/inline/inline-script-12.js?v=refactor-20260523-v25"></script>
 
-<script src="js/core/doc-actions-ensure.js?v=20260522" defer></script>
+<!-- désactivé nettoyage final: <script src="js/core/doc-actions-ensure.js?v=20260522" defer></script> -->
 <script src="js/core/owner-select-edit.js?v=20260523-clean" defer></script>
-<script src="js/core/dashboard-actions-fix.js?v=20260523-final" defer></script>
-<script src="js/core/avenir-kpi-fix.js?v=20260523-v48" defer></script>
-<script src="js/core/paiements-avenir-button-final-fix.js?v=20260523-final" defer></script>
-<script src="js/core/finance-sidecards-restore.js?v=20260523-sidecards-restore" defer></script>
-<script src="js/core/finance-pages-sidecards-final.js?v=20260523-final-sidecards" defer></script>
-<script src="js/core/force-finance-right-column.js?v=20260523-force-right" defer></script>
+<!-- désactivé nettoyage final: <script src="js/core/avenir-kpi-fix.js?v=20260523-v23-clean" defer></script> -->
 
 <link rel="stylesheet" href="styles/gp-payments-date-compact-v3.css?v=20260523-v3">
 <script src="js/core/gp-date-format-global-v3.js?v=20260523-v3" defer></script>
+<script src="js/core/employes-form-coherent-access.js?v=20260527" defer></script>
+<link rel="stylesheet" href="styles/gp-employes-form-coherent-access.css?v=20260527">
+
+<script id="gpSplashFailsafe">
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      const splash = document.getElementById("gpSplash");
+      if (splash) {
+        splash.classList.add("gp-splash-hide");
+        setTimeout(() => splash.remove(), 450);
+      }
+      const login = document.getElementById("loginPage");
+      const app = document.getElementById("app");
+      if (login && (!app || app.style.display === "none") && login.style.display === "none") {
+        login.style.display = "block";
+      }
+    }, 1800);
+  });
+</script>
+
+<!-- V22.1 — Supabase configuration available before first login -->
+<style>
+  #gp-sb-config-modal{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:20px}
+  #gp-sb-config-modal .box{width:100%;max-width:520px;background:#151515;border:1px solid rgba(212,175,55,.28);border-radius:18px;padding:22px;box-shadow:0 25px 80px rgba(0,0,0,.55);color:#fff}
+  #gp-sb-config-modal h3{margin:0 0 7px;font-size:18px}
+  #gp-sb-config-modal p{margin:0 0 16px;color:#aaa;font-size:12px;line-height:1.5}
+  #gp-sb-config-modal label{display:block;margin:10px 0 5px;color:#ddd;font-size:11px;font-weight:700}
+  #gp-sb-config-modal input{width:100%;box-sizing:border-box;padding:10px 11px;border-radius:10px;border:1px solid #444;background:#0e0e0e;color:#fff;outline:none}
+  #gp-sb-config-modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+  #gp-sb-config-modal button{border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+  #gp-sb-config-modal .cancel{background:#2b2b2b;color:#ddd}
+  #gp-sb-config-modal .save{background:#d4af37;color:#111}
+  #gp-sb-config-msg{font-size:11px;margin-top:10px;min-height:16px}
+</style>
+<div id="gp-sb-config-modal">
+  <div class="box">
+    <h3>Configuration Supabase</h3>
+    <p>Cette configuration est nécessaire avant la première connexion. Utilise uniquement la <b>Publishable key</b> (<code>sb_publishable_...</code>), jamais une clé secret/service_role.</p>
+    <label for="gp-sb-login-url">Project URL</label>
+    <input id="gp-sb-login-url" value="https://tpomnpzurgpvjkosvwpk.supabase.co" placeholder="https://xxxx.supabase.co">
+    <label for="gp-sb-login-key">Publishable key</label>
+    <input id="gp-sb-login-key" type="password" autocomplete="off" placeholder="sb_publishable_...">
+    <div id="gp-sb-config-msg"></div>
+    <div class="actions">
+      <button class="cancel" type="button" onclick="GPLoginSupabaseConfig.close()">Annuler</button>
+      <button class="save" type="button" onclick="GPLoginSupabaseConfig.save()">Enregistrer et tester</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  function byId(id){ return document.getElementById(id); }
+  function open(){
+    var m=byId('gp-sb-config-modal'), msg=byId('gp-sb-config-msg');
+    if(!m) return;
+    try{
+      var c=window.GPSupabase && window.GPSupabase.config ? window.GPSupabase.config() : {};
+      if(c.url) byId('gp-sb-login-url').value=c.url;
+      if(c.publishableKey) byId('gp-sb-login-key').value=c.publishableKey;
+    }catch(e){}
+    if(msg) msg.textContent='';
+    m.style.display='flex';
+  }
+  function close(){ var m=byId('gp-sb-config-modal'); if(m)m.style.display='none'; }
+  async function save(){
+    var url=(byId('gp-sb-login-url').value||'').trim().replace(/\/+$/,'');
+    var key=(byId('gp-sb-login-key').value||'').trim();
+    var msg=byId('gp-sb-config-msg');
+    if(!url || !key){ if(msg){msg.style.color='#fca5a5';msg.textContent='URL et Publishable key sont obligatoires.';} return; }
+    if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)){
+      if(msg){msg.style.color='#fca5a5';msg.textContent='URL invalide. Utilise https://xxxx.supabase.co';}
+      return;
+    }
+    if(!/^sb_publishable_/i.test(key)){
+      if(msg){msg.style.color='#fca5a5';msg.textContent='Utilise la Publishable key qui commence par sb_publishable_';}
+      return;
+    }
+    try{
+      if(!window.GPSupabase || !window.GPSupabase.configure) throw new Error('Le module Supabase n’est pas encore chargé. Recharge la page puis réessaie.');
+      window.GPSupabase.configure({url:url,publishableKey:key,table:'gp_app_data',rowId:'main',autosync:false});
+      if(msg){msg.style.color='#86efac';msg.textContent='Configuration enregistrée. Tu peux maintenant fermer cette fenêtre et te connecter.';}
+      setTimeout(close,700);
+    }catch(e){
+      if(msg){msg.style.color='#fca5a5';msg.textContent=e.message||String(e);}
+    }
+  }
+  window.GPLoginSupabaseConfig={open:open,close:close,save:save};
+})();
+</script>
+
+
+<script>
+window.gpSupabaseDiagnostic = async function(){
+  var a=window.GPSupabaseAuth||window.GPFirebaseAuth;
+  var u=window.currentUser||null;
+  var su=window._supabaseCurrentUser||null;
+  var p=null, err=null;
+  try{
+    if(a && typeof a.diagnose==='function') return await a.diagnose();
+    if(su && window.GPSupabase && window.GPSupabase.available()){
+      var r=await window._supabaseClient.from('gp_user_profiles')
+        .select('id,email,full_name,role,is_active').eq('id',su.id).maybeSingle();
+      p=r.data||null; err=r.error ? (r.error.message||String(r.error)) : null;
+    }
+  }catch(e){err=e.message||String(e);}
+  return {
+    apiHasDiagnose: !!(a&&typeof a.diagnose==='function'),
+    currentUser: u ? {id:u.id,email:u.email,role:u.role,isAdmin:u.isAdmin} : null,
+    supabaseUser: su ? {id:su.id,email:su.email} : null,
+    profile:p,
+    cachedRole: localStorage.getItem('gp_session_role'),
+    error:err
+  };
+};
+</script>
+
+<script src="js/core/proprietaires-final-v240.js?v=v240-final-v270"></script>
+<script src="js/core/data-consistency-v250.js?v=v270"></script>
+
+<script>
+(function(){
+  function applyLocalLoginUI(){
+    if(!(window.GPSingleAgency&&window.GPSingleAgency.localAuth)) return;
+    var btns=document.querySelectorAll('[onclick*="GPLoginSupabaseConfig.open"]');
+    btns.forEach(function(b){ b.style.display='none'; });
+    var forgot=document.getElementById('forgotLink');
+    if(forgot) forgot.style.display='none';
+    var lu=document.getElementById('lu'); if(lu){ lu.type='text'; lu.placeholder='Identifiant'; lu.autocomplete='username'; }
+    var lp=document.getElementById('lp'); if(lp) lp.autocomplete='current-password';
+    var hint=document.querySelector('.lb-security');
+    if(hint) hint.innerHTML='<span class="material-symbols-rounded">shield</span> Données stockées localement sur cet appareil';
+  }
+  document.addEventListener('DOMContentLoaded',applyLocalLoginUI);
+  window.addEventListener('load',applyLocalLoginUI);
+})();
+</script>
 </body>
 </html>

@@ -134,9 +134,6 @@
       window.DB = clean;
     }
     try {
-      const raw = JSON.stringify(window.DB);
-      localStorage.setItem(STORAGE_KEY, raw);
-      localStorage.setItem(FIREBASE_CACHE_KEY, raw);
     } catch(e) {}
     return window.DB;
   }
@@ -421,7 +418,6 @@
   async function persistDB(db){
     db = Object.assign({}, DEFAULT_DB, db || {});
     window.DB = db;
-    try { localStorage.setItem('geniusproperty_db_clean_v1', JSON.stringify(db)); } catch(e) {}
     try {
       if(window.GPDB && window.GPDB.save) await window.GPDB.save(db);
       else if(typeof window.saveDB === 'function') await window.saveDB();
@@ -467,15 +463,19 @@
 
   function isAdminUser(){
     var u = window.currentUser || {};
-    if(u.isAdmin) return true;
+    var role = String(u.role || '').toLowerCase().trim();
+    if(u.isAdmin || role === 'admin') return true;
     var emp = getCurrentEmployee();
     return !!(emp && emp.droits && emp.droits.superAdmin);
   }
 
   function currentDroits(){
+    var u = window.currentUser || {};
+    var role = String(u.role || '').toLowerCase().trim();
+    if(role === 'admin' || u.isAdmin) return {superAdmin:true};
     var emp = getCurrentEmployee();
     if(emp && emp.droits) return emp.droits || {};
-    return (window.currentUser && window.currentUser.droits) || {};
+    return u.droits || {};
   }
 
   function canAccessPage(page){
@@ -607,7 +607,7 @@
     var authUser = null;
     try {
       if(window.GPFirebaseAuth && typeof window.GPFirebaseAuth.createEmployeeAccount === 'function') {
-        authUser = await window.GPFirebaseAuth.createEmployeeAccount(email, pass);
+        authUser = await window.GPFirebaseAuth.createEmployeeAccount(email, pass, {fullName: ((v('e-prenom')||'') + ' ' + (v('e-nom')||'')).trim(), role: (/comptable/i.test(v('e-fonction')||v('e-civ')) ? 'comptable' : (/agent|gestionnaire|assistante/i.test(v('e-fonction')||v('e-civ')) ? 'agent' : 'lecture'))});
       }
     } catch(e){
       if(btn){ btn.disabled = false; btn.textContent = 'Enregistrer'; }
@@ -636,13 +636,21 @@
     toast(authUser ? 'Employé enregistré et accès créé ✓' : 'Employé enregistré ✓');
   }
 
+  window.addEventListener('gp:auth-changed', function(){ try{ applyRightsUI(); }catch(e){} });
+
   function patchNavigationGuards(){
     window.canAccess = canAccessPage;
     window.appliqueDroits = applyRightsUI;
     if(window.GPPermissions){
       window.GPPermissions.canPage = canAccessPage;
       window.GPPermissions.applyUI = applyRightsUI;
-      window.GPPermissions.currentRole = function(){ return isAdminUser() ? 'admin' : 'personnalise'; };
+      window.GPPermissions.currentRole = function(){
+        var u = window.currentUser || {};
+        var role = String(u.role || '').toLowerCase().trim();
+        if(isAdminUser()) return 'admin';
+        if(role === 'agent' || role === 'comptable' || role === 'lecture') return role;
+        return 'lecture';
+      };
       window.GPPermissions.has = function(roleOrAction, maybeAction){
         var action = maybeAction || roleOrAction || '';
         var page = String(action).split(':')[0];
@@ -730,19 +738,12 @@
     return normalizeDB(db);
   }
 
-  async function forceCloudPush(db){
-    if(!window.GPFirebase || !window.GPFirebase.push || !window.GPFirebase.available || !window.GPFirebase.available()) return false;
-    try { if(window.GPFirebase.configure) window.GPFirebase.configure({ workspaceId:'auto', autosync:true }); } catch(e) {}
-    await window.GPFirebase.push(normalizeDB(db));
-    return true;
-  }
+  async function forceCloudPush(db){ return false; }
 
   async function persistDB(db){
     db = normalizeDB(db);
     window.DB = db;
     var raw = JSON.stringify(db);
-    try { localStorage.setItem('geniusproperty_db_clean_v1', raw); } catch(e) {}
-    try { localStorage.setItem('geniusproperty_firebase_cache', raw); } catch(e) {}
 
     // Sauvegarde locale d'abord, puis push Firestore explicite.
     try {
@@ -752,11 +753,6 @@
       console.warn('[V13] Sauvegarde locale GPDB impossible, localStorage conservé:', e && (e.message || e));
     }
 
-    try { await forceCloudPush(db); }
-    catch(e){
-      console.warn('[V13] Push Firestore impossible:', e && (e.message || e));
-      toast('Sauvegarde locale OK, mais synchronisation Firebase échouée. Vérifie la connexion.', 'err');
-    }
 
     try { window.dispatchEvent(new CustomEvent('gp:data-changed', { detail:{ db: db } })); } catch(e) {}
     try { document.dispatchEvent(new CustomEvent('gp:data-changed', { detail:{ db: db } })); } catch(e) {}

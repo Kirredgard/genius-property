@@ -111,9 +111,9 @@ body.dark {
 }
 
 #page-paiements .icon-delete{
-    background:
-html body 
-
+    background:#ffe1e1 !important;
+    color:#b00020 !important;
+}
 
 /* =====================================================
    PAIEMENTS ACTIONS — SOURCE UNIQUE PROPRE

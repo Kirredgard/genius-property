@@ -1,0 +1,167 @@
+/* Genius Property — Maintenance & Sécurité
+   UI légère, autonome et cohérente avec l'application locale. */
+#page-admin-stockage .gp-storage-wrap{
+  max-width:1180px;
+  margin:0 auto;
+  padding:24px;
+  color:#1f2937;
+  box-sizing:border-box;
+}
+#page-admin-stockage .gp-storage-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:22px;
+}
+#page-admin-stockage .gp-storage-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:0;
+  font-size:26px;
+  line-height:1.2;
+  font-weight:800;
+  letter-spacing:-.02em;
+}
+#page-admin-stockage .gp-storage-title .material-symbols-rounded{
+  font-size:28px;
+  color:#c99a00;
+}
+#page-admin-stockage .gp-storage-desc{
+  margin:7px 0 0;
+  color:#6b7280;
+  font-size:14px;
+  line-height:1.5;
+  max-width:760px;
+}
+#page-admin-stockage .gp-storage-badge{
+  flex:0 0 auto;
+  padding:7px 11px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  border:1px solid #ead9a0;
+  background:#fffaf0;
+  color:#8a6500;
+}
+#page-admin-stockage .gp-storage-kpis{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:18px;
+}
+#page-admin-stockage .gp-storage-kpi{
+  min-height:76px;
+  padding:15px 16px;
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  box-shadow:0 2px 8px rgba(15,23,42,.04);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  box-sizing:border-box;
+}
+#page-admin-stockage .gp-storage-kpi b{
+  font-size:19px;
+  line-height:1.2;
+  color:#111827;
+}
+#page-admin-stockage .gp-storage-kpi span{
+  margin-top:4px;
+  color:#6b7280;
+  font-size:12px;
+}
+#page-admin-stockage .gp-storage-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+}
+#page-admin-stockage .gp-storage-card{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+  padding:20px;
+  min-height:155px;
+  box-sizing:border-box;
+  box-shadow:0 3px 12px rgba(15,23,42,.045);
+}
+#page-admin-stockage .gp-storage-card h3{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:0 0 8px;
+  font-size:16px;
+  font-weight:800;
+  color:#111827;
+}
+#page-admin-stockage .gp-storage-card h3 .material-symbols-rounded{
+  color:#c99a00;
+  font-size:21px;
+}
+#page-admin-stockage .gp-storage-muted{
+  margin:0;
+  color:#6b7280;
+  font-size:13px;
+  line-height:1.55;
+  max-width:680px;
+}
+#page-admin-stockage .gp-storage-actions{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-top:17px;
+}
+#page-admin-stockage .gp-storage-btn{
+  appearance:none;
+  border:1px solid #d1d5db;
+  background:#fff;
+  color:#1f2937;
+  border-radius:10px;
+  padding:9px 13px;
+  min-height:38px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  font:inherit;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  transition:transform .12s ease,box-shadow .12s ease,background .12s ease;
+  box-sizing:border-box;
+}
+#page-admin-stockage .gp-storage-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(15,23,42,.08);
+}
+#page-admin-stockage .gp-storage-btn.primary{
+  background:#d2a900;
+  border-color:#d2a900;
+  color:#111827;
+}
+#page-admin-stockage .gp-storage-btn.gold{
+  border-color:#d9bc54;
+  background:#fffaf0;
+  color:#7a5b00;
+}
+#page-admin-stockage .gp-storage-btn.success{
+  border-color:#c9dfd0;
+  background:#f4fbf6;
+  color:#166534;
+}
+#page-admin-stockage .gp-storage-btn .material-symbols-rounded{
+  font-size:18px;
+}
+@media(max-width:850px){
+  #page-admin-stockage .gp-storage-wrap{padding:16px;}
+  #page-admin-stockage .gp-storage-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
+  #page-admin-stockage .gp-storage-grid{grid-template-columns:1fr;}
+}
+@media(max-width:520px){
+  #page-admin-stockage .gp-storage-head{flex-direction:column;}
+  #page-admin-stockage .gp-storage-kpis{grid-template-columns:1fr 1fr;}
+  #page-admin-stockage .gp-storage-title{font-size:21px;}
+  #page-admin-stockage .gp-storage-card{padding:16px;}
+}

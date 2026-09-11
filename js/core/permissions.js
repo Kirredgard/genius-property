@@ -35,15 +35,15 @@
     biens:'biens:view', locatives:'locatives:view', contrats:'contrats:view', paiements:'paiements:view', avenir:'avenir:view',
     depenses:'depenses:view', fichiers:'fichiers:view', messages:'messages:view', 'agenda-employes':'agenda-employes:view',
     agenda:'agenda:view', rapports:'rapports:view', journal:'journal:view', droits:'droits:view', parametres:'parametres:view', sync:'sync:view',
-    'admin-stockage':'admin-stockage:view', 'admin-saas':'admin-saas:view', 'license-manager':'license-manager:view', 'nv-bien':'biens:write', 'nv-locative':'locatives:write', 'nv-contrat':'contrats:write',
+    'admin-stockage':'admin-stockage:view', 'nv-bien':'biens:write', 'nv-locative':'locatives:write', 'nv-contrat':'contrats:write',
     'nv-employe':'employes:write', 'nv-proprietaire':'proprietaires:write', 'nv-locataire':'locataires:write',
     'bien-detail':'biens:view', 'proprietaire-detail':'proprietaires:view'
   };
 
   var HIDE_SELECTORS_BY_ROLE = {
-    agent: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="admin-saas"]','#sideMenu li[data-page="license-manager"]','#sideMenu li[data-page="droits"]'],
-    comptable: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="admin-saas"]','#sideMenu li[data-page="license-manager"]','#sideMenu li[data-page="droits"]','#sideMenu li[data-page="employes"]'],
-    lecture: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="admin-saas"]','#sideMenu li[data-page="license-manager"]','#sideMenu li[data-page="droits"]','#sideMenu li[data-page="employes"]',
+    agent: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="droits"]'],
+    comptable: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="droits"]','#sideMenu li[data-page="employes"]'],
+    lecture: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="droits"]','#sideMenu li[data-page="employes"]',
       '#sideMenu li[data-page="nv-bien"]','#sideMenu li[data-page="nv-proprietaire"]','#sideMenu li[data-page="nv-locataire"]',
       '#sideMenu li[data-page="nv-locative"]','#sideMenu li[data-page="nv-contrat"]']
   };

@@ -1,7 +1,7 @@
 
 /* ================================================================
    GENIUS PROPERTY V20 — Navigation Layer
-   Objectif : sortir la navigation de app.legacy.bundle.js sans casser le legacy.
+   Objectif : sortir la navigation de ancien bundle legacy sans casser le legacy.
 ================================================================ */
 (function(){
   'use strict';
@@ -37,11 +37,7 @@
     droits:{name:'Droits d’accès', icon:'admin_panel_settings', subtitle:'Gérez les permissions d’accès de vos employés'},
     parametres:{name:'Paramètres', icon:'settings', subtitle:'Configurez votre plateforme'},
     sync:{name:'Sauvegarde & synchronisation', icon:'cloud_done', subtitle:'Gérez la sauvegarde et la synchronisation'},
-    abonnement:{name:'Abonnement', icon:'workspace_premium', subtitle:'Consultez le statut de votre abonnement et de votre licence'},
-    'admin-saas':{name:'Administration SaaS', icon:'admin_panel_settings', subtitle:'Gérez les licences et les accès clients'},
-    'license-manager':{name:'Gestion des licences', icon:'vpn_key', subtitle:'Créez, suspendez et renouvelez les licences'},
-    'license-activation':{name:'Activation licence', icon:'key', subtitle:'Activez la licence de votre agence'},
-    'admin-stockage':{name:'Administration stockage', icon:'database', subtitle:'Gérez le stockage et les données'},
+    'admin-stockage':{name:'Maintenance & Sécurité', icon:'build', subtitle:'Protégez et entretenez les données de votre agence'},
     'nv-bien':{name:'Ajouter un bien', icon:'add_home', parent:'biens', sub:'Ajouter un bien'},
     'bien-detail':{name:'Détails du bien', icon:'home_work', parent:'biens', sub:'Détails du bien'},
     'proprietaire-detail':{name:'Détails propriétaire', icon:'person', parent:'proprietaires', sub:'Détails propriétaire'},
@@ -88,10 +84,6 @@
     'proprietaire-detail': function(){ call('renderProprietaireDocuments'); return call('switchProprietaireTab', document.getElementById('pdTab-infos'), 'infos'); },
     parametres: function(){ return call('renderParametres'); },
     sync: function(){ return window.GPSyncPage && window.GPSyncPage.render ? window.GPSyncPage.render() : null; },
-    abonnement: function(){ return callModule(['GPClientSubscription'], ['load','render']); },
-    'admin-saas': function(){ return callModule(['GPAdminSaaS','GPSimpleLicenseAdmin'], ['load','render']); },
-    'license-manager': function(){ return callModule(['GPLicenseManager','GPSimpleLicenseAdmin'], ['load','render']); },
-    'license-activation': function(){ return callModule(['GPLicenseActivation'], ['load','render']); },
     'admin-stockage': function(){ return window.GPAdminStockage && window.GPAdminStockage.render ? window.GPAdminStockage.render() : null; }
   };
 
@@ -127,6 +119,7 @@
   }
 
   function canOpen(page){
+    if(window.GPSingleAgency && typeof window.GPSingleAgency.isCommercialPage === 'function' && window.GPSingleAgency.isCommercialPage(page)) return false;
     if(window.GPAuth && typeof window.GPAuth.can === 'function') return window.GPAuth.can(page);
     if(typeof window.canAccess !== 'function') return true;
     try{ return window.canAccess(page); }

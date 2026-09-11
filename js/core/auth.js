@@ -31,7 +31,13 @@
   function role(){
     var u = getUser();
     if(!u) return null;
-    if(u.isAdmin) return 'admin';
+    // Supabase profile is the source of truth in V22.
+    var explicit = String(u.role || '').toLowerCase().trim();
+    if(explicit === 'admin' || u.isAdmin) return 'admin';
+    if(explicit === 'comptable') return 'comptable';
+    if(explicit === 'agent') return 'agent';
+    if(explicit === 'lecture' || explicit === 'readonly') return 'lecture';
+    // Legacy fallback for old local employee records.
     var d = u.droits || {};
     if(d.depenses || d.paiements || d.rapports) return 'comptable';
     if(d.proprietaires || d.locataires || d.bail || d.contrats) return 'agent';

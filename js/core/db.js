@@ -1,4 +1,4 @@
-/* Genius Property V17 — Core DB layer
+/* Genius Property V21 — Core DB layer
    Objectif : centraliser l'accès aux données avant migration Supabase/Firebase.
    Cette couche reste compatible localStorage + window.DB pour ne pas casser le bundle legacy. */
 (function(){
@@ -9,6 +9,7 @@
   var GPStorage = window.GPStorage || null;
   var BACKUP_KEY = 'geniusproperty_last_backup_snapshot';
   var BACKUP_DATE_KEY = 'geniusproperty_last_backup_date';
+  var AUTHORITATIVE_KEY = 'geniusproperty_db_authoritative_v1';
 
   var DEFAULT_DB = {
     proprietaires: [],
@@ -39,6 +40,24 @@
     }
   }
 
+  var GPDB_REVISION_KEY = 'gpdb_local_revision';
+
+  function currentRevision(){
+    var n = parseInt(localStorage.getItem(GPDB_REVISION_KEY) || '0', 10);
+    return Number.isFinite(n) ? n : 0;
+  }
+  function setRevision(n){
+    n = Math.max(0, parseInt(n || '0', 10));
+    localStorage.setItem(GPDB_REVISION_KEY, String(n));
+    return n;
+  }
+  function stampRevision(db, rev){
+    db = db || {};
+    db.meta = db.meta || {};
+    db.meta.localRevision = rev;
+    return db;
+  }
+
   function normalize(db){
     db = db && typeof db === 'object' ? db : {};
     Object.keys(DEFAULT_DB).forEach(function(key){
@@ -65,16 +84,31 @@
 
   function readRaw(){
     var local = localStorage.getItem(STORAGE_KEY);
-    if (window.GPStorage && typeof window.GPStorage.readRaw === 'function') {
-      var active = window.GPStorage.readRaw();
-      // Si l'adapter Firebase renvoie un cache vide mais le stockage local contient des données,
-      // conserver le stockage local pour éviter la disparition après refresh.
-      if (countRecordsRaw(local) > countRecordsRaw(active)) return local;
+    var authoritative = localStorage.getItem(AUTHORITATIVE_KEY);
+    var lp = safeParse(local, null), ap = safeParse(authoritative, null);
+    var lr = lp && lp.meta ? Number(lp.meta.localRevision || 0) : 0;
+    var ar = ap && ap.meta ? Number(ap.meta.localRevision || 0) : 0;
+    var active = null, sp = null, sr = 0;
+    try {
+      if(window.GPStorage && typeof window.GPStorage.readRaw === 'function') {
+        active = window.GPStorage.readRaw();
+        sp = safeParse(active, null);
+        sr = sp && sp.meta ? Number(sp.meta.localRevision || 0) : 0;
+      }
+    } catch(e) {}
+    // Highest revision wins. On equal revisions, authoritative wins over the
+    // legacy raw key/cloud cache. This makes old modules unable to erase data.
+    if(ap && ar >= Math.max(Number(lr||0), Number(sr||0))) {
+      if(ar > Number(lr||0)) { try { localStorage.setItem(STORAGE_KEY, authoritative); } catch(e) {} }
+      if(ar > Number(sr||0)) { try { if(window.GPStorage && window.GPStorage.writeRaw) window.GPStorage.writeRaw(authoritative); } catch(e) {} }
+      return authoritative;
+    }
+    if(sp && sr > Number(lr||0)) {
+      try { localStorage.setItem(STORAGE_KEY, active); } catch(e) {}
       return active;
     }
-    return local;
+    return local || active;
   }
-
   function writeRaw(raw){
     localStorage.setItem(STORAGE_KEY, raw);
     if (window.GPStorage && typeof window.GPStorage.writeRaw === 'function') return window.GPStorage.writeRaw(raw);
@@ -82,10 +116,14 @@
   }
 
   function load(){
-    // FIX V35 : le stockage actif (cache Supabase/localStorage) est la source principale.
-    // Avant, si window.DB existait déjà, on ignorait les données relues du cloud au refresh.
     var fromStorage = safeParse(readRaw(), null);
     var db = normalize(fromStorage || window.DB || DEFAULT_DB);
+    db.meta = db.meta || {};
+    var rev = Number(db.meta.localRevision || currentRevision() || 0);
+    if(!Number.isFinite(rev) || rev < 0) rev = currentRevision();
+    if(rev !== currentRevision()) setRevision(rev);
+    db.meta.localRevision = rev;
+    try { if(!localStorage.getItem(AUTHORITATIVE_KEY)) localStorage.setItem(AUTHORITATIVE_KEY, JSON.stringify(db)); } catch(e) {}
     window.DB = db;
     return db;
   }
@@ -95,20 +133,57 @@
     if (!options.skipLicenseGuard && window.GPLicenseGuard && typeof window.GPLicenseGuard.beforeWrite === 'function') {
       window.GPLicenseGuard.beforeWrite(options.domain || 'data');
     }
-    var data = normalize(db || window.DB || {});
-    data.meta = data.meta || {};
-    data.meta.updatedAt = new Date().toISOString();
+
+    var incoming = normalize(db || window.DB || {});
+    incoming.meta = incoming.meta || {};
+
+    // Optimistic concurrency control:
+    // every GPDB.load() carries the current revision. A delayed operation that
+    // tries to save an older snapshot is rejected instead of resurrecting data.
+    var stored = safeParse(readRaw(), null);
+    var storedRev = stored && stored.meta ? Number(stored.meta.localRevision || 0) : currentRevision();
+    if(!Number.isFinite(storedRev) || storedRev < 0) storedRev = currentRevision();
+
+    var incomingRev = Number(incoming.meta.localRevision || 0);
+    if(!Number.isFinite(incomingRev) || incomingRev < 0) incomingRev = storedRev;
+
+    if(!options.force && stored && incomingRev < storedRev){
+      console.warn('[GPDB] Stale write ignored', {incomingRev:incomingRev, storedRev:storedRev});
+      return false;
+    }
+
+    var nextRev = Math.max(storedRev, incomingRev) + 1;
+    stampRevision(incoming, nextRev);
+    incoming.meta.updatedAt = new Date().toISOString();
 
     try {
-      writeRaw(JSON.stringify(data));
-      // Mutate window.DB in place so const DB references in legacy bundle stay in sync
+      var serialized = JSON.stringify(incoming);
+      writeRaw(serialized);
+      localStorage.setItem(AUTHORITATIVE_KEY, serialized);
+
       if (window.DB && typeof window.DB === 'object') {
         Object.keys(window.DB).forEach(function(k){ delete window.DB[k]; });
-        Object.assign(window.DB, data);
+        Object.assign(window.DB, incoming);
       } else {
-        window.DB = data;
+        window.DB = incoming;
       }
-      if (!options.silent) emit('gp:db:saved', { db: data });
+
+      setRevision(nextRev);
+
+      if (!options.silent) {
+        try { localStorage.setItem('gp_data_dirty_at', new Date().toISOString()); } catch(ignore) {}
+        emit('gp:db:saved', { db: incoming, revision: nextRev });
+      }
+
+      if (!options.skipCloud && !options.silent && window.GPSupabase &&
+          typeof window.GPSupabase.push === 'function' &&
+          typeof window.GPSupabase.available === 'function' && window.GPSupabase.available() &&
+          window.GPSupabase.currentUid && window.GPSupabase.currentUid()) {
+        window.GPSupabase.push(incoming).catch(function(e){
+          console.warn('[GPDB] Synchronisation Supabase échouée:', e && (e.message || e));
+          try { if(window.toast) window.toast('Donnée locale enregistrée ; synchronisation Supabase à vérifier.', 'err'); } catch(ignore) {}
+        });
+      }
       return true;
     } catch(e) {
       console.error('[GPDB] Échec sauvegarde localStorage', e);
@@ -253,7 +328,9 @@
     importJSON: importJSON,
     health: health,
     normalize: normalize,
-    validateSchema: validateSchema
+    validateSchema: validateSchema,
+    authoritativeKey: AUTHORITATIVE_KEY,
+    authoritativeSnapshot: function(){ return safeParse(localStorage.getItem(AUTHORITATIVE_KEY), null); }
   };
 
   GP.DB = GPDB;

@@ -21,18 +21,14 @@
     ]
   },
   "include": [
-    "tests/v21/**/*.ts",
-    "js/v21/**/*.ts",
-    "js/v21/**/*.js",
-    "tests/v21/**/*.js",
+    "tests/**/*.test.js",
+    "js/v21/ui/**/*.js",
     "vite.config.js"
   ],
   "exclude": [
     "node_modules",
     "dist",
     "coverage",
-    "js/**/*.legacy.js",
-    "js/core/consolidated-hotfixes.js",
-    "js/app.legacy.bundle.js"
+    "_archive"
   ]
 }

@@ -1,0 +1,28 @@
+{
+  "version": "v21-final-clean",
+  "firebaseProjectId": "geniusproperty-50bfb",
+  "removedCategories": [
+    "audit/",
+    "tests/",
+    "beta-client-pack/",
+    "_disabled_legacy_hotfixes/",
+    "release/",
+    "top-level markdown migration documentation",
+    "backup index files",
+    "duplicate firebase/firestore v21 files",
+    "node_modules/dist/.firebase"
+  ],
+  "keptRuntime": [
+    "index.html",
+    "js/",
+    "styles/",
+    "assets/",
+    "api/",
+    "firebase.json",
+    ".firebaserc",
+    "firestore.rules",
+    "env.js",
+    "public/env.js",
+    "package.json"
+  ]
+}

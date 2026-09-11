@@ -1,5 +1,5 @@
 /* Genius Property V19 — Legacy bridge
-   Objectif: isoler app.legacy.bundle.js et mesurer ce qui dépend encore de lui.
+   Objectif: isoler ancien bundle legacy et mesurer ce qui dépend encore de lui.
    Ce fichier ne remplace pas le bundle legacy; il signale les fonctions encore attendues par l'interface. */
 (function(){
   'use strict';
