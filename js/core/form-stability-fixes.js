@@ -19,12 +19,21 @@
     var btn=$('loginBtn');
     if(btn){ btn.disabled=true; btn.setAttribute('aria-busy','true'); }
     try{
-      if(!window.GPSupabaseAuth || typeof window.GPSupabaseAuth.login!=='function')
-        throw new Error('Le module de connexion locale n’est pas prêt. Rechargez la page.');
-      await window.GPSupabaseAuth.login(ev);
-      return true;
+      // Firebase is the only authentication provider used by the current app.
+      // The dedicated Firebase auth module owns the complete login flow.
+      if(typeof window._firebaseAuthLoginHandler === 'function') {
+        await window._firebaseAuthLoginHandler(ev);
+        return true;
+      }
+      if(window.GPFirebaseAuth && typeof window.GPFirebaseAuth.signIn === 'function'){
+        var fbUser = await window.GPFirebaseAuth.signIn(user, pass);
+        if(window.GPFirebaseAuth.hydrateCurrentUser) await window.GPFirebaseAuth.hydrateCurrentUser(fbUser);
+        if(typeof window._showApp === 'function') await window._showApp();
+        return true;
+      }
+      throw new Error('Firebase Auth est en cours de chargement. Réessayez dans quelques secondes.');
     }catch(e){
-      showError(e && (e.message||e.code) || 'Connexion impossible.');
+      showError(e && (e.message||e.code) || 'Connexion Firebase impossible.');
       return false;
     }finally{
       if(btn){ btn.disabled=false; btn.removeAttribute('aria-busy'); }
