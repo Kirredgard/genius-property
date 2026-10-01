@@ -9,8 +9,6 @@
 
     export const HOTFIX_SCRIPTS = [
   "js/core/consolidated-hotfixes.js",
-  "js/core/avenir-kpi-fix.js",
-  "js/core/paiements-avenir-button-final-fix.js",
   "js/core/dashboard-actions-fix.js",
   "js/core/flicker-fix.js"
 ];
