@@ -6,6 +6,6 @@
 // (Sur Vercel, tu peux aussi définir VITE_SUPABASE_URL et VITE_SUPABASE_PUBLISHABLE_KEY :
 //  le build génère alors ce fichier tout seul.)
 window.GPV22_ENV = {
-  supabaseUrl: "https://tpomnpzurgpvjkosvwpk.supabase.co",
-  supabasePublishableKey: ""
+  supabaseUrl: "https://maqapwcfuitrwkgydsaw.supabase.co",
+  supabasePublishableKey: "sb_publishable_jb052flKJ1KwH1FRBncQeg_W8-RZbX2"
 };
