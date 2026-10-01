@@ -1,60 +1,20 @@
-# Genius Property v83 — déploiement Vercel + Supabase + domaine OVH
+# Genius Property V83 — Vercel + Supabase + OVH
 
-## Architecture
+## Vercel Environment Variables
 
-- Hébergement frontend : Vercel
-- Authentification et données : Supabase
-- Domaine : OVH
-- Firebase Hosting : non utilisé pour le déploiement
+In Vercel: Project Settings → Environment Variables, add these for **Production** (and Preview if you want preview deployments to work):
 
-## 1. Variables Vercel
+- `VITE_SUPABASE_URL` = `https://tpomnpzurgpvjkosvwpk.supabase.co`
+- `VITE_SUPABASE_PUBLISHABLE_KEY` = your Supabase **Publishable key** (`sb_publishable_...`)
 
-Le projet contient `public/env.js` pour la configuration publique Supabase.
-La valeur à renseigner est :
+Do not add or expose a Supabase `service_role` / secret key.
 
-- `supabaseUrl` : URL publique du projet Supabase
-- `supabasePublishableKey` : clé **Publishable** Supabase uniquement
+The application now prefers these Vite variables at build time and falls back to `public/env.js` for local development.
 
-Ne jamais mettre une clé `service_role` dans le navigateur.
+## Deploy
 
-## 2. Déploiement Vercel
+After committing/pushing this version to GitHub, redeploy the Vercel project.
 
-Depuis le dossier du projet :
+## Domain OVH
 
-```bash
-npm install
-npm run build
-```
-
-Puis importer le dépôt dans Vercel, avec :
-
-- Framework : Vite
-- Build command : `npm run build`
-- Output directory : `dist`
-
-## 3. Routage
-
-Les routes publiques/principales prévues sont :
-
-- `/` : présentation
-- `/connexion` : connexion
-- `/app` : application
-
-`vercel.json` renvoie les routes applicatives vers `index.html` pour permettre le routage côté client.
-
-## 4. Domaine OVH
-
-Ne modifier les DNS qu'après validation de l'URL Vercel.
-
-Dans Vercel : Project → Settings → Domains → ajouter le domaine.
-
-Vercel affichera ensuite les enregistrements DNS à créer chez OVH. Utiliser exactement les valeurs affichées par Vercel.
-
-## 5. Supabase Auth
-
-Dans Supabase → Authentication → URL Configuration :
-
-- ajouter le domaine de production comme Site URL
-- ajouter les URLs de redirection nécessaires, notamment le domaine de production et `/connexion`
-
-Faire les tests avant de basculer le domaine OVH.
+Do not change OVH DNS until the `*.vercel.app` deployment has been tested. Then add the custom domain in Vercel and use the DNS records Vercel displays.
