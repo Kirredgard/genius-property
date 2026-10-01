@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-09-30T16:02:56.267Z",
+  "required": [
+    "index.v21-production.html",
+    "firestore.rules.v21",
+    "storage.rules.v21",
+    "firebase.v21.json",
+    ".env.production.example",
+    "DEPLOYMENT_CHECKLIST_V21.md",
+    "PRODUCTION_GUIDE_V21.md"
+  ],
+  "missing": [
+    "index.v21-production.html",
+    ".env.production.example"
+  ],
+  "ok": false
+}

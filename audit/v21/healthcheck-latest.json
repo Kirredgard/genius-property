@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-10-01T01:06:35.616Z",
+  "architecture": "main-index-app",
+  "missing": [
+    "js/pages/biens.js"
+  ],
+  "forbiddenRootV21Pages": [],
+  "ok": false
+}
