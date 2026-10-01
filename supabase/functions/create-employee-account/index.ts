@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
     const password = String(body?.password || '')
     const fullName = String(body?.fullName || '').trim()
     const requestedRole = String(body?.role || 'lecture').toLowerCase()
-    const role = ['agent', 'comptable', 'lecture'].includes(requestedRole) ? requestedRole : 'lecture'
+    const role = ['gestionnaire', 'agent', 'comptable', 'lecture'].includes(requestedRole) ? requestedRole : 'lecture'
 
     if (!email) return json({ error: 'Email obligatoire.' }, 400)
     if (password.length < 6) return json({ error: 'Mot de passe de 6 caractères minimum.' }, 400)

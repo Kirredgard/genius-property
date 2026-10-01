@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion — Genius Property</title>
+<meta name="description" content="Connectez-vous à votre espace Genius Property.">
+<meta name="theme-color" content="#0a0a0c">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<style>
+@font-face{font-family:Inter;font-style:normal;font-weight:400;font-display:swap;src:url(/assets/landing/fonts/inter-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-style:normal;font-weight:500;font-display:swap;src:url(/assets/landing/fonts/inter-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-style:normal;font-weight:600;font-display:swap;src:url(/assets/landing/fonts/inter-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-style:normal;font-weight:700;font-display:swap;src:url(/assets/landing/fonts/inter-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-style:normal;font-weight:800;font-display:swap;src:url(/assets/landing/fonts/inter-latin-800-normal.woff2) format("woff2")}
+:root{--gold:#d4af37;--gold-hi:#f7e08a;--gold-btn1:#c9a012;--muted:#8b8b92;--line:rgba(212,175,55,.18)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#fff;background:#08080a;-webkit-font-smoothing:antialiased}
+.i{width:1em;height:1em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--gold-hi);outline-offset:2px;border-radius:8px}
+.shell{min-height:100%;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);background:radial-gradient(60% 50% at 15% 0%,rgba(212,175,55,.13),transparent 70%),#08080a}
+
+/* ───── Panneau gauche (identique à l'original) ───── */
+.brand{padding:56px clamp(32px,6vw,96px);display:flex;flex-direction:column;justify-content:space-between;gap:36px;border-right:1px solid rgba(212,175,55,.08)}
+.logo-row{display:flex;align-items:center;gap:14px}
+.logo-row img{width:48px;height:48px;border-radius:50%;box-shadow:0 0 0 1px rgba(212,175,55,.45),0 0 26px rgba(212,175,55,.3)}
+.logo-row b{display:block;font-size:22px;letter-spacing:.12em;font-weight:700}
+.logo-row b span{color:var(--gold-hi)}
+.logo-row small{display:block;font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:rgba(212,175,55,.55);margin-top:3px}
+.pitch h1{font-size:clamp(30px,3.2vw,40px);line-height:1.15;font-weight:800;letter-spacing:-.015em}
+.pitch h1 span{color:#e3b92c}
+.pitch p{margin-top:16px;max-width:400px;color:#74747b;font-size:14.5px;line-height:1.7}
+.rule{width:40px;height:2px;margin:24px 0;background:linear-gradient(90deg,var(--gold),transparent)}
+.pills{display:flex;flex-wrap:wrap;gap:10px;max-width:470px}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;font-size:12.5px;color:#9a9aa1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09)}
+.pill .i{font-size:14px;color:var(--gold)}
+.stats{display:flex;gap:26px;margin-top:30px}
+.stats>div+div{border-left:1px solid var(--line);padding-left:26px}
+.stats b{display:block;font-size:22px;font-weight:700;color:#e3b92c}
+.stats small{display:block;margin-top:4px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6a6a71}
+.sign{font-size:12.5px;color:#5f5f66}
+.sign b{color:rgba(212,175,55,.85);font-weight:600;font-style:italic}
+
+/* ───── Panneau droit : carte de connexion ───── */
+.side{display:flex;align-items:center;justify-content:center;padding:40px 24px;position:relative}
+.back{position:absolute;top:14px;right:20px;display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:500;color:#8b8b92;transition:color .2s}
+.back:hover{color:var(--gold-hi)}
+.back .i{font-size:16px}
+.card{width:100%;max-width:430px;border-radius:26px;padding:34px 32px 28px;border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025) 40%,rgba(255,255,255,.02));box-shadow:0 30px 80px -30px rgba(0,0,0,.9),0 0 60px -30px rgba(212,175,55,.35)}
+.card-head{text-align:center;margin-bottom:24px}
+.card-head img{width:56px;height:56px;border-radius:50%;margin:0 auto 14px;box-shadow:0 0 0 1px rgba(212,175,55,.5),0 0 24px rgba(212,175,55,.35)}
+.card-head h2{font-size:24px;font-weight:800}
+.card-head p{margin-top:6px;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:#7b7b82;line-height:1.6}
+.accent{width:44px;height:2px;margin:16px auto 0;background:linear-gradient(90deg,var(--gold),transparent)}
+
+.view{display:none}
+.view.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin-bottom:8px;color:#d8d8dc}
+label .i{font-size:16px;color:var(--gold)}
+.field{position:relative;margin-bottom:18px}
+.field input{width:100%;height:50px;padding:0 16px;border-radius:12px;border:1px solid rgba(212,175,55,.22);background:rgba(255,255,255,.045);font:inherit;font-size:15px;color:#fff;transition:border-color .2s,box-shadow .2s,background .2s}
+.field input::placeholder{color:#62626a}
+.field input:hover{border-color:rgba(212,175,55,.4)}
+.field input:focus{outline:none;border-color:var(--gold);background:rgba(255,255,255,.07);box-shadow:0 0 0 4px rgba(212,175,55,.16)}
+.field input:-webkit-autofill{-webkit-text-fill-color:#fff;box-shadow:0 0 0 100px #1b1a14 inset}
+.field.has-eye input{padding-right:48px}
+.eye{position:absolute;right:6px;bottom:6px;width:38px;height:38px;border:0;background:none;border-radius:9px;color:#8f7a2a;cursor:pointer;display:grid;place-items:center}
+.eye:hover{background:rgba(212,175,55,.12);color:var(--gold-hi)}
+.eye .i{font-size:19px}
+.row{display:flex;justify-content:flex-end;margin:-6px 0 20px}
+.link{background:none;border:0;font:inherit;font-size:13px;font-weight:600;color:var(--gold);cursor:pointer;padding:2px 0}
+.link:hover{color:var(--gold-hi);text-decoration:underline}
+
+.btn{width:100%;height:52px;border:0;border-radius:13px;font:inherit;font-size:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+  background:linear-gradient(90deg,var(--gold-btn1),#f7e283);color:#14110a;box-shadow:0 10px 30px -8px rgba(212,175,55,.55);transition:transform .15s,box-shadow .2s,opacity .2s}
+.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 16px 36px -8px rgba(212,175,55,.75)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn .i{font-size:18px}
+.spin{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(20,17,10,.25);border-top-color:#14110a;animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+.msg{display:none;margin:0 0 16px;padding:11px 14px;border-radius:11px;font-size:13px;line-height:1.5;align-items:flex-start;gap:10px}
+.msg.show{display:flex}
+.msg .i{font-size:17px;margin-top:1px}
+.msg.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#fca5a5}
+.msg.ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35);color:#86efac}
+
+.divider{height:1px;background:rgba(255,255,255,.08);margin:24px 0 18px}
+.foot{text-align:center;font-size:13px;color:#7b7b82;line-height:1.55}
+.secure{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;color:#5f5f66}
+.secure .i{font-size:14px}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .brand{padding:28px 24px 8px;gap:18px;border:0}
+  .pitch p,.rule,.pills,.stats,.sign{display:none}
+  .pitch h1{font-size:26px}
+  .side{padding:20px 16px 40px;flex-direction:column;align-items:center}
+  .back{position:static;margin-bottom:16px;align-self:flex-end}
+  .card{padding:28px 22px 24px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- Icônes -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 6.1A9.8 9.8 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.6 6.6C3.9 8.3 2 12 2 12s3.5 7 10 7c1.7 0 3.2-.4 4.5-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.2 8 8 9 4.8-1 8-4.5 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 20V8l8-5 8 5v12"/><path d="M9 20v-6h6v6"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+  <symbol id="i-pay" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></symbol>
+</svg>
+
+<div class="shell">
+  <section class="brand" aria-label="Genius Property">
+    <div class="logo-row">
+      <img src="/assets/logo.svg" alt="">
+      <div><b>GENIUS <span>PROPERTY</span></b><small>Gestion immobilière</small></div>
+    </div>
+
+    <div class="pitch">
+      <h1>Votre patrimoine,<br><span>géré avec excellence.</span></h1>
+      <p>Un espace interne, sécurisé et complet pour gérer les biens, les propriétaires, les locataires et les finances de votre agence.</p>
+      <div class="rule"></div>
+      <div class="pills">
+        <span class="pill"><svg class="i"><use href="#i-home"/></svg>Gestion de biens</span>
+        <span class="pill"><svg class="i"><use href="#i-file"/></svg>Contrats officiels</span>
+        <span class="pill"><svg class="i"><use href="#i-pay"/></svg>Suivi paiements</span>
+        <span class="pill"><svg class="i"><use href="#i-chart"/></svg>Rapports &amp; analyses</span>
+        <span class="pill"><svg class="i"><use href="#i-shield"/></svg>100% sécurisé</span>
+      </div>
+      <div class="stats">
+        <div><b>360°</b><small>Vision complète</small></div>
+        <div><b>100%</b><small>Local &amp; sécurisé</small></div>
+        <div><b>Pro</b><small>Qualité premium</small></div>
+      </div>
+    </div>
+
+    <div class="sign">by <b>Genius Immo &amp; BTP</b></div>
+  </section>
+
+  <main class="side">
+    <a class="back" href="/"><svg class="i"><use href="#i-back"/></svg>Retour au site</a>
+
+    <div class="card">
+      <div class="card-head">
+        <img src="/assets/logo.svg" alt="Genius Property">
+        <h2 id="title">Accès sécurisé</h2>
+        <p id="subtitle">Espace interne de l’agence</p>
+        <div class="accent"></div>
+      </div>
+
+      <div class="msg err" id="msg" role="alert"><svg class="i"><use href="#i-alert"/></svg><span></span></div>
+
+      <form class="view on" id="v-login" novalidate>
+        <div class="field">
+          <label for="email"><svg class="i"><use href="#i-mail"/></svg>Adresse email</label>
+          <input id="email" type="email" inputmode="email" autocomplete="username" placeholder="votre@email.com" required>
+        </div>
+        <div class="field has-eye">
+          <label for="password"><svg class="i"><use href="#i-lock"/></svg>Mot de passe</label>
+          <input id="password" type="password" autocomplete="current-password" placeholder="Votre mot de passe" required>
+          <button class="eye" type="button" data-eye="password" aria-label="Afficher le mot de passe"><svg class="i"><use href="#i-eye"/></svg></button>
+        </div>
+        <div class="row"><button class="link" type="button" data-go="forgot">Mot de passe oublié ?</button></div>
+        <button class="btn" id="loginBtn" type="submit"><span class="lbl">Se connecter</span><svg class="i"><use href="#i-arrow"/></svg></button>
+        <div class="divider"></div>
+        <p class="foot">Pas encore d’accès ? Contactez l’administrateur de votre agence.</p>
+      </form>
+
+      <form class="view" id="v-forgot" novalidate>
+        <div class="field">
+          <label for="femail"><svg class="i"><use href="#i-mail"/></svg>Adresse email</label>
+          <input id="femail" type="email" inputmode="email" autocomplete="email" placeholder="votre@email.com" required>
+        </div>
+        <button class="btn" id="forgotBtn" type="submit"><span class="lbl">Envoyer le lien</span><svg class="i"><use href="#i-arrow"/></svg></button>
+        <div class="divider"></div>
+        <p class="foot"><button class="link" type="button" data-go="login">← Retour à la connexion</button></p>
+      </form>
+
+      <form class="view" id="v-reset" novalidate>
+        <div class="field has-eye">
+          <label for="npass"><svg class="i"><use href="#i-lock"/></svg>Nouveau mot de passe</label>
+          <input id="npass" type="password" autocomplete="new-password" placeholder="8 caractères minimum" required>
+          <button class="eye" type="button" data-eye="npass" aria-label="Afficher le mot de passe"><svg class="i"><use href="#i-eye"/></svg></button>
+        </div>
+        <div class="field">
+          <label for="npass2"><svg class="i"><use href="#i-lock"/></svg>Confirmer le mot de passe</label>
+          <input id="npass2" type="password" autocomplete="new-password" placeholder="Retapez le mot de passe" required>
+        </div>
+        <button class="btn" id="resetBtn" type="submit"><span class="lbl">Enregistrer</span><svg class="i"><use href="#i-arrow"/></svg></button>
+      </form>
+
+      <div class="secure"><svg class="i"><use href="#i-shield"/></svg>Connexion chiffrée et sécurisée</div>
+    </div>
+  </main>
+</div>
+
+<!-- Configuration (URL + clé publique) : modifiable uniquement dans env.js -->
+<script src="/env.js"></script>
+<script src="/js/core/supabase-adapter.js"></script>
+<script>
+(function(){
+  'use strict';
+  var $ = function(id){ return document.getElementById(id); };
+  var params = new URLSearchParams(location.search);
+  var hash = location.hash || '';
+  var isRecovery = /type=recovery/.test(hash) || params.get('type') === 'recovery';
+  var fromApp = params.get('from') === 'app';
+  var TITLES = {
+    login:  ['Accès sécurisé', 'Espace interne de l’agence'],
+    forgot: ['Mot de passe oublié', 'Recevez un lien de réinitialisation par email'],
+    reset:  ['Nouveau mot de passe', 'Choisissez un nouveau mot de passe']
+  };
+
+  /* ---------- UI helpers ---------- */
+  function show(view){
+    ['login','forgot','reset'].forEach(function(v){ $('v-'+v).classList.toggle('on', v === view); });
+    $('title').textContent = TITLES[view][0];
+    $('subtitle').textContent = TITLES[view][1];
+    message('');
+    var first = $('v-'+view).querySelector('input'); if (first && window.innerWidth > 900) first.focus();
+  }
+  function message(text, kind){
+    var box = $('msg');
+    box.className = 'msg ' + (kind || 'err') + (text ? ' show' : '');
+    box.querySelector('use').setAttribute('href', kind === 'ok' ? '#i-check' : '#i-alert');
+    box.querySelector('span').textContent = text || '';
+  }
+  function busy(btn, on, label){
+    btn.disabled = !!on;
+    var l = btn.querySelector('.lbl'), ic = btn.querySelector('.i, .spin');
+    if (on) {
+      btn.dataset.label = l.textContent; l.textContent = label || 'Veuillez patienter…';
+      if (ic) { var s = document.createElement('span'); s.className = 'spin'; btn.replaceChild(s, ic); }
+    } else {
+      l.textContent = btn.dataset.label || l.textContent;
+      var sp = btn.querySelector('.spin');
+      if (sp) { var svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('class','i'); svg.innerHTML = '<use href="#i-arrow"/>'; btn.replaceChild(svg, sp); }
+    }
+  }
+  function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
+
+  document.querySelectorAll('[data-go]').forEach(function(b){ b.addEventListener('click', function(){ show(b.dataset.go); }); });
+  document.querySelectorAll('[data-eye]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var inp = $(b.dataset.eye), showIt = inp.type === 'password';
+      inp.type = showIt ? 'text' : 'password';
+      b.querySelector('use').setAttribute('href', showIt ? '#i-eye-off' : '#i-eye');
+      b.setAttribute('aria-label', showIt ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+    });
+  });
+
+  /* ---------- Supabase (configuré automatiquement via env.js) ---------- */
+  var cfgOk = !!(window.GPSupabase && window.GPSupabase.config().configured);
+  function client(){
+    if (!cfgOk) return Promise.reject(new Error('Le service de connexion n’est pas encore activé. Contactez l’administrateur.'));
+    return window.GPSupabase.ready();
+  }
+  if (!cfgOk) message('Le service de connexion n’est pas encore activé. Contactez l’administrateur.', 'err');
+
+  function goApp(){ location.replace('/app'); }
+
+  function friendly(e){
+    var m = (e && (e.message || e.error_description)) || '';
+    if (/invalid login credentials/i.test(m)) return 'Email ou mot de passe incorrect.';
+    if (/email not confirmed/i.test(m)) return 'Votre email n’est pas encore confirmé. Vérifiez votre boîte de réception.';
+    if (/rate limit|too many/i.test(m)) return 'Trop de tentatives. Patientez quelques minutes puis réessayez.';
+    if (/failed to fetch|network|chargement|impossible de charger/i.test(m)) return 'Connexion au serveur impossible. Vérifiez votre connexion internet.';
+    return m || 'Une erreur est survenue. Réessayez.';
+  }
+
+  /* ---------- Connexion ---------- */
+  $('v-login').addEventListener('submit', async function(ev){
+    ev.preventDefault();
+    message('');
+    var email = $('email').value.trim(), pwd = $('password').value;
+    if (!validEmail(email)) return message('Saisissez une adresse email valide.');
+    if (!pwd) return message('Saisissez votre mot de passe.');
+    var btn = $('loginBtn'); busy(btn, true, 'Connexion…');
+    try {
+      var sb = await client();
+      var r = await sb.auth.signInWithPassword({ email: email, password: pwd });
+      if (r.error) throw r.error;
+      var p = await sb.from('gp_user_profiles').select('id,role,is_active').eq('id', r.data.user.id).maybeSingle();
+      if (p.error || !p.data) { await sb.auth.signOut().catch(function(){}); throw new Error('Profil utilisateur introuvable. Contactez l’administrateur.'); }
+      if (p.data.is_active === false) { await sb.auth.signOut().catch(function(){}); throw new Error('Ce compte est désactivé. Contactez l’administrateur.'); }
+      message('Connexion réussie, redirection…', 'ok');
+      goApp();
+    } catch (e) {
+      busy(btn, false);
+      message(friendly(e));
+    }
+  });
+
+  /* ---------- Mot de passe oublié ---------- */
+  $('v-forgot').addEventListener('submit', async function(ev){
+    ev.preventDefault();
+    message('');
+    var email = $('femail').value.trim() || $('email').value.trim();
+    if (!validEmail(email)) return message('Saisissez une adresse email valide.');
+    var btn = $('forgotBtn'); busy(btn, true, 'Envoi…');
+    try {
+      var sb = await client();
+      var r = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/connexion' });
+      if (r.error) throw r.error;
+      message('Si un compte existe pour cet email, un lien de réinitialisation vient d’être envoyé.', 'ok');
+    } catch (e) { message(friendly(e)); }
+    busy(btn, false);
+  });
+
+  /* ---------- Nouveau mot de passe ---------- */
+  $('v-reset').addEventListener('submit', async function(ev){
+    ev.preventDefault();
+    message('');
+    var a = $('npass').value, b = $('npass2').value;
+    if (a.length < 8) return message('Le mot de passe doit contenir au moins 8 caractères.');
+    if (a !== b) return message('Les deux mots de passe ne correspondent pas.');
+    var btn = $('resetBtn'); busy(btn, true, 'Enregistrement…');
+    try {
+      var sb = await client();
+      var r = await sb.auth.updateUser({ password: a });
+      if (r.error) throw r.error;
+      message('Mot de passe mis à jour. Redirection…', 'ok');
+      setTimeout(goApp, 900);
+    } catch (e) { busy(btn, false); message(friendly(e)); }
+  });
+
+  /* ---------- Démarrage ---------- */
+  if (isRecovery) show('reset');
+  if (cfgOk) {
+    client().then(function(sb){
+      sb.auth.onAuthStateChange(function(event){ if (event === 'PASSWORD_RECOVERY') show('reset'); });
+      if (isRecovery || fromApp) return;
+      return sb.auth.getSession().then(function(r){ if (r.data && r.data.session) goApp(); });
+    }).catch(function(e){ message(friendly(e)); });
+  }
+})();
+</script>
+</body>
+</html>

@@ -3,1339 +3,429 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Genius Property — Gestion interne de l’agence</title>
-<meta name="description" content="Genius Property — Application interne de gestion immobilière pour une agence">
-<meta name="theme-color" content="#D4AF37">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<title>Genius Property — Logiciel de gestion immobilière</title>
+<meta name="description" content="Genius Property est le logiciel de gestion immobilière complet pour les agences et gestionnaires locatifs : biens, propriétaires, locataires, contrats et paiements sur une seule plateforme.">
+<meta name="theme-color" content="#0e0b02">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://flagcdn.com">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles/theme.css">
-<link rel="stylesheet" href="styles/app-shell.css?v=20260523">
-<link rel="stylesheet" href="styles/mobile.css?v=ultra-mobile-20260522">
-<link rel="stylesheet" href="styles/ui-icons-close-enhanced.css?v=20260522-docgold">
-<script src="env.js?v=supabase-v290"></script>
-<script src="js/core/clean-runtime.js?v=v15-clean"></script>
-<script src="js/core/single-agency-mode.js?v=1"></script>
-<script src="js/inline/inline-script-01.js?v=refactor-20260523-v25"></script>
-<script src="js/inline/inline-script-03.js?v=refactor-20260523-v25" defer></script>
-<script src="js/core/lazy-libs.js" defer></script>
-<link rel="stylesheet" href="styles/dashboard.css?v=clean-v1">
-  <link rel="stylesheet" href="styles/bureau-theme-pages.css?v=20260523">
-<link rel="stylesheet" href="styles/gp-payments-table-compact-v5.css?v=20260523-v5">
 
-<style id="gp-splash-css">
-  #gpSplash{position:fixed;inset:0;z-index:999999;background:#060606;display:flex;align-items:center;justify-content:center;color:#f8fafc;font-family:Inter,Arial,sans-serif;transition:opacity .35s ease}
-  #gpSplash.gp-splash-hide{opacity:0;pointer-events:none}
-  .gp-splash-card{display:flex;flex-direction:column;align-items:center;gap:16px;padding:30px 34px;border:1px solid rgba(212,175,55,.25);border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.02));box-shadow:0 30px 80px rgba(0,0,0,.45)}
-  .gp-splash-logo{width:62px;height:62px;border-radius:999px;object-fit:contain;filter:drop-shadow(0 0 18px rgba(212,175,55,.45))}
-  .gp-splash-title{font-weight:900;letter-spacing:.08em;text-transform:uppercase}
-  .gp-splash-line{width:90px;height:3px;border-radius:999px;background:linear-gradient(90deg,transparent,#d4af37,transparent);animation:gpSplashPulse 1.1s ease-in-out infinite}
-  @keyframes gpSplashPulse{0%,100%{opacity:.35;transform:scaleX(.75)}50%{opacity:1;transform:scaleX(1)}}
+<style>
+@font-face{font-family:Inter;font-style:normal;font-weight:400;font-display:swap;src:url(assets/landing/fonts/inter-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-style:normal;font-weight:500;font-display:swap;src:url(assets/landing/fonts/inter-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-style:normal;font-weight:600;font-display:swap;src:url(assets/landing/fonts/inter-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-style:normal;font-weight:700;font-display:swap;src:url(assets/landing/fonts/inter-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-style:normal;font-weight:800;font-display:swap;src:url(assets/landing/fonts/inter-latin-800-normal.woff2) format("woff2")}
+:root{
+  --gold:#f0b71c;
+  --gold-light:#fbcb44;
+  --gold-text:#e2aa14;
+  --gold-deep:#c58d03;
+  --ink:#0e0b02;
+  --ink-2:#121212;
+  --text:#1a1a1a;
+  --muted:#5f5f5f;
+  --band:#fef9e7;
+  --line:#ececec;
+  --wrap:1312px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--text);background:#fff;line-height:1.5;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+.wrap{width:100%;max-width:var(--wrap);margin:0 auto;padding:0 28px}
+.wrap.wide{max-width:1376px}
+.i{width:1em;height:1em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+:focus-visible{outline:3px solid var(--gold-light);outline-offset:3px;border-radius:6px}
+
+/* ───────── Boutons ───────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:44px;padding:0 20px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;border:1.5px solid transparent;transition:transform .15s ease,box-shadow .2s ease,background .2s ease,color .2s ease;white-space:nowrap}
+.btn .i{font-size:18px}
+.btn-gold{background:linear-gradient(90deg,var(--gold) 0%,var(--gold-light) 100%);color:#17120a;box-shadow:0 8px 24px rgba(240,183,28,.22)}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(240,183,28,.34)}
+.btn-ghost{background:rgba(0,0,0,.25);color:#fff;border-color:var(--gold-deep)}
+.btn-ghost:hover{background:rgba(240,183,28,.12);border-color:var(--gold)}
+.btn-sm{height:36px;padding:0 16px;font-size:13px;gap:8px;border-radius:7px}
+.btn-sm .i{font-size:16px}
+
+/* ───────── Hero ───────── */
+.hero{position:relative;background:var(--ink);color:#fff;overflow:hidden;min-height:480px}
+.hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(70% 90% at 78% 20%,rgba(120,98,60,.28),transparent 70%),
+  linear-gradient(180deg,#0b0903 0%,#0e0b02 100%)}
+.hero-art{position:absolute;right:0;bottom:0;width:min(56%,820px);aspect-ratio:646/382;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 24%),linear-gradient(180deg,transparent 0,#000 14%);
+  -webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent 0,#000 24%),linear-gradient(180deg,transparent 0,#000 14%);mask-composite:intersect}
+.hero-art img{width:100%;height:100%;object-fit:cover}
+.hero-art::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--ink) 0,transparent 22%);pointer-events:none}
+
+header.nav{position:fixed;top:0;left:0;right:0;z-index:50;transition:background .25s ease,box-shadow .25s ease,backdrop-filter .25s ease}
+header.nav.solid{background:rgba(14,11,2,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 1px 0 rgba(240,183,28,.22),0 8px 24px rgba(0,0,0,.25)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:64px;gap:24px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{width:38px;height:38px;border-radius:50%}
+.brand-t{display:flex;flex-direction:column;line-height:1.1}
+.brand-n{white-space:nowrap;font-weight:800;font-size:15px;letter-spacing:.07em;color:#fff}
+.brand-n b{color:var(--gold-text);font-weight:800}
+.brand-s{font-size:8.5px;letter-spacing:.22em;color:var(--gold-deep);margin-top:5px;font-weight:600;text-transform:uppercase}
+.nav-links{display:flex;gap:36px;font-size:13px;font-weight:500;color:#ececec}
+.nav-links a{white-space:nowrap;position:relative;padding:6px 0;transition:color .2s}
+.nav-links a:hover{color:var(--gold-light)}
+.burger{display:none;background:none;border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;width:42px;height:42px;cursor:pointer;align-items:center;justify-content:center}
+
+.hero-in{position:relative;z-index:2;padding:120px 28px 56px}
+.hero-copy{max-width:560px}
+.hero h1{font-size:clamp(26px,2.7vw,38px);line-height:1.08;font-weight:800;letter-spacing:-.02em;color:#fff}
+.hero h1 span{display:block;color:var(--gold-text)}
+@media (min-width:861px){.hero h1 span{white-space:nowrap}}
+.hero p.lead{margin-top:18px;font-size:15px;line-height:1.55;color:#d7d3cb;max-width:470px}
+.hero-cta{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap}
+.trust{display:flex;gap:28px;margin-top:28px;flex-wrap:wrap}
+.trust div{display:flex;align-items:center;gap:8px;font-size:12px;color:#e6e2da;font-weight:500}
+.trust .i{color:var(--gold-text);font-size:24px;stroke-width:1.5}
+
+/* ───────── Sections communes ───────── */
+section{position:relative}
+.eyebrow{display:block;text-align:center;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gold-deep)}
+.h2{font-size:clamp(20px,2.1vw,26px);line-height:1.18;font-weight:800;letter-spacing:-.015em;color:#0a0a0a}
+.ico{flex:none;display:grid;place-items:center;border-radius:50%;color:#fff;background:linear-gradient(145deg,#e0a712 0%,#c58d03 70%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18),0 4px 12px rgba(197,141,3,.22)}
+
+/* ───────── Fonctionnalités ───────── */
+.features{padding:52px 0 50px;background:#fff}
+.features .h2{text-align:center;margin-top:8px}
+.features .sub{text-align:center;color:var(--muted);font-size:13.5px;margin:10px auto 32px;max-width:760px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{display:flex;gap:14px;align-items:flex-start;padding:20px 18px;border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:0 2px 10px rgba(20,20,20,.03);transition:box-shadow .2s ease,border-color .2s ease}
+.card:hover{border-color:#f0dca0;box-shadow:0 8px 24px rgba(197,141,3,.10)}
+.card .ico{width:42px;height:42px}
+.card .ico .i{font-size:21px}
+.card h3{font-size:13.5px;font-weight:700;color:#0a0a0a;margin-top:2px}
+.card p{font-size:12px;line-height:1.5;color:var(--muted);margin-top:4px}
+
+/* ───────── Interface moderne ───────── */
+.ui{background:var(--band);padding:46px 0}
+.ui-grid{display:grid;grid-template-columns:1.12fr 1fr;gap:56px;align-items:center}
+.ui-shot img{width:100%;height:auto;border-radius:16px;box-shadow:0 22px 44px rgba(60,40,0,.28),0 2px 6px rgba(0,0,0,.2)}
+.ui-copy .eyebrow{text-align:left}
+.ui-copy .h2{margin-top:6px;font-size:clamp(19px,2vw,24px)}
+.ui-copy>p{margin-top:12px;color:#4b4b4b;font-size:13.5px;line-height:1.55;max-width:440px}
+.points{display:grid;gap:10px;margin-top:18px}
+.point{display:flex;gap:16px;align-items:center}
+.point .ico{width:40px;height:40px}
+.point .ico .i{font-size:20px}
+.point h3{font-size:13.5px;font-weight:700;color:#0a0a0a}
+.point p{font-size:12px;color:var(--muted);margin-top:1px}
+
+/* ───────── Pourquoi ───────── */
+.why{padding:42px 0 46px;background:#fff}
+.why .h2{text-align:center;margin-top:8px}
+.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:28px}
+.why-item{display:flex;gap:18px;align-items:center}
+.why-item .ico{width:50px;height:50px}
+.why-item .ico .i{font-size:24px}
+.why-item h3{font-size:13.5px;font-weight:700;color:#0a0a0a}
+.why-item p{font-size:12px;line-height:1.5;color:var(--muted);margin-top:4px}
+
+/* ───────── Appel à l'action ───────── */
+.cta{background:#090804;color:#fff;overflow:hidden}
+.cta-art{position:absolute;right:0;top:0;bottom:0;width:62%;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 38%);mask-image:linear-gradient(90deg,transparent 0,#000 38%)}
+.cta-art img{width:100%;height:100%;object-fit:cover;object-position:left center}
+.cta-art::after{content:"";position:absolute;inset:0;background:rgba(9,8,4,.45)}
+.cta-in{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:40px;padding-top:40px;padding-bottom:40px}
+.cta h2{font-size:clamp(19px,2vw,24px);font-weight:800;line-height:1.2;letter-spacing:-.01em}
+.cta h2 span{color:var(--gold-text)}
+.cta p{margin-top:6px;font-size:13px;color:#dcd8cf}
+.cta .btn{margin-top:16px}
+.stats{display:flex;gap:0}
+.stat{padding:2px 34px;text-align:left;border-left:1px solid rgba(255,255,255,.14)}
+.stat:first-child{border-left:0}
+.stat strong{display:block;font-size:21px;font-weight:800;color:var(--gold-text);line-height:1.1}
+.stat span{display:block;margin-top:4px;font-size:12px;color:#d7d3cb}
+
+
+/* ───────── Tarifs ───────── */
+.pricing{background:var(--band);padding:46px 0}
+.pricing-box{max-width:760px;margin:0 auto;text-align:center}
+.pricing .h2{margin-top:6px}
+.pricing p{margin:12px auto 0;color:#4b4b4b;font-size:13.5px;line-height:1.6;max-width:600px}
+.pricing .btn-row{display:flex;gap:12px;justify-content:center;margin-top:22px;flex-wrap:wrap}
+.btn-outline{background:#fff;color:#1a1408;border-color:#e3c466}
+.btn-outline:hover{background:#fffaf0;border-color:var(--gold-deep)}
+.btn-outline .wa{width:18px;height:18px;fill:#1fa855;flex:none}
+
+/* ───────── Contact ───────── */
+.contact{background:#fff;padding:46px 0 50px}
+.contact .h2{text-align:center;margin-top:6px}
+.contact .sub{text-align:center;color:var(--muted);font-size:13.5px;margin:10px auto 28px;max-width:560px}
+.c-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1000px;margin:0 auto}
+.c-card{display:flex;gap:14px;align-items:flex-start;padding:20px 18px;border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:0 2px 10px rgba(20,20,20,.03)}
+.c-card .ico{width:42px;height:42px}
+.c-card .ico .i{font-size:20px}
+.c-card h3{font-size:13.5px;font-weight:700;color:#0a0a0a}
+.c-card .lines{display:grid;gap:3px;margin-top:6px;font-size:13px}
+.c-card .lines a{color:#3a3a3a;overflow-wrap:anywhere;transition:color .2s}
+.c-card .lines a:hover{color:var(--gold-deep);text-decoration:underline;text-underline-offset:3px}
+.c-card small{display:block;margin-top:6px;font-size:11.5px;color:var(--muted)}
+
+/* ───────── WhatsApp flottant ───────── */
+.wa-float{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:60;width:46px;height:46px;border-radius:50%;background:#25d366;display:grid;place-items:center;box-shadow:0 4px 14px rgba(0,0,0,.28);opacity:.92;transition:opacity .2s ease,transform .2s ease}
+.wa-float:hover{opacity:1;transform:scale(1.06)}
+.wa-float svg{width:26px;height:26px;fill:#fff}
+
+/* ───────── Pied de page ───────── */
+footer{background:var(--ink-2);color:#cfcfcf}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:24px;height:64px;font-size:12px}
+.foot .brand img{width:30px;height:30px}
+.foot .brand-n{font-size:12px;letter-spacing:.08em}
+.foot .brand-s{font-size:7px;margin-top:3px;letter-spacing:.22em}
+.foot-links{display:flex;gap:30px}
+.foot-links a:hover{color:var(--gold-light)}
+.foot small{font-size:11.5px;color:#a7a7a7}
+
+/* ───────── Responsive ───────── */
+@media (max-width:1100px){
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .why-grid{grid-template-columns:repeat(2,1fr);gap:30px}
+  .ui-grid{grid-template-columns:1fr;gap:34px}
+  .ui-copy .eyebrow{text-align:center}
+  .nav-links{gap:28px}
+  .cta-in{flex-direction:column;align-items:flex-start}
+  .cta-art{width:100%;opacity:.6}
+  .c-grid{grid-template-columns:1fr;max-width:520px}
+}
+@media (max-width:860px){
+  .burger{display:inline-flex}
+  .nav-links{display:none;position:absolute;top:64px;left:16px;right:16px;flex-direction:column;gap:0;background:rgba(14,11,2,.97);border:1px solid rgba(240,183,28,.25);border-radius:12px;padding:8px 18px}
+  .nav-links.open{display:flex}
+  .nav-links a{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+  .nav-links a:last-child{border-bottom:0}
+  .nav-cta{display:none}
+  .hero{min-height:0;display:flex;flex-direction:column}
+  .hero-in{order:1;padding:120px 22px 30px}
+  .hero-art{order:2;position:relative;width:100%;margin-top:0}
+  .foot{flex-direction:column;height:auto;padding:22px 0;text-align:center}
+  .foot-links{flex-wrap:wrap;justify-content:center;gap:12px 22px}
+}
+@media (max-width:640px){
+  .wrap{padding-left:20px;padding-right:20px}
+  .cards,.why-grid{grid-template-columns:1fr}
+  .btn{width:100%}
+  .nav-in .btn{width:auto}
+  .trust{gap:18px}
+  .stats{flex-wrap:wrap;gap:16px 0}
+  .stat{padding:2px 22px}
+  .stat:first-child{padding-left:0}
+  .brand-s{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition:none!important}
+}
 </style>
-  <link rel="stylesheet" href="styles/gp-maintenance-security.css?v=local-maintenance-v1">
-
-<style id="gp-location-context-nav">
-  .gp-location-context-nav{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 0 14px;padding:5px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;width:max-content;max-width:100%;}
-  .gp-location-context-nav button{border:0;background:transparent;color:#64748b;border-radius:7px;padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
-  .gp-location-context-nav button:hover{background:#fff;color:#334155;}
-  .gp-location-context-nav button.active{background:#fff;color:#111827;box-shadow:0 1px 3px rgba(15,23,42,.10);}
-  .gp-location-context-nav .material-symbols-rounded{font-size:16px;}
-  @media(max-width:700px){.gp-location-context-nav{width:100%;overflow:auto;flex-wrap:nowrap}.gp-location-context-nav button{white-space:nowrap;}}
-</style>
-
-<link rel="stylesheet" href="js/core/v31-edit-drawer-alignment.css">
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+<symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+<symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+<symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="i-tablet" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+<symbol id="i-euro" viewBox="0 0 24 24"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+<symbol id="i-cog" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 12h16"/><path d="M4 6h16"/><path d="M4 18h16"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+<symbol id="i-wa" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol>
+</svg>
 
-<div id="gpSplash"><div class="gp-splash-card"><img class="gp-splash-logo" src="assets/logo.svg" alt=""><div class="gp-splash-title">Genius Property</div><div class="gp-splash-line"></div></div></div>
 
-<!-- ==================== CONNEXION — ESPACE INTERNE AGENCE ==================== -->
-<div id="loginPage" style="display:none">
-  <canvas id="particles"></canvas>
-  <div class="ln-blob ln-blob-1"></div>
-  <div class="ln-blob ln-blob-2"></div>
-  <div class="ln-blob ln-blob-3"></div>
-
-  <div class="login-left">
-    <div class="ln-brand">
-      <img class="ln-logo-img" src="assets/logo.svg" alt="Genius Property Logo" width="400" height="400" fetchpriority="high">
-      <div class="ln-brand-text">
-        <div class="ln-brand-name">GENIUS PROPERTY</div>
-        <div class="ln-brand-sub">Gestion Immobilière</div>
-      </div>
-    </div>
-    <div class="ln-headline">
-      <h1>Votre patrimoine,<br><span>géré avec excellence.</span></h1>
-      <p>Un espace interne, sécurisé et complet pour gérer les biens, les propriétaires, les locataires et les finances de votre agence.</p>
-    </div>
-    <div class="ln-divider"></div>
-    <div class="ln-features">
-      <div class="ln-feat-pill"><span class="material-symbols-rounded">home_work</span> Gestion de biens</div>
-      <div class="ln-feat-pill"><span class="material-symbols-rounded">description</span> Contrats officiels</div>
-      <div class="ln-feat-pill"><span class="material-symbols-rounded">payments</span> Suivi paiements</div>
-      <div class="ln-feat-pill"><span class="material-symbols-rounded">bar_chart</span> Rapports & analyses</div>
-      <div class="ln-feat-pill"><span class="material-symbols-rounded">shield</span> 100% sécurisé</div>
-    </div>
-    <div class="ln-stats">
-      <div>
-        <div class="ln-stat-num">360°</div>
-        <div class="ln-stat-lbl">Vision complète</div>
-      </div>
-      <div style="width:1px;background:rgba(212,175,55,.12)"></div>
-      <div>
-        <div class="ln-stat-num">100%</div>
-        <div class="ln-stat-lbl">Local & sécurisé</div>
-      </div>
-      <div style="width:1px;background:rgba(212,175,55,.12)"></div>
-      <div>
-        <div class="ln-stat-num">Pro</div>
-        <div class="ln-stat-lbl">Qualité premium</div>
-      </div>
-    </div>
-    <!-- Signature discrète -->
-    <div class="ln-signature">by <span>Genius Immo & BTP</span></div>
-  </div>
-
-  <div class="login-right">
-    <div class="login-box">
-      <div class="lb-logo-wrap">
-        <img class="lb-logo" src="assets/logo.svg" alt="Logo">
-        <div class="lb-title">Accès Sécurisé</div>
-        <div class="lb-subtitle">Espace interne de l’agence</div>
-      </div>
-      <div class="lb-accent"></div>
-      <div class="lfield">
-        <span class="material-symbols-rounded mat">person</span>
-        <input type="text" id="lu" placeholder="Identifiant" autocomplete="username" value="admin">
-      </div>
-      <div class="lfield">
-        <span class="material-symbols-rounded mat">lock</span>
-        <input type="password" id="lp" placeholder="Mot de passe" autocomplete="current-password" value="admin123">
-        <span class="material-symbols-rounded mat" style="font-size:18px;cursor:pointer;opacity:.5;transition:.2s" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=.5" onclick="tglPwd()">visibility</span>
-      </div>
-      <button class="login-btn-main" id="loginBtn" onclick="window.gpSupabaseLoginFromButton && window.gpSupabaseLoginFromButton(event)">Se connecter</button>
-      <div class="auth-error" id="authError"></div>
-      <button type="button" onclick="GPLoginSupabaseConfig.open()" style="margin-top:10px;width:100%;border:1px solid rgba(212,175,55,.35);background:rgba(212,175,55,.08);color:#d4af37;border-radius:10px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer">
-        ⚙ Configurer Supabase
-      </button>
-
-      <!-- Mot de passe oublié — flow inline -->
-      <div id="forgotFlow" style="display:none;margin-top:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:16px">
-        <div style="font-size:13px;color:#e5e5e5;margin-bottom:10px;font-weight:500">
-          <span class="material-symbols-rounded" style="font-size:15px;vertical-align:middle;margin-right:4px">lock_reset</span>
-          Réinitialisation du mot de passe
-        </div>
-        <div style="font-size:11px;color:#9ca3af;margin-bottom:10px;line-height:1.5">
-          Entrez votre email ci-dessous. Vous recevrez un lien pour choisir un nouveau mot de passe.
-        </div>
-        <div style="display:flex;gap:8px">
-          <input id="forgotEmail" type="email" placeholder="votre@email.com"
-            style="flex:1;padding:8px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-size:12px">
-          <button onclick="sendResetEmail()"
-            style="padding:8px 14px;border-radius:7px;border:none;background:var(--gold);color:#fff;font-size:12px;cursor:pointer;font-weight:500;white-space:nowrap">
-            Envoyer
-          </button>
-        </div>
-        <div id="forgotMsg" style="font-size:11px;margin-top:8px;min-height:14px"></div>
-        <button onclick="toggleForgotFlow(false)"
-          style="margin-top:8px;background:none;border:none;color:#9ca3af;font-size:11px;cursor:pointer;padding:0">
-          ← Retour à la connexion
-        </button>
-      </div>
-      <div id="forgotLink" class="login-hint">
-        <a onclick="toggleForgotFlow(true)" style="cursor:pointer">
-          <span class="material-symbols-rounded" style="font-size:12px">lock_reset</span> Mot de passe oublié ?
-        </a>
-      </div>
-      <div class="lb-security">
-        <span class="material-symbols-rounded">shield</span>
-        Données chiffrées et stockées localement
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ==================== APP ==================== -->
-<div class="app-wrap" id="app" style="display:none">
-
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <img src="assets/extracted/inline-image-f07d7f26fa.png" onclick="navigate('dashboard')" title="Retour à l'accueil" alt="Genius Property" id="sidebar-logo">
-  <ul class="menu" id="sideMenu" aria-label="Navigation principale">
-    <li class="active" data-page="dashboard"><span class="material-symbols-rounded">home</span> Tableau de bord</li>
-
-    <li class="menu-section" data-menu-section="gestion" aria-hidden="true">GESTION</li>
-    <li data-page="biens"><span class="material-symbols-rounded">home_work</span> Biens</li>
-    <li data-page="proprietaires"><span class="material-symbols-rounded">person</span> Propriétaires</li>
-    <li data-page="locatives"><span class="material-symbols-rounded">door_front</span> Locations</li>
-
-    <li class="menu-section" data-menu-section="finance" aria-hidden="true">FINANCE</li>
-    <li data-page="paiements"><span class="material-symbols-rounded">payments</span> Encaissements</li>
-    <li data-page="depenses"><span class="material-symbols-rounded">account_balance_wallet</span> Dépenses</li>
-    <li data-page="situation"><span class="material-symbols-rounded">request_quote</span> Situation propriétaires</li>
-
-    <li class="menu-section" data-menu-section="activite" aria-hidden="true">ACTIVITÉ</li>
-    <li data-page="messages"><span class="material-symbols-rounded">mail</span> Messages</li>
-    <li data-page="journal" id="menuJournal"><span class="material-symbols-rounded">manage_search</span> Journal</li>
-
-    <li class="menu-section" data-menu-section="administration" aria-hidden="true">ADMINISTRATION</li>
-    <li data-page="employes"><span class="material-symbols-rounded">badge</span> Équipe</li>
-    <li data-page="parametres"><span class="material-symbols-rounded">settings</span> Paramètres</li>
-    <li data-page="admin-stockage"><span class="material-symbols-rounded">build</span> Maintenance &amp; Sécurité</li>
-  </ul>
-  <ul class="menu-logout">
-    <li class="logout" onclick="doLogout()"><span class="material-symbols-rounded">logout</span> Déconnexion</li>
-  </ul>
-</aside>
-
-<!-- Sidebar grouping: keeps the navigation short while respecting existing data-page routing. -->
-<script>
-(function(){
-  function refreshSidebarSections(){
-    var menu=document.getElementById('sideMenu');
-    if(!menu) return;
-    var section=null;
-    Array.prototype.forEach.call(menu.children,function(el){
-      if(el.classList && el.classList.contains('menu-section')){
-        if(section) section.hidden=!section._hasVisible;
-        section=el; section._hasVisible=false; return;
-      }
-      if(section && el.matches && el.matches('li[data-page]')){
-        var cs=getComputedStyle(el);
-        if(cs.display!=='none' && !el.hidden) section._hasVisible=true;
-      }
-    });
-    if(section) section.hidden=!section._hasVisible;
-  }
-  window.refreshSidebarSections=refreshSidebarSections;
-  document.addEventListener('DOMContentLoaded',function(){
-    refreshSidebarSections();
-    var menu=document.getElementById('sideMenu');
-    if(menu){
-      new MutationObserver(refreshSidebarSections).observe(menu,{subtree:true,attributes:true,attributeFilter:['style','class','hidden']});
-    }
-  });
-})();
-</script>
-
-<!-- MAIN -->
-<main class="content" id="mainContent">
-
-  <!-- TOPBAR (shared) -->
-  <header class="topbar" id="topbar">
-    <div id="globalBreadcrumb" class="topbar-breadcrumb gp-global-breadcrumb"></div>
-    <div class="top-icons">
-      <div id="syncIndicator" style="display:none;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;transition:.2s"></div>
-      <!-- Recherche -->
-      <div class="u-rel">
-        <button class="tb-icon-btn" id="topbarSearchBtn" title="Rechercher"><span class="material-symbols-rounded">search</span></button>
-        <div id="topbarSearchDrop" class="u-dropdown-popup" style="display:none;width:260px">
-          <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #f5f5f5">
-            <span class="material-symbols-rounded" style="font-size:15px;color:#D4AF37;flex-shrink:0">search</span>
-            <input id="topbarSearchInput" type="text" placeholder="Rechercher…" autocomplete="off"
-              style="flex:1;border:none;outline:none;font-size:12.5px;font-family:'Inter',sans-serif;color:#111;background:transparent"
-              oninput="runTopbarSearch(this.value)"
-              onkeydown="if(event.key==='Escape')closeTopbarSearch()">
-          </div>
-          <div id="topbarSearchResults" style="max-height:220px;overflow-y:auto">
-            <div style="padding:16px;text-align:center;font-size:12px;color:#9ca3af">Tapez pour rechercher…</div>
-          </div>
-        </div>
-      </div>
-      <!-- Aide -->
-      <button class="tb-icon-btn" id="helpBtn" title="Aide" style="position:relative"><span class="material-symbols-rounded">help</span></button>
-      <!-- Agenda -->
-      <button class="tb-icon-btn" id="topbarAgendaBtn" title="Agenda" style="position:relative">
-        <span class="material-symbols-rounded">calendar_month</span>
-        <span id="agendaTopbarDot" style="display:none;position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:#16a34a;border:1.5px solid white"></span>
-      </button>
-      <!-- Messages -->
-      <button class="tb-icon-btn" id="topbarMessagesBtn" title="Messages"><span class="material-symbols-rounded">mail</span></button>
-      <!-- Notifications -->
-      <button class="tb-icon-btn" title="Notifications" id="notifBtn" style="position:relative"><span class="material-symbols-rounded">notifications</span><span class="tb-notif-dot" id="notifDot"></span><span class="tb-notif-count" id="notifCount" style="display:none"></span></button>
-      <!-- Thème -->
-      <button class="tb-icon-btn" title="Mode jour/nuit" id="themeIcon"><span class="material-symbols-rounded">dark_mode</span></button>
-      <div class="tb-sep"></div>
-      <!-- Profil utilisateur style card -->
-      <div class="user-box" onclick="toggleUM()">
-        <div class="user-avatar" id="topbarAvatar" style="background:linear-gradient(135deg,#D4AF37,#f5d56a)!important;border-radius:50%!important;width:30px!important;height:30px!important;min-width:30px!important;max-width:30px!important;flex:0 0 30px!important;aspect-ratio:1/1!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:0 4px 12px rgba(212,175,55,.30)!important"><span class="material-symbols-rounded" style="font-size:20px;color:#111;font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24">person</span></div>
-        <div class="user-info">
-          <span class="user-name" id="gpUName">Chargement…</span>
-          <span class="user-role">Administrateur</span>
-        </div>
-        <span class="material-symbols-rounded user-chevron">expand_more</span>
-        <div class="user-menu" id="userMenu">
-          <div class="user-menu-header">
-            <div class="user-menu-avatar" id="menuAvatar">A</div>
-            <div class="user-menu-meta">
-              <span class="user-menu-name" id="gpUserMenuName"></span>
-              <span class="user-menu-email">admin@geniusproperty.com</span>
-            </div>
-          </div>
-          <div class="menu-item" onclick="openProfilModal();toggleUM()"><span class="material-symbols-rounded">person</span> Mon profil</div>
-          <div class="menu-divider"></div>
-          <div class="menu-item menu-item-danger" onclick="doLogout()"><span class="material-symbols-rounded">logout</span> Déconnexion</div>
-        </div>
-      </div>
+<!-- ============ HERO ============ -->
+<section class="hero" id="accueil">
+  <header class="nav">
+    <div class="wrap nav-in">
+      <a class="brand" href="#accueil" aria-label="Genius Property — accueil">
+        <img src="assets/logo.svg" alt="" width="44" height="44">
+        <span class="brand-t">
+          <span class="brand-n">GENIUS <b>PROPERTY</b></span>
+          <span class="brand-s">Gestion immobilière</span>
+        </span>
+      </a>
+      <nav class="nav-links" id="navLinks" aria-label="Navigation principale">
+        <a href="#accueil">Accueil</a>
+        <a href="#fonctionnalites">Fonctionnalités</a>
+        <a href="#pourquoi">Pourquoi nous ?</a>
+        <a href="#tarifs">Tarifs</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <a class="btn btn-gold btn-sm nav-cta" href="/connexion" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="#i-user"/></svg>Se connecter<svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+      <button class="burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navLinks"><svg class="i" aria-hidden="true"><use href="#i-menu"/></svg></button>
     </div>
   </header>
 
-  <!-- Overlay et boites recherche (conservés vides pour compatibilité) -->
-  <div id="globalSearchOverlay" style="display:none"></div>
-  <div id="globalSearchBox" style="display:none"></div>
+  <div class="hero-art"><img src="assets/landing/hero-devices.jpg" alt="Tableau de bord Genius Property sur ordinateur portable et liste des biens sur smartphone" width="646" height="382" fetchpriority="high"></div>
 
-  <!-- ====== APPLICATION PAGE MOUNTS ====== -->
-  <!-- These mounts are intentionally empty: the active renderer owns their content. -->
-  <div class="page" id="page-dashboard"></div>
-  <div class="page" id="page-biens"></div>
-  <div class="page" id="page-bien-detail" style="display:none"></div>
-  <div class="page" id="page-proprietaires"><div id="gpProprietairesModern" class="gp-modern-zone" style="padding:0"></div></div>
-  <div class="page" id="page-locatives"></div>
-  <div class="page" id="page-locataires"></div>
-  <div class="page" id="page-contrats"></div>
-  <div class="page" id="page-paiements"></div>
-  <div class="page" id="page-depenses"></div>
-  <div class="page" id="page-situation"></div>
-  <div class="page" id="page-employes"></div>
-  <div class="page" id="page-messages"></div>
-  <div class="page" id="page-journal"></div>
-  <div class="page" id="page-fichiers"></div>
-  <div class="page" id="page-droits"></div>
-
-  <!-- ====== JOURNAL D'ACTIVITÉ — V20 ====== --><div class="page" id="page-agenda">
-    <div class="page-hero" style="--hero-color:#D4AF37">
-      <div class="page-hero-icon"><span class="material-symbols-rounded">calendar_month</span></div>
-      <div class="page-hero-text">
-        <h3>Agenda</h3>
-        <p>Organisez vos rendez-vous et événements</p>
+  <div class="wrap hero-in">
+    <div class="hero-copy">
+      <h1>Votre patrimoine,<span>géré avec excellence.</span></h1>
+      <p class="lead">Genius Property est le logiciel de gestion immobilière complet pour les agences et gestionnaires locatifs. Gérez vos biens, propriétaires, locataires, contrats et paiements depuis une seule plateforme.</p>
+      <div class="hero-cta">
+        <a class="btn btn-gold" href="/connexion" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="#i-user"/></svg>Se connecter<svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+        <a class="btn btn-ghost" href="#fonctionnalites">Découvrir l’application<svg class="i" aria-hidden="true"><use href="#i-arrow-down"/></svg></a>
       </div>
-    </div>
-    <div id="agendaPageMount" class="agenda-page-mount"></div>
-  </div>
-
-  <div class="page" id="page-agenda-employes">
-      <div class="journal-modern-head" style="margin-bottom:12px">
-        <div class="journal-modern-title">
-          <div class="journal-modern-icon"><span class="material-symbols-rounded">event_note</span></div>
-          <div>
-            <h2>Agenda employés</h2>
-            <p>Planifiez et suivez les missions de chaque employé</p>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div id="missionDoneCount" style="font-size:11px;color:#16a34a;font-weight:800;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:3px 10px;display:none"></div>
-          <button class="btn btn-primary" onclick="openEmpMissionModal()"><span class="material-symbols-rounded" style="font-size:16px">add_task</span> Nouvelle mission</button>
-        </div>
-      </div>
-      <div class="emp-agenda-page">
-        <aside class="emp-agenda-side">
-          <div class="emp-agenda-side-head">
-            <div class="emp-agenda-title"><span class="material-symbols-rounded">group</span><span>Employés</span></div>
-            <div class="journal-search" style="min-width:0"><span class="material-symbols-rounded">search</span><input id="empAgendaSearch" type="search" placeholder="Rechercher un employé…" oninput="renderEmployeeAgenda()"></div>
-          </div>
-          <div id="empAgendaEmployeeList" class="emp-agenda-employee-list"></div>
-        </aside>
-        <section class="emp-agenda-main">
-          <div class="emp-agenda-top">
-            <div class="emp-agenda-who">
-              <div id="empAgendaAvatar" class="emp-agenda-big-avatar">--</div>
-              <div><div id="empAgendaName" class="emp-agenda-name">Sélectionnez un employé</div><div id="empAgendaRole" class="emp-agenda-role">Planifiez et suivez les missions</div></div>
-            </div>
-          </div>
-          <div class="emp-agenda-body">
-            <div class="emp-calendar-zone">
-              <div class="emp-calendar-head">
-                <button class="msg-mail-icon-btn" onclick="empAgendaPrevMonth()"><span class="material-symbols-rounded">chevron_left</span></button>
-                <h3 id="empAgendaMonthLabel"></h3>
-                <button class="msg-mail-icon-btn" onclick="empAgendaNextMonth()"><span class="material-symbols-rounded">chevron_right</span></button>
-              </div>
-              <div class="emp-calendar-grid" id="empAgendaWeekdays"></div>
-              <div class="emp-calendar-grid" id="empAgendaGrid"></div>
-            </div>
-            <aside class="emp-list-zone">
-              <div class="emp-list-head"><h3 id="empAgendaDayTitle">Missions du jour</h3><p id="empAgendaDayDate"></p></div>
-              <div id="empAgendaMissions" class="emp-mission-list"></div>
-              <div id="missionDoneList" style="padding:0 10px 10px"></div>
-            </aside>
-          </div>
-        </section>
-      </div>
-    </div>
-
-
-  
-
-  <!-- ====== MESSAGES — V20 ====== --><!-- ====== ADMIN SAAS ====== -->
-
-  <div class="page" id="page-rapports">
-    <div class="page-hero" style="--hero-color:#2563eb">
-      <div class="page-hero-icon"><span class="material-symbols-rounded">bar_chart</span></div>
-      <div class="page-hero-text">
-        <h3>Rapports</h3>
-        <p>Synthèse financière, occupation et indicateurs clés</p>
-      </div>
-    </div>
-
-    <div id="rpt-content" class="gp-card" style="padding:18px;border-radius:18px;background:#fff;border:1px solid #e5e7eb">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px">
-        <div>
-          <h2 style="margin:0;font-size:20px">Rapport d'activité</h2>
-          <p style="margin:4px 0 0;color:#64748b;font-size:13px">Vue globale des revenus, dépenses et locations</p>
-        </div>
-        <button class="btn btn-primary" onclick="exportRapportPDF()"><span class="material-symbols-rounded" style="font-size:16px">picture_as_pdf</span> Export PDF</button>
-      </div>
-
-      <div class="kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px">
-        <div class="kpi-card"><span>Revenus encaissés</span><strong id="rpt-rev">0 FCFA</strong></div>
-        <div class="kpi-card"><span>Dépenses</span><strong id="rpt-dep">0 FCFA</strong></div>
-        <div class="kpi-card"><span>Résultat net</span><strong id="rpt-net">0 FCFA</strong></div>
-        <div class="kpi-card"><span>Taux d'occupation</span><strong id="rpt-taux">0 %</strong></div>
-      </div>
-
-      <div class="kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px">
-        <div class="kpi-card"><span>Paiements</span><strong id="rpt-nb-pay">0</strong></div>
-        <div class="kpi-card"><span>Impayés</span><strong id="rpt-nb-imp">0</strong></div>
-        <div class="kpi-card"><span>Contrats actifs</span><strong id="rpt-nb-ct">0</strong></div>
-        <div class="kpi-card"><span>Locataires actifs</span><strong id="rpt-nb-lc">0</strong></div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
-        <div class="gp-card" style="padding:14px;border:1px solid #e5e7eb;border-radius:16px"><h3 style="margin:0 0 10px;font-size:15px">Revenus / dépenses</h3><canvas id="rptBar" height="180"></canvas></div>
-        <div class="gp-card" style="padding:14px;border:1px solid #e5e7eb;border-radius:16px"><h3 style="margin:0 0 10px;font-size:15px">Statut locatif</h3><canvas id="rptDonut" height="180"></canvas></div>
+      <div class="trust">
+        <div><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg>100% sécurisé</div>
+        <div><svg class="i" aria-hidden="true"><use href="#i-tablet"/></svg>Accessible partout</div>
+        <div><svg class="i" aria-hidden="true"><use href="#i-chart"/></svg>Simple et intuitif</div>
       </div>
     </div>
   </div>
+</section>
 
-  <!-- ====== MAINTENANCE & SÉCURITÉ ====== -->
-  <div class="page" id="page-sync">
-    <div id="gp-sync-root"></div>
+<!-- ============ FONCTIONNALITÉS ============ -->
+<section class="features" id="fonctionnalites">
+  <div class="wrap wide">
+    <span class="eyebrow">Une solution complète</span>
+    <h2 class="h2">Tout ce dont vous avez besoin pour gérer votre activité immobilière</h2>
+    <p class="sub">Genius Property centralise tous les aspects de la gestion locative dans un seul espace, sécurisé et accessible depuis votre navigateur.</p>
+
+    <div class="cards">
+      <article class="card"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg></div><div><h3>Gestion des biens</h3><p>Ajoutez et suivez tous vos biens immobiliers avec leurs caractéristiques.</p></div></article>
+      <article class="card"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg></div><div><h3>Propriétaires</h3><p>Gérez vos propriétaires et suivez leurs informations.</p></div></article>
+      <article class="card"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg></div><div><h3>Locataires</h3><p>Retrouvez facilement les informations de vos locataires.</p></div></article>
+      <article class="card"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg></div><div><h3>Contrats</h3><p>Créez et suivez vos contrats de location.</p></div></article>
+
+      <article class="card"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-euro"/></svg></div><div><h3>Paiements</h3><p>Suivez les loyers, charges et échéances.</p></div></article>
+      <article class="card"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-folder"/></svg></div><div><h3>Documents</h3><p>Centralisez tous vos documents importants.</p></div></article>
+      <article class="card"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-chart"/></svg></div><div><h3>Tableau de bord</h3><p>Une vision claire et complète de votre activité.</p></div></article>
+      <article class="card"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-cog"/></svg></div><div><h3>Utilisateurs</h3><p>Gérez les accès et les droits de votre équipe.</p></div></article>
+    </div>
   </div>
+</section>
 
-  <div class="page" id="page-admin-stockage">
-    <div id="gp-admin-stockage-root"></div>
-  </div>
-
-  <!-- ====== PARAMÈTRES ====== -->
-  <div class="page" id="page-parametres">
-    <div class="cfg-wrap">
-      <!-- Bloc Logo & identité -->
-      <div class="cfg-logo-card">
-        <div class="cfg-logo-inner">
-          <div class="cfg-logo-badge">
-            <img src="assets/extracted/inline-image-f4502e2766.png" style="width:48px;height:48px;object-fit:contain;" loading="lazy" decoding="async">
-          </div>
-          <div class="cfg-logo-text">
-            <span class="cfg-logo-name">Genius Property</span>
-            <span class="cfg-logo-tagline">Gestion Immobilière</span>
-          </div>
-        </div>
-        <div class="cfg-version-tag">v3 · Local Storage</div>
-      </div>
-
-      <!-- Grille de paramètres -->
-      <div class="cfg-grid">
-        <!-- Logo -->
-        <div class="cfg-section">
-          <div class="cfg-section-icon" style="background:#f0fdf4;color:#16a34a"><span class="material-symbols-rounded">add_photo_alternate</span></div>
-          <div class="cfg-section-body">
-            <h4 class="cfg-section-title">Logo de l'entreprise</h4>
-            <p class="cfg-section-desc">Ce logo apparaîtra sur tous les documents officiels générés (contrats, reçus, etc.).</p>
-            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-              <div id="cfg-logo-preview-wrap" style="width:90px;height:90px;border-radius:12px;border:2px dashed #d1d5db;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#f9fafb;cursor:pointer;transition:.2s;flex-shrink:0" onclick="document.getElementById('cfg-logo-input').click()" title="Cliquer pour changer le logo">
-                <img id="cfg-logo-preview" src="" style="display:none;width:100%;height:100%;object-fit:contain;border-radius:10px" loading="lazy" decoding="async">
-                <span id="cfg-logo-placeholder" class="material-symbols-rounded" style="font-size:36px;color:#d1d5db">add_photo_alternate</span>
-              </div>
-              <div style="flex:1;min-width:200px">
-                <input type="file" id="cfg-logo-input" accept="image/*" style="display:none" onchange="previewLogo(this)">
-                <button class="btn btn-primary" onclick="document.getElementById('cfg-logo-input').click()" style="margin-bottom:8px">
-                  <span class="material-symbols-rounded" style="font-size:15px">upload</span> Charger un logo
-                </button>
-                <button class="btn cfg-export-btn" onclick="removeLogo()" style="margin-bottom:8px">
-                  <span class="material-symbols-rounded" style="font-size:15px">delete</span> Supprimer
-                </button>
-                <p style="font-size:11px;color:#aaa;margin-top:4px">Formats acceptés : PNG, JPG, SVG — Max 2 Mo</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Agence -->
-        <div class="cfg-section">
-          <div class="cfg-section-icon"><span class="material-symbols-rounded">business</span></div>
-          <div class="cfg-section-body">
-            <h4 class="cfg-section-title">Informations de l'entreprise</h4>
-            <div class="fgrid g2">
-              <div class="fg"><label>Nom de l'agence <span>*</span></label><input id="cfg-agence" value="Genius Property" placeholder="Nom de l'agence"></div>
-              <div class="fg"><label>Email de contact</label><input type="email" id="cfg-email" value="contact@geniusproperty.com" placeholder="Email"></div>
-              <div class="fg"><label>Téléphone</label><input type="text" id="cfg-tel" placeholder="Ex: +221 33 XXX XX XX"></div>
-              <div class="fg"><label>Adresse</label><input type="text" id="cfg-adresse" placeholder="Ex: Dakar, Sénégal"></div>
-              <div class="fg"><label>RCCM</label><input type="text" id="cfg-rccm" placeholder="Numéro RCCM"></div>
-              <div class="fg"><label>NINEA</label><input type="text" id="cfg-ninea" placeholder="Numéro NINEA"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Préférences -->
-        <div class="cfg-section">
-          <div class="cfg-section-icon"><span class="material-symbols-rounded">tune</span></div>
-          <div class="cfg-section-body">
-            <h4 class="cfg-section-title">Préférences d'affichage</h4>
-            <div class="fgrid g2">
-              <div class="fg">
-                <label>Devise</label>
-                <select id="cfg-devise"><option selected>FCFA</option><option>EUR</option><option>USD</option></select>
-              </div>
-              <div class="fg">
-                <label>Thème</label>
-                <select id="cfg-theme" onchange="const _ti=document.querySelector('#themeIcon .material-symbols-rounded');if(this.value==='dark'){document.body.classList.add('dark');if(_ti)_ti.textContent='light_mode';}else{document.body.classList.remove('dark');if(_ti)_ti.textContent='dark_mode';}localStorage.setItem('geniusproperty_theme',this.value)">
-                  <option value="light">☀️ Clair</option>
-                  <option value="dark">🌙 Sombre</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Actions données -->
-        <div class="cfg-section">
-          <div class="cfg-section-icon" style="background:#fef3c7;color:#d97706"><span class="material-symbols-rounded">database</span></div>
-          <div class="cfg-section-body">
-            <h4 class="cfg-section-title">Gestion des données</h4>
-            <p class="cfg-section-desc">Exportez ou réinitialisez les données de l'application stockées dans votre navigateur.</p>
-            <div class="cfg-data-actions">
-              <button class="btn btn-primary" onclick="saveSettings()">
-                <span class="material-symbols-rounded" style="font-size:15px">save</span> Sauvegarder
-              </button>
-              <button class="btn cfg-export-btn" onclick="exportAllData()">
-                <span class="material-symbols-rounded" style="font-size:15px">file_download</span> Exporter tout
-              </button>
-              <button class="btn btn-danger" onclick="(async()=>{const ok=window.GPForms?await GPForms.confirm('Réinitialiser toutes les données ?', {title:'Réinitialisation', okText:'Réinitialiser'}):confirm('Réinitialiser toutes les données ?'); if(ok){localStorage.removeItem(GP_STORAGE_KEY);localStorage.removeItem('geniusproperty_db');location.reload();}})()">
-                <span class="material-symbols-rounded" style="font-size:15px">delete_forever</span> Réinitialiser
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer info -->
-      <!-- Bloc support -->
-      <div class="cfg-support-card">
-        <div class="cfg-support-left">
-          <div class="cfg-support-icon"><span class="material-symbols-rounded">headset_mic</span></div>
-          <div>
-            <div class="cfg-support-title">Besoin d'aide ?</div>
-            <div class="cfg-support-desc">Un problème ? Notre équipe vous répond rapidement.</div>
-            <div class="cfg-support-contacts">
-              <span class="cfg-support-contact-item">
-                <span class="material-symbols-rounded">call</span>
-                <span>🇸🇳 <a href="tel:+221775878004">+221 77 587 80 04</a> / <a href="tel:+221787781818">+221 78 778 18 18</a></span>
-              </span>
-              <span class="cfg-support-contact-item">
-                <span class="material-symbols-rounded">public</span>
-                <span>🌍 <a href="tel:+33661311802">+33 6 61 31 18 02</a></span>
-              </span>
-              <span class="cfg-support-contact-item">
-                <span class="material-symbols-rounded">mail</span>
-                <span><a href="mailto:support@geniusimmobtp.com">support@geniusimmobtp.com</a></span>
-              </span>
-            </div>
-          </div>
-        </div>
-        <button class="cfg-support-btn" onclick="window.location.href='mailto:support@geniusimmobtp.com'">
-          <span class="material-symbols-rounded">mail</span> Contacter le support
-        </button>
-      </div>
-
-      <div class="cfg-footer">
-        <span class="material-symbols-rounded" style="font-size:14px;color:#aaa">info</span>
-        <span>Genius Property V16 — Les données sont stockées localement dans votre navigateur (localStorage). Aucune donnée n'est envoyée sur un serveur.</span>
+<!-- ============ INTERFACE MODERNE ============ -->
+<section class="ui" id="interface">
+  <div class="wrap ui-grid">
+    <div class="ui-shot">
+      <img src="assets/landing/interface.png" alt="Page « Gestion des biens » : liste des biens avec loyer et statut" width="603" height="291" loading="lazy">
+    </div>
+    <div class="ui-copy">
+      <span class="eyebrow">Une interface moderne</span>
+      <h2 class="h2">Une gestion claire et efficace</h2>
+      <p>Une interface intuitive et moderne pour vous permettre de gagner du temps au quotidien. Retrouvez rapidement toutes les informations essentielles sur vos biens, vos locataires et vos paiements.</p>
+      <div class="points">
+        <div class="point"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-zap"/></svg></div><div><h3>Gain de temps</h3><p>Toutes vos informations en quelques clics.</p></div></div>
+        <div class="point"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-eye"/></svg></div><div><h3>Vue d’ensemble</h3><p>Un tableau de bord complet et personnalisé.</p></div></div>
+        <div class="point"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-tablet"/></svg></div><div><h3>Accessible partout</h3><p>Depuis votre ordinateur, tablette ou smartphone.</p></div></div>
       </div>
     </div>
   </div>
+</section>
 
-</main>
-</div><!-- /app-wrap -->
-
-<div id="pdfDoc" style="display:none;font-family:'Georgia',serif;color:#1a1a2e;background:#fff;max-width:794px;margin:0 auto">
-  <!-- En-tête agence -->
-  <div style="background:linear-gradient(135deg,#0F0F0F 0%,#1a1a2e 60%,#0F0F0F 100%);padding:36px 40px 28px;color:#fff;position:relative;overflow:hidden">
-    <div style="position:absolute;top:0;right:0;width:200px;height:100%;background:linear-gradient(to left,rgba(212,175,55,.15),transparent)"></div>
-    <div style="display:flex;justify-content:space-between;align-items:flex-start">
-      <div style="display:flex;align-items:flex-start;gap:16px">
-        <!-- Logo dynamique -->
-        <div id="pdf-logo-wrap" style="display:none;flex-shrink:0">
-          <img id="pdf-logo-img" src="" style="width:68px;height:68px;object-fit:contain;border-radius:8px;border:1px solid rgba(212,175,55,.3);background:rgba(255,255,255,.05);padding:4px" loading="lazy" decoding="async">
-        </div>
-        <div>
-          <div id="pdf-agence-nom" style="font-size:26px;font-weight:900;letter-spacing:2px;color:#D4AF37">GENIUS PROPERTY</div>
-          <div style="font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.6);margin-top:2px">GESTION IMMOBILIÈRE</div>
-          <div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,.7);line-height:1.8">
-            <span id="pdf-agence-adresse"></span><br id="pdf-agence-adresse-br">
-            <span id="pdf-agence-tel"></span><br id="pdf-agence-tel-br">
-            <span id="pdf-agence-email">contact@geniusproperty.com</span><br id="pdf-agence-email-br">
-            <span id="pdf-agence-rccm-wrap" style="display:none"><span style="color:rgba(255,255,255,.45);font-size:10px">RCCM&nbsp;</span><span id="pdf-agence-rccm"></span>&nbsp;&nbsp;</span>
-            <span id="pdf-agence-ninea-wrap" style="display:none"><span style="color:rgba(255,255,255,.45);font-size:10px">NINEA&nbsp;</span><span id="pdf-agence-ninea"></span></span>
-          </div>
-        </div>
-      </div>
-      <div style="text-align:right">
-        <div style="background:rgba(212,175,55,.2);border:1px solid rgba(212,175,55,.4);border-radius:8px;padding:10px 18px">
-          <div style="font-size:10px;letter-spacing:2px;color:#D4AF37;text-transform:uppercase">Contrat N°</div>
-          <div style="font-size:18px;font-weight:700;color:#fff;margin-top:4px" id="pdf-num">—</div>
-        </div>
-        <div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,.5)">Date de signature</div>
-        <div style="font-size:12px;color:#fff;font-weight:600" id="pdf-sign">—</div>
-      </div>
-    </div>
-<div style="margin-top:24px;height:2px;background:linear-gradient(to right,#D4AF37,rgba(212,175,55,.2),transparent)"></div>
-    <div style="margin-top:10px;font-size:14px;font-weight:700;letter-spacing:4px;color:#D4AF37;text-transform:uppercase;text-align:center">CONTRAT DE LOCATION</div>
-  </div>
-
-  <!-- Corps du contrat -->
-  <div style="padding:36px 40px">
-    <!-- Article 1 - Parties -->
-    <div style="margin-bottom:28px">
-      <div class="u-flex-center u-gap-12" style="margin-bottom:14px">
-        <div class="u-avatar-mini">1</div>
-        <div class="u-section-label">ENTRE LES SOUSSIGNÉS</div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div style="background:#f8f9fa;border-left:3px solid #D4AF37;border-radius:0 8px 8px 0;padding:14px 16px">
-          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#888;text-transform:uppercase;margin-bottom:6px">Le Bailleur / L'Agence</div>
-          <div style="font-size:13px;font-weight:700;color:#0F0F0F" id="pdf-bailleur">Genius Property</div>
-          <div style="font-size:11px;color:#666;margin-top:3px" id="pdf-bailleur-email">contact@geniusproperty.com</div>
-          <div style="font-size:11px;color:#666;margin-top:2px" id="pdf-bailleur-tel"></div>
-          <div style="font-size:11px;color:#666;margin-top:2px" id="pdf-bailleur-adresse"></div>
-          <div style="font-size:10px;color:#999;margin-top:4px" id="pdf-bailleur-rccm-ninea"></div>
-        </div>
-        <div style="background:#f8f9fa;border-left:3px solid #1a1a2e;border-radius:0 8px 8px 0;padding:14px 16px">
-          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#888;text-transform:uppercase;margin-bottom:6px">Le Locataire</div>
-          <div style="font-size:13px;font-weight:700;color:#0F0F0F" id="pdf-loc">—</div>
-          <div style="font-size:11px;color:#666;margin-top:3px">Ci-après dénommé « LE LOCATAIRE »</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Article 2 - Bien loué -->
-    <div style="margin-bottom:28px">
-      <div class="u-flex-center u-gap-12" style="margin-bottom:14px">
-        <div class="u-avatar-mini">2</div>
-        <div class="u-section-label">BIEN LOUÉ</div>
-      </div>
-      <p style="font-size:13px;line-height:1.7;color:#333;background:#f8f9fa;padding:14px 16px;border-radius:8px">
-        Le présent contrat a pour objet la location du bien immobilier désigné ci-dessous : <strong id="pdf-lv"></strong>, de type <strong id="pdf-type"></strong>.
-        Ce bien est mis à disposition à titre de résidence principale / usage commercial conformément à la destination convenue entre les parties.
-      </p>
-    </div>
-
-    <!-- Article 3 - Conditions financières -->
-    <div style="margin-bottom:28px">
-      <div class="u-flex-center u-gap-12" style="margin-bottom:14px">
-        <div class="u-avatar-mini">3</div>
-        <div class="u-section-label">CONDITIONS FINANCIÈRES</div>
-      </div>
-      <table style="width:100%;border-collapse:collapse;font-size:13px">
-        <tr style="background:#0F0F0F;color:#fff">
-          <th style="padding:10px 14px;text-align:left;font-size:10px;letter-spacing:1px;text-transform:uppercase;border-radius:6px 0 0 0">Désignation</th>
-          <th style="padding:10px 14px;text-align:right;font-size:10px;letter-spacing:1px;text-transform:uppercase;border-radius:0 6px 0 0">Montant (FCFA)</th>
-        </tr>
-        <tr style="border-bottom:1px solid #e9ecef">
-          <td style="padding:11px 14px;color:#333">Loyer mensuel</td>
-          <td style="padding:11px 14px;text-align:right;font-weight:700;color:#0F0F0F" id="pdf-loyer">—</td>
-        </tr>
-        <tr style="border-bottom:1px solid #e9ecef;background:#fafafa">
-          <td style="padding:11px 14px;color:#333">Charges mensuelles</td>
-          <td style="padding:11px 14px;text-align:right;font-weight:700;color:#0F0F0F" id="pdf-charges">—</td>
-        </tr>
-        <tr style="border-bottom:1px solid #e9ecef">
-          <td style="padding:11px 14px;color:#333">Dépôt de garantie (caution)</td>
-          <td style="padding:11px 14px;text-align:right;font-weight:700;color:#0F0F0F" id="pdf-caution">—</td>
-        </tr>
-        <tr style="border-bottom:1px solid #e9ecef;background:#fafafa">
-          <td style="padding:11px 14px;color:#333">Honoraires d'agence</td>
-          <td style="padding:11px 14px;text-align:right;font-weight:700;color:#0F0F0F" id="pdf-honor">—</td>
-        </tr>
-        <tr style="border-bottom:2px solid #D4AF37">
-          <td style="padding:11px 14px;color:#333">Frais de dossier</td>
-          <td style="padding:11px 14px;text-align:right;font-weight:700;color:#0F0F0F" id="pdf-frais">—</td>
-        </tr>
-      </table>
-      <div style="background:#fef9ec;border:1px solid #D4AF37;border-radius:0 0 8px 8px;padding:10px 14px;font-size:12px;color:#666">
-        Prochain paiement prévu le : <strong style="color:#0F0F0F" id="pdf-proch">—</strong>
-      </div>
-    </div>
-
-    <!-- Article 4 - Durée -->
-    <div style="margin-bottom:28px">
-      <div class="u-flex-center u-gap-12" style="margin-bottom:14px">
-        <div class="u-avatar-mini">4</div>
-        <div class="u-section-label">DURÉE DU CONTRAT</div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-        <div style="text-align:center;background:#f8f9fa;border-radius:8px;padding:14px">
-          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#888;text-transform:uppercase">Date de début</div>
-          <div style="font-size:15px;font-weight:700;color:#0F0F0F;margin-top:6px" id="pdf-debut">—</div>
-        </div>
-        <div style="text-align:center;background:#f8f9fa;border-radius:8px;padding:14px">
-          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#888;text-transform:uppercase">Date de fin</div>
-          <div style="font-size:15px;font-weight:700;color:#0F0F0F;margin-top:6px" id="pdf-fin">—</div>
-        </div>
-        <div style="text-align:center;background:#fef9ec;border:1px solid rgba(212,175,55,.4);border-radius:8px;padding:14px">
-          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#888;text-transform:uppercase">Statut</div>
-          <div style="font-size:15px;font-weight:700;color:#D4AF37;margin-top:6px" id="pdf-statut">—</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Article 5 - Observations -->
-    <div style="margin-bottom:36px">
-      <div class="u-flex-center u-gap-12" style="margin-bottom:14px">
-        <div class="u-avatar-mini">5</div>
-        <div class="u-section-label">CLAUSES PARTICULIÈRES & OBSERVATIONS</div>
-      </div>
-      <div style="background:#f8f9fa;border-radius:8px;padding:16px;min-height:60px;font-size:13px;color:#555;line-height:1.7" id="pdf-obs">Néant</div>
-    </div>
-
-    <!-- Article 6 - Obligations -->
-    <div style="margin-bottom:36px">
-      <div class="u-flex-center u-gap-12" style="margin-bottom:14px">
-        <div class="u-avatar-mini">6</div>
-        <div class="u-section-label">OBLIGATIONS DES PARTIES</div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:12px;line-height:1.7;color:#555">
-        <div style="background:#f8f9fa;border-radius:8px;padding:14px">
-          <div style="font-weight:700;color:#0F0F0F;margin-bottom:8px">Le Bailleur s'engage à :</div>
-          <ul style="padding-left:16px;margin:0">
-            <li>Délivrer le bien en bon état d'usage</li>
-            <li>Assurer la jouissance paisible des lieux</li>
-            <li>Effectuer les réparations nécessaires hors entretien courant</li>
-          </ul>
-        </div>
-        <div style="background:#f8f9fa;border-radius:8px;padding:14px">
-          <div style="font-weight:700;color:#0F0F0F;margin-bottom:8px">Le Locataire s'engage à :</div>
-          <ul style="padding-left:16px;margin:0">
-            <li>Payer le loyer et les charges aux échéances convenues</li>
-            <li>User paisiblement des locaux loués</li>
-            <li>Ne pas sous-louer sans accord écrit du bailleur</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- Signatures -->
-    <div style="background:#0F0F0F;border-radius:12px;padding:28px 32px;color:#fff">
-      <div style="text-align:center;font-size:12px;color:rgba(255,255,255,.5);margin-bottom:20px;letter-spacing:1px;text-transform:uppercase">Fait à Dakar, le <span id="pdf-sign-footer" style="color:#D4AF37;font-weight:700"></span></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px">
-        <div style="text-align:center">
-          <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#D4AF37;text-transform:uppercase;margin-bottom:16px">Pour l'Agence</div>
-          <div style="border-bottom:1.5px solid rgba(255,255,255,.3);height:50px;margin-bottom:10px;position:relative">
-            <div style="position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:30px;height:2px;background:#D4AF37"></div>
-          </div>
-          <div style="font-size:11px;color:rgba(255,255,255,.5)">Signature & Cachet</div>
-          <div style="font-size:12px;font-weight:600;color:#fff;margin-top:4px" id="pdf-bailleur-sign">Genius Property</div>
-        </div>
-        <div style="text-align:center">
-          <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#D4AF37;text-transform:uppercase;margin-bottom:16px">Le Locataire</div>
-          <div style="border-bottom:1.5px solid rgba(255,255,255,.3);height:50px;margin-bottom:10px;position:relative">
-            <div style="position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:30px;height:2px;background:#D4AF37"></div>
-          </div>
-          <div style="font-size:11px;color:rgba(255,255,255,.5)">Signature précédée de « Lu et approuvé »</div>
-          <div style="font-size:12px;font-weight:600;color:#fff;margin-top:4px" id="pdf-loc-sign">—</div>
-        </div>
-      </div>
-      <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1);text-align:center;font-size:10px;color:rgba(255,255,255,.3)">
-        Ce contrat est établi en deux (2) exemplaires originaux, un pour chaque partie. — Genius Property — Gestion Immobilière
-      </div>
+<!-- ============ POURQUOI ============ -->
+<section class="why" id="pourquoi">
+  <div class="wrap">
+    <span class="eyebrow">Pourquoi choisir Genius Property ?</span>
+    <h2 class="h2">Une solution pensée pour les professionnels</h2>
+    <div class="why-grid">
+      <div class="why-item"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-db"/></svg></div><div><h3>Centralisé</h3><p>Toutes vos informations au même endroit.</p></div></div>
+      <div class="why-item"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-tablet"/></svg></div><div><h3>Accessible</h3><p>Depuis n’importe quel navigateur, où que vous soyez.</p></div></div>
+      <div class="why-item"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg></div><div><h3>Sécurisé</h3><p>Vos données sont protégées et vos accès contrôlés.</p></div></div>
+      <div class="why-item"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-star"/></svg></div><div><h3>Pensé pour les pros</h3><p>Une interface adaptée aux besoins des agences et gestionnaires.</p></div></div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- ====== VIEW / EDIT MODAL ====== -->
-<div id="rowModal" class="row-modal">
-  <div class="row-modal-box">
-    <h3 id="rowModalTitle"><span class="material-symbols-rounded">info</span><span id="rowModalTitleText">Détails</span></h3>
-    <div id="rowModalBody"></div>
-    <div class="modal-footer">
-      <button class="btn btn-primary" id="rowModalEditBtn" style="display:none" onclick="switchToEdit()"><span class="material-symbols-rounded" style="font-size:15px">edit</span> Modifier</button>
-      <button class="btn btn-danger"  id="rowModalDelBtn"  style="display:none" onclick="deleteFromModal()"><span class="material-symbols-rounded" style="font-size:15px">delete</span> Supprimer</button>
-      <button class="btn" style="background:#f3f4f6;color:#374151" onclick="closeRowModal()">Fermer</button>
+<!-- ============ TARIFS ============ -->
+<section class="pricing" id="tarifs">
+  <div class="wrap pricing-box">
+    <span class="eyebrow">Tarifs</span>
+    <h2 class="h2">Une offre adaptée à votre agence</h2>
+    <p>Genius Property est proposé sur devis. Le tarif dépend de la taille de votre agence, du nombre de biens gérés et de vos besoins. Contactez-nous : nous vous répondons avec une proposition personnalisée.</p>
+    <div class="btn-row">
+      <a class="btn btn-gold" href="mailto:contact@klopyimmo.com?subject=Demande%20de%20devis%20%E2%80%94%20Genius%20Property&body=Bonjour%2C%0A%0AJe%20souhaite%20recevoir%20un%20devis%20pour%20Genius%20Property.%0A%0ANom%20de%20l%E2%80%99agence%20%3A%0ANombre%20de%20biens%20g%C3%A9r%C3%A9s%20%3A%0AT%C3%A9l%C3%A9phone%20%3A%0A"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg>Demander un devis</a>
+      <a class="btn btn-outline" href="https://wa.me/221775878004?text=Bonjour%2C%20je%20souhaite%20un%20devis%20pour%20Genius%20Property." target="_blank" rel="noopener"><svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-wa"/></svg>Écrire sur WhatsApp</a>
     </div>
   </div>
-</div>
+</section>
 
-<!-- TOAST -->
-<div class="toast" id="toastEl">
-  <span id="toastIcon" style="font-size:18px">✅</span>
-  <span id="toastMsg">Succès</span>
-</div>
-
-<!-- ====== MODAL PROFIL ====== -->
-
-<div id="profilModal" style="display:none">
-  <div class="profil-modal-box">
-    <!-- Header gradient avec avatar -->
-    <div class="profil-modal-header">
-      <button class="profil-modal-close" onclick="closeProfilModal()"><span class="material-symbols-rounded" style="font-size:17px">close</span></button>
-      <h3><span class="material-symbols-rounded">manage_accounts</span> Mon profil</h3>
-      <div class="profil-avatar-wrap">
-        <div class="profil-avatar-big" id="profilAvatarBig" onclick="document.getElementById('profil-photo-inp').click()">
-          <span id="profilAvatarInitial" style="pointer-events:none">A</span>
-          <img id="profilAvatarImg" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:13px;position:absolute;inset:0" loading="lazy" decoding="async">
-          <div class="profil-avatar-overlay"><span class="material-symbols-rounded">photo_camera</span></div>
-        </div>
-        <input type="file" id="profil-photo-inp" accept="image/*" style="display:none" onchange="profilPhotoChange(this)">
-        <div class="profil-user-name" id="profilDisplayName">Admin</div>
-        <div class="profil-user-email" id="profilDisplayEmail">admin@geniusproperty.com</div>
-        <div class="profil-user-role" id="profilDisplayRole">Administrateur</div>
-      </div>
+<!-- ============ APPEL À L'ACTION ============ -->
+<section class="cta">
+  <div class="cta-art" aria-hidden="true"><img src="assets/landing/cta-bg.jpg" alt="" loading="lazy"></div>
+  <div class="wrap cta-in">
+    <div>
+      <h2>Prêt à <span>simplifier</span> votre gestion immobilière ?</h2>
+      <p>Rejoignez dès maintenant les professionnels qui font confiance à Genius Property.</p>
+      <a class="btn btn-gold btn-sm" href="/connexion" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="#i-user"/></svg>Se connecter à Genius Property<svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
     </div>
-    <!-- Body -->
-    <div class="profil-modal-body">
-      <!-- Informations personnelles -->
-      <div class="profil-section">
-        <div class="profil-section-title"><span class="material-symbols-rounded">person</span> Informations personnelles</div>
-        <div class="profil-grid">
-          <div class="profil-field"><label>Prénom</label><input id="profil-prenom" placeholder="Prénom"></div>
-          <div class="profil-field"><label>Nom</label><input id="profil-nom" placeholder="Nom"></div>
-          <div class="profil-field full"><label>Fonction / Rôle</label><input id="profil-fonction" placeholder="Ex: Gestionnaire immobilier" readonly style="background:#f9fafb;color:#888;cursor:not-allowed"></div>
-          <div class="profil-field full"><label>Email (identifiant)</label><input id="profil-email" type="email" placeholder="email@agence.com" readonly style="background:#f9fafb;color:#888;cursor:not-allowed"></div>
-          <div class="profil-field"><label>Téléphone</label><input id="profil-tel" placeholder="77 000 00 00"></div>
-          <div class="profil-field"><label>Adresse</label><input id="profil-adresse" placeholder="Adresse"></div>
-        </div>
-      </div>
-      <!-- Changer mot de passe -->
-      <div class="profil-section">
-        <div class="profil-section-title"><span class="material-symbols-rounded">lock</span> Changer le mot de passe</div>
-        <div class="profil-grid">
-          <div class="profil-field full">
-            <label>Nouveau mot de passe</label>
-            <div class="profil-pass-wrap">
-              <input id="profil-newpass" type="password" placeholder="Laisser vide pour ne pas changer">
-              <span class="profil-pass-eye" onclick="tglPassField('profil-newpass','profil-pass-eye-icon')"><span class="material-symbols-rounded" id="profil-pass-eye-icon" style="font-size:18px">visibility</span></span>
-            </div>
-          </div>
-        </div>
-        <div id="profil-pass-strength" style="font-size:11px;margin-top:4px;color:#9ca3af;min-height:14px"></div>
-      </div>
-      <!-- Mes droits d'accès (lecture seule) -->
-      <div class="profil-section" id="profil-droits-section">
-        <div class="profil-section-title"><span class="material-symbols-rounded">admin_panel_settings</span> Mes droits d'accès</div>
-        <div class="profil-droits" id="profil-droits-list"></div>
-      </div>
-    </div>
-    <div class="profil-modal-footer">
-      <button class="btn" style="background:#f3f4f6;color:#374151" onclick="closeProfilModal()">Annuler</button>
-      <button class="btn btn-primary" onclick="saveProfilUser()"><span class="material-symbols-rounded" style="font-size:15px">save</span> Enregistrer</button>
+    <div class="stats">
+      <div class="stat"><strong>360°</strong><span>Vision complète</span></div>
+      <div class="stat"><strong>100%</strong><span>Local et sécurisé</span></div>
+      <div class="stat"><strong>Pro</strong><span>Qualité premium</span></div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- ====== PANNEAU NOTIFICATIONS ====== -->
-
-<!-- Panneau notifications -->
-<div class="tb-panel" id="notifPanel">
-  <div class="tb-panel-head">
-    <h4><span class="material-symbols-rounded">notifications</span> Notifications</h4>
-    <button class="tb-panel-close" onclick="closeNotifPanel()"><span class="material-symbols-rounded">close</span></button>
-  </div>
-  <div class="tb-panel-body" id="notifList">
-    <div class="notif-empty"><span class="material-symbols-rounded">notifications_off</span>Aucune notification</div>
-  </div>
-  <div class="tb-panel-foot">
-    <button onclick="markAllRead()"><span class="material-symbols-rounded" style="font-size:12px;vertical-align:middle">done_all</span> Tout marquer lu</button>
-    <button onclick="navigate('paiements');closeNotifPanel()">Voir les échéances →</button>
-  </div>
-</div>
-
-<!-- Panneau aide -->
-<div class="tb-panel" id="helpPanel" style="width:360px">
-  <div class="tb-panel-head">
-    <h4><span class="material-symbols-rounded">help</span> Centre d'aide</h4>
-    <button class="tb-panel-close" onclick="closeHelpPanel()"><span class="material-symbols-rounded">close</span></button>
-  </div>
-  <div class="help-tabs">
-    <button class="help-tab active" onclick="switchHelpTab('nav',this)">Navigation</button>
-    <button class="help-tab" onclick="switchHelpTab('faq',this)">FAQ</button>
-    <button class="help-tab" onclick="switchHelpTab('shortcuts',this)">Raccourcis</button>
-  </div>
-  <div class="tb-panel-body">
-    <!-- Navigation rapide -->
-    <div class="help-section active" id="help-nav">
-      <div style="padding:8px 16px 4px;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px">Aller vers</div>
-      <div class="help-nav-item" onclick="navigate('dashboard');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">dashboard</span></div> Tableau de bord</div>
-      <div class="help-nav-item" onclick="navigate('locatives');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">door_front</span></div> Locations</div>
-      <div class="help-nav-item" onclick="navigate('paiements');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">payments</span></div> Paiements</div>
-      <div class="help-nav-item" onclick="navigate('paiements');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">event</span></div> Paiements</div>
-      <div class="help-nav-item" onclick="navigate('biens');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">home</span></div> Biens immobiliers</div>
-      <div class="help-nav-item" onclick="navigate('locatives');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">apartment</span></div> Locatives</div>
-      <div class="help-nav-item" onclick="navigate('rapports');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">bar_chart</span></div> Rapports</div>
-      <div class="help-nav-item" onclick="navigate('parametres');closeHelpPanel()"><div class="help-nav-icon"><span class="material-symbols-rounded">settings</span></div> Paramètres</div>
-    </div>
-    <!-- FAQ -->
-    <div class="help-section" id="help-faq">
-      <div class="help-faq-item" onclick="toggleFaq(this)">
-        <div class="help-faq-q">Comment ajouter un nouveau locataire ?<span class="material-symbols-rounded">expand_more</span></div>
-        <div class="help-faq-a">Ouvrez <b>Locations</b> depuis le menu latéral, puis cliquez sur <b>Nouvelle location</b>. Dans le formulaire, cochez <b>Nouveau locataire</b> pour créer sa fiche en même temps que la location.</div>
-      </div>
-      <div class="help-faq-item" onclick="toggleFaq(this)">
-        <div class="help-faq-q">Comment enregistrer un paiement ?<span class="material-symbols-rounded">expand_more</span></div>
-        <div class="help-faq-a">Depuis la page <b>Paiements</b>, cliquez sur <b>+ Nouveau paiement</b>. Sélectionnez le contrat, saisissez le montant et la date, puis enregistrez.</div>
-      </div>
-      <div class="help-faq-item" onclick="toggleFaq(this)">
-        <div class="help-faq-q">Comment générer un rapport PDF ?<span class="material-symbols-rounded">expand_more</span></div>
-        <div class="help-faq-a">Accédez à la page <b>Rapports</b>, sélectionnez la période souhaitée, puis cliquez sur le bouton <b>Exporter PDF</b> en haut à droite.</div>
-      </div>
-      <div class="help-faq-item" onclick="toggleFaq(this)">
-        <div class="help-faq-q">Comment créer un contrat de location ?<span class="material-symbols-rounded">expand_more</span></div>
-        <div class="help-faq-a">Ouvrez <b>Locations</b> depuis le menu latéral, puis cliquez sur une location. Le contrat, les dates, le loyer, la caution et les échéances se gèrent directement dans la même fiche.</div>
-      </div>
-      <div class="help-faq-item" onclick="toggleFaq(this)">
-        <div class="help-faq-q">Comment activer le mode sombre ?<span class="material-symbols-rounded">expand_more</span></div>
-        <div class="help-faq-a">Cliquez sur l'icône <b>lune</b> dans la barre en haut à droite pour basculer entre le mode clair et le mode sombre.</div>
-      </div>
-      <div class="help-faq-item" onclick="toggleFaq(this)">
-        <div class="help-faq-q">Comment gérer les droits d'accès des employés ?<span class="material-symbols-rounded">expand_more</span></div>
-        <div class="help-faq-a">Dans <b>Employés</b>, ouvrez la fiche d'un employé et cochez les modules auxquels il doit avoir accès. Les restrictions s'appliquent immédiatement à la prochaine connexion.</div>
-      </div>
-      <div class="help-faq-item" onclick="toggleFaq(this)">
-        <div class="help-faq-q">Les données sont-elles sauvegardées automatiquement ?<span class="material-symbols-rounded">expand_more</span></div>
-        <div class="help-faq-a">Oui, toutes les modifications sont sauvegardées automatiquement en local (localStorage). Si Supabase est configuré dans les <b>Paramètres</b>, les données sont aussi synchronisées en cloud.</div>
-      </div>
-    </div>
-    <!-- Raccourcis -->
-    <div class="help-section" id="help-shortcuts">
-      <div style="padding:8px 16px 4px;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px">Navigation</div>
-      <div class="help-shortcut"><span class="help-shortcut-label">Tableau de bord</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">D</span></span></div>
-      <div class="help-shortcut"><span class="help-shortcut-label">Locations / locataires</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">L</span></span></div>
-      <div class="help-shortcut"><span class="help-shortcut-label">Locations / contrats</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">C</span></span></div>
-      <div class="help-shortcut"><span class="help-shortcut-label">Paiements</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">P</span></span></div>
-      <div class="help-shortcut"><span class="help-shortcut-label">Rapports</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">R</span></span></div>
-      <div style="padding:8px 16px 4px;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Interface</div>
-      <div class="help-shortcut"><span class="help-shortcut-label">Mode sombre</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">T</span></span></div>
-      <div class="help-shortcut"><span class="help-shortcut-label">Plein écran</span><span class="help-keys"><span class="kb">F11</span></span></div>
-      <div class="help-shortcut"><span class="help-shortcut-label">Notifications</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">N</span></span></div>
-      <div class="help-shortcut"><span class="help-shortcut-label">Centre d'aide</span><span class="help-keys"><span class="kb">Alt</span><span class="kb">H</span></span></div>
-      <div class="help-shortcut"><span class="help-shortcut-label">Recherche globale</span><span class="help-keys"><span class="kb">Ctrl</span><span class="kb">K</span></span></div>
+<!-- ============ CONTACT ============ -->
+<section class="contact" id="contact">
+  <div class="wrap">
+    <span class="eyebrow">Contact</span>
+    <h2 class="h2">Parlons de votre agence</h2>
+    <p class="sub">Une question, une démonstration ou une demande de devis ? Notre équipe vous répond.</p>
+    <div class="c-grid">
+      <div class="c-card"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg></div><div><h3>E-mail</h3><div class="lines"><a href="mailto:contact@klopyimmo.com">contact@klopyimmo.com</a></div></div></div>
+      <div class="c-card"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-phone"/></svg></div><div><h3>Téléphone</h3><div class="lines"><a href="tel:+221775878004">(+221) 77 587 80 04</a><a href="tel:+221338273526">(+221) 33 827 35 26</a></div></div></div>
+      <div class="c-card"><div class="ico"><svg class="i" aria-hidden="true"><use href="#i-globe"/></svg></div><div><h3>Site partenaire</h3><div class="lines"><a href="https://geniusimmobtp.com/" target="_blank" rel="noopener">geniusimmobtp.com</a></div><small>Genius Immo &amp; BTP</small></div></div>
     </div>
   </div>
-  <div class="help-version">
-    <strong>Genius Property</strong> — v9.0 &nbsp;·&nbsp; Tous droits réservés<br>
-    <a href="mailto:support@geniusimmobtp.com" style="color:var(--gold);text-decoration:none">support@geniusimmobtp.com</a>
-    &nbsp;·&nbsp;
-    <a href="tel:+221775878004" style="color:var(--gold);text-decoration:none">+221 77 587 80 04</a>
+</section>
+
+<!-- ============ PIED DE PAGE ============ -->
+<footer>
+  <div class="wrap foot">
+    <a class="brand" href="#accueil" aria-label="Genius Property">
+      <img src="assets/logo.svg" alt="" width="30" height="30">
+      <span class="brand-t">
+        <span class="brand-n">GENIUS <b>PROPERTY</b></span>
+        <span class="brand-s">Gestion immobilière</span>
+      </span>
+    </a>
+    <nav class="foot-links" aria-label="Pied de page">
+      <a href="#accueil">Accueil</a>
+      <a href="#fonctionnalites">Fonctionnalités</a>
+      <a href="#tarifs">Tarifs</a>
+      <a href="#contact">Contact</a>
+      <a href="#">Mentions légales</a>
+      <a href="#">Confidentialité</a>
+    </nav>
+    <small>© <span id="year">2026</span> Genius Property. Tous droits réservés.</small>
   </div>
-</div>
+</footer>
 
-<!-- ===== MODAL DOCUMENTS LOCATAIRE ===== -->
-<div id="locataireDocsModal" class="row-modal">
-  <div class="row-modal-box" style="width:760px">
-    <h3>
-      <span class="material-symbols-rounded">folder</span>
-      Documents du locataire
-    </h3>
-
-    <div id="locataireDocsTitle" style="font-size:13px;color:#777;margin:-8px 0 12px"></div>
-
-    <div class="loc-doc-form">
-      <div class="fg">
-        <label>Nom du document <span>*</span></label>
-        <input type="text" id="locDocName" placeholder="Ex: Pièce d’identité">
-      </div>
-      <div class="fg">
-        <label>Album</label>
-        <input type="text" id="locDocAlbum" placeholder="Ex: Identité, Contrat, Factures">
-      </div>
-    </div>
-
-    <div id="locDocDrop" class="loc-doc-drop" onclick="document.getElementById('locDocFile').click()">
-      <span class="material-symbols-rounded">cloud_upload</span>
-      <strong>Déposer un fichier ici</strong><br>
-      <small>ou cliquer pour sélectionner un PDF, une image ou un document</small>
-      <input type="file" id="locDocFile" style="display:none" onchange="handleLocDocFile(this.files[0])">
-    </div>
-
-    <div class="form-actions" style="margin-top:8px">
-      <button class="btn btn-primary" onclick="addLocataireDocument()"><span class="material-symbols-rounded" style="font-size:16px">add</span> Ajouter le document</button>
-      <button class="btn" onclick="clearLocataireDocForm()">Réinitialiser</button>
-    </div>
-
-    <div id="locDocList" class="loc-doc-list"></div>
-
-    <div class="modal-footer">
-      <button class="btn" onclick="closeLocataireDocs()">Fermer</button>
-    </div>
-  </div>
-</div>
-
-<!-- Correctif final Bureau : titre séparé, diagramme à droite, blocs compactés, agenda paramétré -->
-<!-- MODAL AGENDA PRINCIPAL -->
-<div id="gpAgendaModal">
-  <div class="gp-agenda-modal-box">
-    <div class="gp-am-header">
-      <div class="gp-am-header-left">
-        <div class="gp-am-header-icon"><span class="material-symbols-rounded">calendar_month</span></div>
-        <div>
-          <div class="gp-am-title">Agenda complet</div>
-          <div class="gp-am-sub" id="gpAmSub">Tous vos événements</div>
-        </div>
-      </div>
-      <button class="gp-am-close" onclick="closeFullAgendaModal()"><span class="material-symbols-rounded">close</span></button>
-    </div>
-    <div class="gp-am-toolbar">
-      <div class="gp-am-search">
-        <span class="material-symbols-rounded">search</span>
-        <input type="text" id="gpAmSearch" placeholder="Rechercher un événement…" oninput="gpAmRender()">
-      </div>
-      <select class="gp-am-filter" id="gpAmFilterType" onchange="gpAmRender()">
-        <option value="">Tous types</option>
-        <option value="rdv">Rendez-vous</option>
-        <option value="tache">Tâche</option>
-        <option value="rappel">Rappel</option>
-        <option value="autre">Autre</option>
-      </select>
-      <select class="gp-am-filter" id="gpAmFilterPriority" onchange="gpAmRender()">
-        <option value="">Toutes priorités</option>
-        <option value="haute">Haute priorité</option>
-        <option value="normale">Normale</option>
-      </select>
-      <select class="gp-am-filter" id="gpAmFilterStatus" onchange="gpAmRender()">
-        <option value="active">À faire</option>
-        <option value="done">Terminés</option>
-        <option value="">Tous</option>
-      </select>
-      <button class="gp-am-btn-add" onclick="openEventForm()">
-        <span class="material-symbols-rounded">add</span>Nouvel événement
-      </button>
-    </div>
-    <div class="gp-am-body">
-      <div class="gp-am-events" id="gpAmEventsList"></div>
-      <div class="gp-am-cal-panel">
-        <div class="gp-am-cal-nav">
-          <button class="gp-am-cal-nav-btn" onclick="gpAmCalMove(-1)"><span class="material-symbols-rounded">chevron_left</span></button>
-          <div class="gp-am-cal-label" id="gpAmCalLabel"></div>
-          <button class="gp-am-cal-nav-btn" onclick="gpAmCalMove(1)"><span class="material-symbols-rounded">chevron_right</span></button>
-        </div>
-        <div class="gp-am-cal-grid" id="gpAmCalGrid"></div>
-        <div class="gp-am-day-sel-label" id="gpAmDayLabel"></div>
-        <div class="gp-am-day-events" id="gpAmDayEvents"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL FORMULAIRE ÉVÉNEMENT -->
-<div id="gpEventFormModal">
-  <div class="gp-ef-box">
-    <div class="gp-ef-header">
-      <div class="gp-ef-title">
-        <span class="material-symbols-rounded">event</span>
-        <span id="gpEfTitle">Nouvel événement</span>
-      </div>
-      <button class="gp-am-close" onclick="closeEventForm()"><span class="material-symbols-rounded">close</span></button>
-    </div>
-    <div class="gp-ef-body">
-      <input type="hidden" id="gpEfId">
-      <div class="gp-ef-field">
-        <label class="gp-ef-label">Titre *</label>
-        <input type="text" id="gpEfTitre" placeholder="Ex: Visite appartement, Appel client…">
-      </div>
-      <div class="gp-ef-row">
-        <div class="gp-ef-field">
-          <label class="gp-ef-label">Type</label>
-          <select id="gpEfType">
-            <option value="rdv">Rendez-vous</option>
-            <option value="tache">Tâche</option>
-            <option value="rappel">Rappel</option>
-            <option value="autre">Autre</option>
-          </select>
-        </div>
-        <div class="gp-ef-field">
-          <label class="gp-ef-label">Priorité</label>
-          <select id="gpEfPriority">
-            <option value="normale">Normale</option>
-            <option value="haute">Haute priorité</option>
-          </select>
-        </div>
-      </div>
-      <div class="gp-ef-row">
-        <div class="gp-ef-field">
-          <label class="gp-ef-label">Date *</label>
-          <input type="date" placeholder="jj/mm/aaaa" lang="fr" id="gpEfDate">
-        </div>
-        <div class="gp-ef-field">
-          <label class="gp-ef-label">Heure</label>
-          <input type="time" id="gpEfTime">
-        </div>
-      </div>
-      <div class="gp-ef-field">
-        <label class="gp-ef-label">Lieu / Bien concerné</label>
-        <input type="text" id="gpEfLieu" placeholder="Ex: Appartement Dakar Plateau…">
-      </div>
-      <div class="gp-ef-field">
-        <label class="gp-ef-label">Notes</label>
-        <textarea id="gpEfNote" placeholder="Détails, instructions…"></textarea>
-      </div>
-    </div>
-    <div class="gp-ef-footer">
-      <button class="gp-ef-btn danger" id="gpEfDeleteBtn" onclick="deleteAgendaEvent()" style="display:none">
-        <span class="material-symbols-rounded">delete</span>Supprimer
-      </button>
-      <div style="display:flex;gap:8px;margin-left:auto">
-        <button class="gp-ef-btn ghost" onclick="closeEventForm()">Annuler</button>
-        <button class="gp-ef-btn primary" onclick="saveAgendaEvent()">
-          <span class="material-symbols-rounded">check</span>Enregistrer
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== PONT AGENDA ↔ JOURNAL EMPLOYÉS — Connexion bidirectionnelle ===== -->
-
-<!-- Picker employé pour le formulaire d'événement -->
-<div id="gpEfEmployeePicker">
-  <div class="gp-ep-box">
-    <div class="gp-ep-header">
-      <div class="gp-ep-title"><span class="material-symbols-rounded">group</span>Assigner à un employé</div>
-      <button class="gp-am-close" onclick="document.getElementById('gpEfEmployeePicker').classList.remove('open')"><span class="material-symbols-rounded">close</span></button>
-    </div>
-    <div class="gp-ep-search">
-      <span class="material-symbols-rounded" style="font-size:16px;color:#D4AF37">search</span>
-      <input type="text" id="gpEpSearch" placeholder="Rechercher un employé…" oninput="gpRenderEmployeePicker()">
-    </div>
-    <div class="gp-ep-list" id="gpEpList"></div>
-  </div>
-</div>
-<!-- =====================================================================
-     GENIUS PROPERTY — RESPONSIVE SYSTEM (toutes tailles d'écran)
-     XS:<360px | SM:360-480 | MD:481-768 | LG:769-1024 | XL:1025-1440 | 2XL:>1440
-====================================================================== -->
-<!-- ====== PAGINATION LOCATAIRES & BIENS ====== -->
-
-<!-- Barre de progression -->
-<div id="gp-progress-bar" aria-hidden="true">
-  <div id="gp-progress-fill"></div>
-</div>
-
-<!-- Conteneur skeleton (injecté dans .content) -->
-<div id="gp-skeleton-wrap" aria-hidden="true" aria-live="polite"></div>
-<script src="js/core/runtime.js?v=v65-no-owner-double-save" defer></script>
-<script src="js/core/storage-adapter.js" defer></script>
-<!-- Supabase adapter -->
-
-<script src="js/core/supabase-adapter.js?v=supabase-v290" defer></script>
-<script src="js/core/db.js?v=db-v280-owner-commit" defer></script>
-<script src="js/core/auth.js" defer></script>
-<script src="js/core/permissions.js" defer></script>
-<script src="js/core/supabase-auth.js?v=supabase-v290" defer></script>
-<script src="js/core/username-lock.js" defer></script>
-<script src="js/safe-bootstrap.js?v=supabase-v1" defer></script>
-<script src="js/core/renderers.js" defer></script>
-<script src="js/core/ui-functions.js?v=v76-topbar" defer></script>
-<script src="js/core/topbar-patch.js" defer></script>
-<script src="js/core/fallback-renderers.js?v=20260526" defer></script>
-<script src="js/pages/employes-modern.js?v=restore-v48" defer></script>
-<script src="js/core/navigation.js" defer></script>
-<script src="js/core/validation.js" defer></script>
-<script src="js/core/forms.js" defer></script>
-<!-- proprietaires.js legacy CRUD removed: current-workflows.js is the single owner form/CRUD -->
-<script src="js/pages/rapports.js" defer></script>
-<script src="js/pages/dashboard.js" defer></script>
-<script src="js/pages/agenda.js?v=v76-compact" defer></script>
-<script src="js/pages/messagerie.js" defer></script>
-<script src="js/pages/sync.js" defer></script>
-<script src="js/pages/admin-stockage.js" defer></script>
-<script src="js/core/mobile.js" defer></script>
-<script src="js/pages/mobile-pages.js?v=clean-v1" defer></script>
-<script src="js/core/legacy-bridge.js" defer></script>
-<script src="js/pages/dashboard-desktop.js?v=clean" defer></script>
-<script src="js/v21/ui/ui-stability.service.js?v=20260526" defer></script>
-<script src="js/pages/compact-layout.js?v=v82-owner-mandat" defer></script>
-<script src="js/core/form-stability-fixes.js?v=local-lite-1" defer></script>
-<script src="js/inline/inline-script-06.js?v=refactor-20260523-v25"></script>
-
-<!-- ====== EMPLOYÉ : FORMULAIRE UNIQUE V18 ====== -->
-<script src="js/inline/inline-script-07.js?v=refactor-20260523-v25"></script>
-<script src="js/inline/inline-script-08.js?v=refactor-20260523-v25"></script>
-
-
-
-<script src="js/inline/inline-script-11.js?v=v82-owner-mandat"></script>
-<!-- pages/biens.js legacy CRUD retired: current-workflows.js is the single Bien form/CRUD -->
-<script src="js/core/missing-actions.js?v=v82-owner-mandat" defer></script>
-<script src="js/core/parametres-restore.js" defer></script>
-<script src="js/core/sidebar-badge-restore.js" defer></script>
-
-
-<!-- désactivé nettoyage final: <script src="js/core/doc-actions-ensure.js?v=20260522" defer></script> -->
-<script src="js/core/owner-select-edit.js?v=v63-owner-count" defer></script>
-<!-- désactivé nettoyage final: <script src="js/core/avenir-kpi-fix.js?v=20260523-v23-clean" defer></script> -->
-
-<link rel="stylesheet" href="styles/gp-payments-date-compact-v3.css?v=20260523-v3">
-<script src="js/core/gp-date-format-global-v3.js?v=20260523-v3" defer></script>
-
-<script id="gpSplashFailsafe">
-  window.addEventListener("load", () => {
-    setTimeout(() => {
-      const splash = document.getElementById("gpSplash");
-      if (splash) {
-        splash.classList.add("gp-splash-hide");
-        setTimeout(() => splash.remove(), 450);
-      }
-      const login = document.getElementById("loginPage");
-      const app = document.getElementById("app");
-      if (login && (!app || app.style.display === "none") && login.style.display === "none") {
-        login.style.display = "block";
-      }
-    }, 1800);
-  });
-</script>
-
-<!-- V22.1 — Supabase configuration available before first login -->
-<style>
-  #gp-sb-config-modal{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:20px}
-  #gp-sb-config-modal .box{width:100%;max-width:520px;background:#151515;border:1px solid rgba(212,175,55,.28);border-radius:18px;padding:22px;box-shadow:0 25px 80px rgba(0,0,0,.55);color:#fff}
-  #gp-sb-config-modal h3{margin:0 0 7px;font-size:18px}
-  #gp-sb-config-modal p{margin:0 0 16px;color:#aaa;font-size:12px;line-height:1.5}
-  #gp-sb-config-modal label{display:block;margin:10px 0 5px;color:#ddd;font-size:11px;font-weight:700}
-  #gp-sb-config-modal input{width:100%;box-sizing:border-box;padding:10px 11px;border-radius:10px;border:1px solid #444;background:#0e0e0e;color:#fff;outline:none}
-  #gp-sb-config-modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-  #gp-sb-config-modal button{border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
-  #gp-sb-config-modal .cancel{background:#2b2b2b;color:#ddd}
-  #gp-sb-config-modal .save{background:#d4af37;color:#111}
-  #gp-sb-config-msg{font-size:11px;margin-top:10px;min-height:16px}
-</style>
-<div id="gp-sb-config-modal">
-  <div class="box">
-    <h3>Configuration Supabase</h3>
-    <p>Cette configuration est nécessaire avant la première connexion. Utilise uniquement la <b>Publishable key</b> (<code>sb_publishable_...</code>), jamais une clé secret/service_role.</p>
-    <label for="gp-sb-login-url">Project URL</label>
-    <input id="gp-sb-login-url" value="https://tpomnpzurgpvjkosvwpk.supabase.co" placeholder="https://xxxx.supabase.co">
-    <label for="gp-sb-login-key">Publishable key</label>
-    <input id="gp-sb-login-key" type="password" autocomplete="off" placeholder="sb_publishable_...">
-    <div id="gp-sb-config-msg"></div>
-    <div class="actions">
-      <button class="cancel" type="button" onclick="GPLoginSupabaseConfig.close()">Annuler</button>
-      <button class="save" type="button" onclick="GPLoginSupabaseConfig.save()">Enregistrer et tester</button>
-    </div>
-  </div>
-</div>
-<script>
-(function(){
-  'use strict';
-  function byId(id){ return document.getElementById(id); }
-  function open(){
-    var m=byId('gp-sb-config-modal'), msg=byId('gp-sb-config-msg');
-    if(!m) return;
-    try{
-      var c=window.GPSupabase && window.GPSupabase.config ? window.GPSupabase.config() : {};
-      if(c.url) byId('gp-sb-login-url').value=c.url;
-      if(c.publishableKey) byId('gp-sb-login-key').value=c.publishableKey;
-    }catch(e){}
-    if(msg) msg.textContent='';
-    m.style.display='flex';
-  }
-  function close(){ var m=byId('gp-sb-config-modal'); if(m)m.style.display='none'; }
-  async function save(){
-    var url=(byId('gp-sb-login-url').value||'').trim().replace(/\/+$/,'');
-    var key=(byId('gp-sb-login-key').value||'').trim();
-    var msg=byId('gp-sb-config-msg');
-    if(!url || !key){ if(msg){msg.style.color='#fca5a5';msg.textContent='URL et Publishable key sont obligatoires.';} return; }
-    if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)){
-      if(msg){msg.style.color='#fca5a5';msg.textContent='URL invalide. Utilise https://xxxx.supabase.co';}
-      return;
-    }
-    if(!/^sb_publishable_/i.test(key)){
-      if(msg){msg.style.color='#fca5a5';msg.textContent='Utilise la Publishable key qui commence par sb_publishable_';}
-      return;
-    }
-    try{
-      if(!window.GPSupabase || !window.GPSupabase.configure) throw new Error('Le module Supabase n’est pas encore chargé. Recharge la page puis réessaie.');
-      window.GPSupabase.configure({url:url,publishableKey:key,table:'gp_app_data',rowId:'main',autosync:false});
-      if(msg){msg.style.color='#86efac';msg.textContent='Configuration enregistrée. Tu peux maintenant fermer cette fenêtre et te connecter.';}
-      setTimeout(close,700);
-    }catch(e){
-      if(msg){msg.style.color='#fca5a5';msg.textContent=e.message||String(e);}
-    }
-  }
-  window.GPLoginSupabaseConfig={open:open,close:close,save:save};
-})();
-</script>
-
-
-<script>
-window.gpSupabaseDiagnostic = async function(){
-  var a=window.GPSupabaseAuth;
-  var u=window.currentUser||null;
-  var su=window._supabaseCurrentUser||null;
-  var p=null, err=null;
-  try{
-    if(a && typeof a.diagnose==='function') return await a.diagnose();
-    if(su && window.GPSupabase && window.GPSupabase.available()){
-      var r=await window._supabaseClient.from('gp_user_profiles')
-        .select('id,email,full_name,role,is_active').eq('id',su.id).maybeSingle();
-      p=r.data||null; err=r.error ? (r.error.message||String(r.error)) : null;
-    }
-  }catch(e){err=e.message||String(e);}
-  return {
-    apiHasDiagnose: !!(a&&typeof a.diagnose==='function'),
-    currentUser: u ? {id:u.id,email:u.email,role:u.role,isAdmin:u.isAdmin} : null,
-    supabaseUser: su ? {id:su.id,email:su.email} : null,
-    profile:p,
-    cachedRole: localStorage.getItem('gp_session_role'),
-    error:err
-  };
-};
-</script>
-
+<a class="wa-float" href="https://wa.me/221775878004?text=Bonjour%2C%20je%20souhaite%20un%20devis%20pour%20Genius%20Property." target="_blank" rel="noopener" aria-label="Discuter sur WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-wa"/></svg></a>
 
 <script>
 (function(){
-  function applySupabaseLoginUI(){
-    var lu=document.getElementById('lu');
-    var lp=document.getElementById('lp');
-    if(lu){ lu.type='email'; lu.placeholder='Email'; lu.autocomplete='username'; }
-    if(lp) lp.autocomplete='current-password';
-    var hint=document.querySelector('.lb-security');
-    if(hint) hint.innerHTML='<span class="material-symbols-rounded">cloud</span> Authentification sécurisée par Supabase';
+  var y=document.getElementById('year'); if(y) y.textContent=new Date().getFullYear();
+  var nav=document.querySelector('header.nav');
+  function onScroll(){nav.classList.toggle('solid',window.scrollY>12)}
+  onScroll();window.addEventListener('scroll',onScroll,{passive:true});
+  var b=document.getElementById('burger'), n=document.getElementById('navLinks');
+  if(b&&n){
+    b.addEventListener('click',function(){var o=n.classList.toggle('open');b.setAttribute('aria-expanded',o)});
+    n.addEventListener('click',function(e){if(e.target.tagName==='A'){n.classList.remove('open');b.setAttribute('aria-expanded','false')}});
   }
-  document.addEventListener('DOMContentLoaded',applySupabaseLoginUI);
-  window.addEventListener('load',applySupabaseLoginUI);
 })();
 </script>
-
-<script src="js/core/gp-pagination.js?v=common-12"></script>
-<script src="js/core/media.js?v=v63-canonical-media"></script>
-<!-- current-data-sync.js retired: duplicate global refresh/consistency layer removed -->
-<script src="js/core/locations-page-restorer.js?v=v70-location-ui-restore" defer></script>
-<script src="js/core/current-workflows.js?v=v76-photo-delete"></script>
-<script src="js/core/location-data-audit.js?v=v69-location-source-unique"></script>
-<script src="js/core/current-finance-workflows.js?v=v83-fix"></script>
-<script src="js/core/v27-unified-actions.js?v=v83-fix"></script>
-<script src="js/core/finance-close-fix-v17.js?v=v17"></script>
-<script src="js/core/final-navigation-guard.js?v=v15"></script>
-<link rel="stylesheet" href="styles/employes-drawer-v18.css?v=20260929-v19">
-<script src="js/core/employes-drawer-v18.js?v=20260929-v19"></script>
-<script src="js/core/activity-pages-v20.js?v=20260930-v48"></script>
-<script src="js/core/runtime-final-v23.js?v=v83-fix"></script>
-<script src="js/core/ui-consistency-v26.js"></script>
-
-<script src="js/core/v32-unified-gp10-edit-forms.js?v=v32"></script>
-<script src="js/core/v37-clean-bien-click-expense-bar.js?v=v37-clean"></script>
-<script src="js/core/v39-compact-final.js?v=v43-spacing-select"></script>
-<script src="js/core/export-import-final-v46.js?v=v46-final"></script>
-<script src="js/core/encaissements-v2.js?v=v62-canonical-receipt"></script>
-<script src="js/core/relations-v52.js?v=v63-owner-relations"></script>
-<script src="js/core/biens-renderer-canonical.js?v=v68-canonical"></script>
-<script src="js/core/bien-detail-final.js?v=v83-fix"></script>
-<script src="js/core/situation-proprietaires.js?v=v83-fix"></script>
-<script src="js/core/contrats-generateur.js?v=v81-contrats" defer></script>
-<script src="js/core/mandat-generateur.js?v=v83-fix" defer></script>
 </body>
 </html>
