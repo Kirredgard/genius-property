@@ -36,5 +36,14 @@ await copyDir('js');
 await copyDir('assets');
 await copyDir('styles');
 
+// Generate the runtime Supabase config from Vercel/build environment variables.
+// This file is intentionally static because the legacy app reads window.GPV22_ENV
+// before its classic scripts execute. Never expose server/service-role secrets here.
+const runtimeEnv = `// Generated at build time. Do not commit production values.\nwindow.GPV22_ENV = {\n  supabaseUrl: ${JSON.stringify(process.env.VITE_SUPABASE_URL || '')},\n  supabasePublishableKey: ${JSON.stringify(process.env.VITE_SUPABASE_PUBLISHABLE_KEY || '')}\n};\n`;
 await copyFileIfExists('env.js');
+if (process.env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+  await mkdir(dist, { recursive: true });
+  await (await import('node:fs/promises')).writeFile(path.join(dist, 'env.js'), runtimeEnv, 'utf8');
+  console.log('Generated dist/env.js from VITE_SUPABASE_* environment variables.');
+}
 console.log('Runtime assets copied for Vercel/static hosting.');
