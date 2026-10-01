@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
 
     const { data: callerProfile, error: profileError } = await admin
       .from('gp_user_profiles')
-      .select('id, role, is_active')
+      .select('id, role, is_active, agency_id')
       .eq('id', callerData.user.id)
       .maybeSingle()
 
@@ -69,8 +69,24 @@ Deno.serve(async (req) => {
       console.error('[create-employee-account] profile lookup failed', profileError.message)
       return json({ error: profileError.message }, 500)
     }
-    if (!callerProfile || callerProfile.is_active === false || callerProfile.role !== 'admin') {
+    if (!callerProfile || callerProfile.is_active === false || !['admin', 'super_admin'].includes(callerProfile.role)) {
       return json({ error: 'Seul un administrateur actif peut créer un compte employé.' }, 403)
+    }
+
+    // Multi-agences : le nouvel employé rejoint TOUJOURS l'agence de celui qui le crée
+    // (pour le super_admin : l'agence dans laquelle il se trouve actuellement).
+    // L'agence n'est jamais lue dans le corps de la requête.
+    const agencyId = callerProfile.agency_id
+    if (!agencyId) {
+      return json({ error: 'Votre compte n’est rattaché à aucune agence.' }, 403)
+    }
+    const { data: agency, error: agencyError } = await admin
+      .from('gp_agencies')
+      .select('id, is_active')
+      .eq('id', agencyId)
+      .maybeSingle()
+    if (agencyError || !agency || agency.is_active === false) {
+      return json({ error: 'Cette agence est introuvable ou suspendue.' }, 403)
     }
 
     let body: any
@@ -105,6 +121,7 @@ Deno.serve(async (req) => {
       full_name: fullName,
       role,
       is_active: true,
+      agency_id: agencyId,
     }, { onConflict: 'id' })
 
     if (upsertError) {
@@ -113,8 +130,8 @@ Deno.serve(async (req) => {
       return json({ error: `Compte Auth créé mais profil impossible à enregistrer: ${upsertError.message}` }, 500)
     }
 
-    console.info('[create-employee-account] employee created', { uid: user.id, email, role })
-    return json({ ok: true, uid: user.id, email, role })
+    console.info('[create-employee-account] employee created', { uid: user.id, email, role, agencyId })
+    return json({ ok: true, uid: user.id, email, role, agencyId })
   } catch (err) {
     console.error('[create-employee-account] unexpected error', err)
     return json({ error: err instanceof Error ? err.message : 'Erreur serveur inattendue.' }, 500)
