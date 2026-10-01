@@ -9,7 +9,7 @@
   ];
   const ROLE_RIGHTS={
     'Administrateur': Object.fromEntries(RIGHTS.map(([k])=>[k,true])),
-    'Gestionnaire': Object.fromEntries(RIGHTS.map(([k])=>[k,['dashboard','proprietaires','biens','locatives','messages','journal','rapports'].includes(k)])),
+    'Gestionnaire': Object.fromEntries(RIGHTS.map(([k])=>[k,true])),
     'Agent': Object.fromEntries(RIGHTS.map(([k])=>[k,['dashboard','biens','locatives','messages'].includes(k)])),
     'Comptable': Object.fromEntries(RIGHTS.map(([k])=>[k,['dashboard','paiements','depenses','rapports'].includes(k)])),
     'Assistante': Object.fromEntries(RIGHTS.map(([k])=>[k,['dashboard','proprietaires','biens','locatives','messages'].includes(k)]))
@@ -79,11 +79,11 @@
     const d=db();if(!Array.isArray(d.employes))d.employes=[];const old=editing?d.employes[editIndex]:null;let uid=old?.uid||old?.supaUserId||null;
     try{
       if(!editing){
-        if(!window.GPFirebaseAuth?.createEmployeeAccount)throw new Error('Le service de création de compte employé est indisponible.');
-        const auth=await window.GPFirebaseAuth.createEmployeeAccount(email,pass,{fullName:[prenom,nom].filter(Boolean).join(' '),role:role==='Comptable'?'comptable':role==='Agent'||role==='Gestionnaire'||role==='Assistante'?'agent':'lecture'});uid=auth.uid;
+        const mk=window.GPSupabaseAuth?.createEmployeeAccount||window.GPFirebaseAuth?.createEmployeeAccount;if(!mk)throw new Error('Le service de création de compte employé est indisponible.');
+        const auth=await mk(email,pass,{fullName:[prenom,nom].filter(Boolean).join(' '),role:role==='Gestionnaire'?'gestionnaire':role==='Comptable'?'comptable':role==='Agent'||role==='Assistante'?'agent':'lecture'});uid=auth.uid;
       }
       const p=await photo();const emp={...(old||{}),id:old?.id||'EP-'+Date.now(),uid,supaUserId:uid,prenom,nom,email,tel:val('emp18Tel'),fonction:val('emp18Fonction'),contrat:val('emp18Contrat'),civ:role,role,statut:val('emp18Status')||'Actif',adresse:val('emp18Adresse'),piece:val('emp18Piece')||'CNI',numpiece:val('emp18NumPiece'),deldeb:val('emp18Date'),delexp:val('emp18Exp'),droits:readRights()};
-      if(p)emp.photo=p;if(pass)emp.tempPassword=pass;
+      if(p)emp.photo=p;delete emp.tempPassword;
       if(editing)d.employes[editIndex]=emp;else d.employes.push(emp);
       const saved=await save(d);if(saved===false) throw new Error('Modification non enregistrée. Rechargez puis réessayez.');window.DB=window.GPDB&&window.GPDB.load?window.GPDB.load():d;
       close();if(window.renderEmployesModern)window.renderEmployesModern();if(window.updateSidebarBadges)window.updateSidebarBadges();toast(editing?'Employé modifié ✓':'Employé créé ✓');

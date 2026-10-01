@@ -608,7 +608,7 @@
     var authUser = null;
     try {
       if(window.GPFirebaseAuth && typeof window.GPFirebaseAuth.createEmployeeAccount === 'function') {
-        authUser = await window.GPFirebaseAuth.createEmployeeAccount(email, pass, {fullName: ((v('e-prenom')||'') + ' ' + (v('e-nom')||'')).trim(), role: (/comptable/i.test(v('e-fonction')||v('e-civ')) ? 'comptable' : (/agent|gestionnaire|assistante/i.test(v('e-fonction')||v('e-civ')) ? 'agent' : 'lecture'))});
+        authUser = await window.GPFirebaseAuth.createEmployeeAccount(email, pass, {fullName: ((v('e-prenom')||'') + ' ' + (v('e-nom')||'')).trim(), role: (/gestionnaire/i.test(v('e-fonction')||v('e-civ')) ? 'gestionnaire' : /comptable/i.test(v('e-fonction')||v('e-civ')) ? 'comptable' : (/agent|gestionnaire|assistante/i.test(v('e-fonction')||v('e-civ')) ? 'agent' : 'lecture'))});
       }
     } catch(e){
       if(btn){ btn.disabled = false; btn.textContent = 'Enregistrer'; }

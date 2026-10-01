@@ -210,6 +210,9 @@
     available:function(){ return !!(window.GPSupabase && window.GPSupabase.available()); }
   };
 
+  // Les écrans « Équipe » appellent encore l'ancien nom : on le branche sur Supabase.
+  window.GPFirebaseAuth = window.GPFirebaseAuth || { createEmployeeAccount: createEmployeeAccount };
+
   // Alias temporaire de compatibilité avec les anciens boutons/pages.
   window.gpSupabaseLoginFromButton=login;
   window.gpFirebaseLoginFromButton=login;

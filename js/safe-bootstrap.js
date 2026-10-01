@@ -14,11 +14,10 @@
   }
 
   function showLogin(){
-    var login=$('loginPage'), app=$('app'), err=$('authError');
+    // L'écran de connexion est désormais une page dédiée : /connexion
+    var app=$('app');
     if(app) app.style.display='none';
-    if(login) login.style.display='flex';
-    if(err && /Supabase/i.test(err.textContent||'')) err.textContent='';
-    hideSplash();
+    if(location.pathname.indexOf('/connexion') !== 0) location.replace('/connexion?from=app');
   }
 
   async function showApp(){
@@ -80,7 +79,7 @@
 
   async function logout(){
     _appShown = false; // permet une reconnexion propre
-    try { if(window.GPSupabaseAuth && window.GPSupabaseAuth.signOut) await window.GPFirebaseAuth.signOut(); }
+    try { if(window.GPSupabaseAuth && window.GPSupabaseAuth.signOut) await window.GPSupabaseAuth.signOut(); }
     catch(e){ console.warn('[legacy-safe] logout Supabase:', e && (e.message||e)); }
     window.currentUser=null;
     try { localStorage.removeItem('gp_session_name'); } catch(e){}
@@ -150,7 +149,8 @@
   document.addEventListener('DOMContentLoaded', function(){
     var hasCached=false;
     try{ hasCached=!!(localStorage.getItem('gp_session_name')||localStorage.getItem('gp_session_firstname')||localStorage.getItem('gp_user_name')); }catch(_){}
-    if(!hasCached && !window.currentUser) showLogin();
+    // Pas de redirection immédiate : on vérifie d'abord la session Supabase (initAuthScreen),
+    // sinon un utilisateur tout juste connecté depuis /connexion serait renvoyé en boucle.
     setTimeout(initAuthScreen, 120);
   });
   window.addEventListener('supabase:ready', function(){ setTimeout(initAuthScreen, 150); });

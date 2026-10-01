@@ -6,6 +6,7 @@
 
   var ROLE_LABELS = {
     admin: 'Administrateur',
+    gestionnaire: 'Gestionnaire',
     agent: 'Agent immobilier',
     comptable: 'Comptable',
     lecture: 'Lecture seule'
@@ -13,6 +14,7 @@
 
   var ROLE_PERMISSIONS = {
     admin: ['*'],
+    gestionnaire: ['*'],
     agent: [
       'dashboard:view','biens:view','biens:write','proprietaires:view','proprietaires:write',
       'locataires:view','locataires:write','locatives:view','locatives:write','contrats:view','contrats:write',
@@ -40,7 +42,13 @@
     'bien-detail':'biens:view', 'proprietaire-detail':'proprietaires:view'
   };
 
+  // Actions refusées même quand le rôle a '*' (gestionnaire : tout sauf Maintenance & Sécurité).
+  var ROLE_DENY = {
+    gestionnaire: ['admin-stockage:view']
+  };
+
   var HIDE_SELECTORS_BY_ROLE = {
+    gestionnaire: ['#sideMenu li[data-page="admin-stockage"]'],
     agent: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="droits"]'],
     comptable: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="droits"]','#sideMenu li[data-page="employes"]'],
     lecture: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="droits"]','#sideMenu li[data-page="employes"]',
@@ -63,6 +71,7 @@
   function has(role, action){
     role = role || currentRole();
     action = normalizeAction(action);
+    if((ROLE_DENY[role] || []).indexOf(action) !== -1) return false;
     var list = ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS.lecture;
     return list.indexOf('*') !== -1 || list.indexOf(action) !== -1;
   }

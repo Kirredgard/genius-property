@@ -26,8 +26,9 @@
   }
   readConfig();
 
+  function isPublicKey(k){ return /^sb_publishable_/i.test(k) || /^eyJ[\w-]+\.[\w-]+\.[\w-]+$/.test(k); }
   function valid(){
-    return /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(state.url) && /^sb_publishable_/i.test(state.publishableKey);
+    return /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(state.url) && isPublicKey(state.publishableKey);
   }
 
   function loadLibrary(){
@@ -69,7 +70,7 @@
     var key = String(opts.publishableKey || '').trim();
     if(!url || !key) throw new Error('URL et Publishable key sont obligatoires.');
     if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)) throw new Error('URL Supabase invalide.');
-    if(!/^sb_publishable_/i.test(key)) throw new Error('Utilise la Publishable key qui commence par sb_publishable_.');
+    if(!isPublicKey(key)) throw new Error('Clé publique Supabase invalide.');
     state.url = url;
     state.publishableKey = key;
     state.configured = true;

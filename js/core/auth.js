@@ -7,6 +7,7 @@
   var ADMIN_ONLY = ['admin-stockage'];
   var ROLE_LABELS = {
     admin: 'Administrateur',
+    gestionnaire: 'Gestionnaire',
     agent: 'Agent',
     comptable: 'Comptable',
     lecture: 'Lecture seule'
@@ -34,6 +35,7 @@
     // Supabase profile is the source of truth in V22.
     var explicit = String(u.role || '').toLowerCase().trim();
     if(explicit === 'admin' || u.isAdmin) return 'admin';
+    if(explicit === 'gestionnaire') return 'gestionnaire';
     if(explicit === 'comptable') return 'comptable';
     if(explicit === 'agent') return 'agent';
     if(explicit === 'lecture' || explicit === 'readonly') return 'lecture';
