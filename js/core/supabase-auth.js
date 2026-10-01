@@ -24,7 +24,7 @@
     var sb = await window.GPSupabase.ready();
     var profile = null;
     try {
-      var r = await sb.from('gp_user_profiles').select('id,email,full_name,role,is_active').eq('id',authUser.id).maybeSingle();
+      var r = await sb.from('gp_user_profiles').select('id,email,full_name,role,is_active,agency_id').eq('id',authUser.id).maybeSingle();
       if(r.error) throw r.error;
       profile = r.data || null;
     } catch(e) {
@@ -39,7 +39,23 @@
       await sb.auth.signOut().catch(function(){});
       throw new Error('Ce compte est désactivé. Contactez l’administrateur.');
     }
-    var role = profile.role ? String(profile.role).toLowerCase() : 'anonymous';
+    var realRole = profile.role ? String(profile.role).toLowerCase() : 'anonymous';
+    var isSuperAdmin = realRole === 'super_admin';
+    // Le reste de l'appli ne connaît que « admin » : le super_admin est vu comme admin.
+    var role = isSuperAdmin ? 'admin' : realRole;
+    if(!profile.agency_id) {
+      await sb.auth.signOut().catch(function(){});
+      throw new Error('Votre compte n’est rattaché à aucune agence. Contactez l’administrateur.');
+    }
+    var agency = null;
+    try {
+      var ar = await sb.from('gp_agencies').select('id,name,slug,is_active').eq('id',profile.agency_id).maybeSingle();
+      if(!ar.error) agency = ar.data || null;
+    } catch(_) {}
+    if(agency && agency.is_active === false) {
+      await sb.auth.signOut().catch(function(){});
+      throw new Error('Cette agence est suspendue. Contactez l’administrateur de la plateforme.');
+    }
     var fullName = (profile && profile.full_name) || (authUser.user_metadata && (authUser.user_metadata.full_name || authUser.user_metadata.name)) || (authUser.email || '').split('@')[0];
     var user = {
       id: authUser.id,
@@ -47,6 +63,11 @@
       full_name: fullName,
       role: role,
       isAdmin: role === 'admin',
+      isSuperAdmin: isSuperAdmin,
+      realRole: realRole,
+      agencyId: profile.agency_id,
+      agencyName: agency && agency.name || '',
+      agency: agency,
       droits: {},
       source: 'supabase',
       profile: profile
