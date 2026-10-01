@@ -5,6 +5,7 @@ const root = process.cwd();
 
 const requiredFiles = [
   'index.html',
+  'app.html',
   'firebase.json',
   'vite.config.js',
   'ARCHITECTURE_DECISION_MAIN_APP.md',

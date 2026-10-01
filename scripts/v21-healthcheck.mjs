@@ -4,6 +4,7 @@ import path from 'node:path';
 const root = process.cwd();
 const required = [
   'index.html',
+  'app.html',
   'env.js',
   'firebase.json',
   'firestore.rules',
