@@ -149,7 +149,7 @@
     isAdmin: isAdmin,
     role: role,
     roleLabel: function(){ return ROLE_LABELS[role()] || 'Session'; },
-    source: function(){ var u=getUser(); return u && u.source || (window.GPFirebaseAuth && window.GPFirebaseAuth.available && window.GPFirebaseAuth.available() ? 'firebase' : 'local'); },
+    source: function(){ var u=getUser(); return u && u.source || (window.GPSupabaseAuth && window.GPSupabaseAuth.available && window.GPSupabaseAuth.available() ? 'supabase' : 'local'); },
     can: can,
     requireAdmin: requireAdmin,
     refresh: refresh

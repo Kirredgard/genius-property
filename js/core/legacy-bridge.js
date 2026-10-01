@@ -6,7 +6,7 @@
 
   const REQUIRED_LEGACY_APIS = [
     'navigate','toast','renderTable','updateSidebarBadges','auditLog','resetAfterSave',
-    'renderPaiements','renderLocatairesModern','renderBiensCards','renderProprietairesCards',
+    'renderPaiements','renderLocatairesModern','renderProprietairesCards',
     'renderDepenses','renderContrats','renderRapports','renderAvenir','renderEmpActivities',
     'renderEmployeeAgenda','gpAmRender','renderMessages','renderConvList','updateMsgBadge',
     'openImportModal','closeImportModal','previewPhoto','getPhotoData','toggleExportMenu',

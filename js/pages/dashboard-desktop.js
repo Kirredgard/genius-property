@@ -27,7 +27,7 @@
   function dateText(d){ try{return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});}catch(e){return d||'—';} }
   function nav(page){ if(typeof window.navigate==='function') window.navigate(page); }
   function setBienTypeFilter(type){ try{ localStorage.setItem('gp_biens_type_filter', type||''); sessionStorage.setItem('gp_biens_type_filter', type||''); }catch(e){} nav('biens'); setTimeout(applyDashboardFilters,80); }
-  function setPaymentFilter(kind){ try{ sessionStorage.setItem('gp_paiements_filter', kind||''); }catch(e){} if(kind==='late'){ nav('avenir'); setTimeout(function(){ if(typeof window.filterAvenir==='function') window.filterAvenir('retard'); },90); } else { nav('paiements'); } }
+  function setPaymentFilter(kind){ try{ sessionStorage.setItem('gp_paiements_filter', kind||''); }catch(e){} if(kind==='late'){ nav('paiements'); } else { nav('paiements'); } }
   function applyDashboardFilters(){
     var type=''; try{ type=sessionStorage.getItem('gp_biens_type_filter')||localStorage.getItem('gp_biens_type_filter')||''; }catch(e){}
     if(type){ var input=document.getElementById('biensSearch'); if(input){ input.value=type; if(typeof window.renderBiensCards==='function') window.renderBiensCards(true); else if(typeof window.renderTable==='function') window.renderTable('biens'); } }
@@ -138,7 +138,7 @@
       '</section>'+
     '</div>';
   }
-  function card(icon,label,value,sub,page){ var target=String(page||'').toLowerCase(); if(target==='loyers') target='paiements'; if(target==='dépenses'||target==='depenses') target='depenses'; return '<article class="gd-kpi" onclick="if(window.navigate)navigate(\''+target+'\')"><div class="gd-kpi-icon"><span class="material-symbols-rounded">'+icon+'</span></div><div><h3>'+esc(label)+'</h3><strong>'+esc(value)+'</strong><p class="'+(sub?'':'gd-kpi-sub-empty')+'">'+esc(sub)+'</p></div></article>';}
+  function card(icon,label,value,sub,page){ var target=String(page||'').toLowerCase(); if(target==='loyers') target='paiements'; if(target==='dépenses'||target==='depenses') target='depenses'; if(target==='locatives'||target==='location') target='locataires'; var safeLabel=(target==='locataires'?'Locataires':label); return '<article class="gd-kpi" data-gp-target="'+esc(target)+'" onclick="if(window.gpDashboardGo)gpDashboardGo(this.dataset.gpTarget);else if(window.navigate)navigate(this.dataset.gpTarget)"><div class="gd-kpi-icon"><span class="material-symbols-rounded">'+icon+'</span></div><div><h3>'+esc(safeLabel)+'</h3><strong>'+esc(value)+'</strong><p class="'+(sub?'':'gd-kpi-sub-empty')+'">'+esc(sub)+'</p></div></article>';}
 
   function chartData(months){
     var labels=[], vals=[], deps=[], dates=[], now=new Date();

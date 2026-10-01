@@ -32,11 +32,11 @@
 
     // Restaurer la dernière page visitée.
     // Pour les pages données (paiements, depenses, etc.), on attend que les données
-    // Firestore soient prêtes avant de naviguer, afin d'éviter le flash "ancienne version".
+    // Supabase soient prêtes avant de naviguer, afin d'éviter le flash "ancienne version".
     var lastPage = 'dashboard';
     try { lastPage = localStorage.getItem('gp_last_page') || 'dashboard'; } catch(_){}
 
-    var dataPages = ['paiements','depenses','avenir','rapports','locatives','contrats','locataires','proprietaires','biens'];
+    var dataPages = ['paiements','depenses','rapports','locatives','contrats','locataires','proprietaires','biens'];
     var needsData = dataPages.indexOf(lastPage) !== -1;
 
     function doNavigate(page){
@@ -50,7 +50,7 @@
     } else {
       // Pages données : naviguer vers dashboard d'abord, puis attendre les données
       doNavigate('dashboard');
-      // Si le pull Firestore arrive (événement gp:db:synced ou firebase:data-loaded),
+      // Si le pull Supabase arrive (événement gp:db:synced ou supabase:data-loaded),
       // ou au bout de 3s max (données localStorage), naviguer vers la vraie page
       var navigated = false;
       function navigateToTarget(){
@@ -58,20 +58,20 @@
         navigated = true;
         doNavigate(lastPage);
       }
-      // Écoute le pull Firestore
-      window.addEventListener('gp:firebase:pulled', navigateToTarget, {once:true});
+      // Écoute le pull Supabase
+      window.addEventListener('gp:supabase:pulled', navigateToTarget, {once:true});
       window.addEventListener('gp:db:imported', navigateToTarget, {once:true});
       // Fallback : si les données sont déjà en localStorage (pas vides), naviguer après 400ms
       setTimeout(function(){
         if(navigated) return;
         var db = window.DB || {};
         var hasData = (db[lastPage] && db[lastPage].length > 0) ||
-                      (lastPage==='avenir' && db.paiements && db.paiements.length > 0);
+                      false;
         if(hasData){
           navigateToTarget();
         } else {
-          // Attendre encore un peu (Firestore en cours)
-          window.addEventListener('gp:firebase:pulled', navigateToTarget, {once:true});
+          // Attendre encore un peu (Supabase en cours)
+          window.addEventListener('gp:supabase:pulled', navigateToTarget, {once:true});
           setTimeout(navigateToTarget, 2500); // fallback ultime
         }
       }, 400);
@@ -80,8 +80,8 @@
 
   async function logout(){
     _appShown = false; // permet une reconnexion propre
-    try { if(window.GPFirebaseAuth && window.GPFirebaseAuth.signOut) await window.GPFirebaseAuth.signOut(); }
-    catch(e){ console.warn('[legacy-safe] logout Firebase:', e && (e.message||e)); }
+    try { if(window.GPSupabaseAuth && window.GPSupabaseAuth.signOut) await window.GPFirebaseAuth.signOut(); }
+    catch(e){ console.warn('[legacy-safe] logout Supabase:', e && (e.message||e)); }
     window.currentUser=null;
     try { localStorage.removeItem('gp_session_name'); } catch(e){}
     showLogin();
@@ -129,8 +129,8 @@
         var cached=(localStorage.getItem('gp_session_name')||localStorage.getItem('gp_session_firstname')||'').trim();
         if(cached) document.querySelectorAll('.user-name,.user-menu-name,#gpUName').forEach(function(el){ if(el) el.textContent=cached; });
       } catch(_) {}
-      if(window.GPFirebaseAuth && window.GPFirebaseAuth.available && window.GPFirebaseAuth.available()){
-        var user = await window.GPFirebaseAuth.restoreSession();
+      if(window.GPSupabaseAuth && typeof window.GPSupabaseAuth.restoreSession === 'function'){
+        var user = await window.GPSupabaseAuth.restoreSession();
         if(user){
           _initRunning = false;
           if(!_appShown){ _appShown = true; return showApp(); }
@@ -153,7 +153,7 @@
     if(!hasCached && !window.currentUser) showLogin();
     setTimeout(initAuthScreen, 120);
   });
-  window.addEventListener('firebase:ready', function(){ setTimeout(initAuthScreen, 300); });
+  window.addEventListener('supabase:ready', function(){ setTimeout(initAuthScreen, 150); });
 
   // [cleaned] debug console statement removed
 })();

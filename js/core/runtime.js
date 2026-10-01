@@ -341,8 +341,10 @@
 
   function install(){
     patchSave('saveLocataire', 'locataires');
-    patchSave('saveProprietaire', 'proprietaires');
-    patchSave('saveBien', 'biens');
+    // Propriétaires est sauvegardé exclusivement par GPV10.saveOwner().
+    // Ne pas l'envelopper ici : le double pipeline provoquait des écritures concurrentes.
+    // Biens est sauvegardé exclusivement par GPV10.saveBien().
+    // Ne pas l'envelopper ici : le formulaire possède déjà son pipeline canonique.
     patchSave('saveLocative', 'locatives');
     patchSave('saveContrat', 'contrats');
     patchDelete();
@@ -381,8 +383,7 @@
     locatives: ['locatives','nv-locative'],
     bail: ['biens','nv-bien','locatives','nv-locative','bien-detail'],
     contrats: ['contrats','nv-contrat'],
-    paiements: ['paiements','avenir'],
-    avenir: ['avenir'],
+    paiements: ['paiements'],
     depenses: ['depenses'],
     fichiers: ['fichiers'],
     messages: ['messages'],

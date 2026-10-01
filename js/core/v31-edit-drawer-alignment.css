@@ -1,0 +1,6 @@
+/* V31: all edit drawers use the owner drawer shell */
+#gpActionsDrawer{width:520px!important;max-width:100vw!important}
+#gpActionsOverlay{position:fixed!important;inset:0!important}
+.gpad-head{padding:20px 24px 16px!important}
+.gpad-body{padding:20px 24px!important}
+.gpad-foot{padding:14px 24px!important}

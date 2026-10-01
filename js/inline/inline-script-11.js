@@ -4,10 +4,15 @@
   function blob(o){ return JSON.stringify(o||'').toLowerCase(); }
   function initials(pr,n){ var a=(pr||'').trim().charAt(0); var b=(n||'').trim().charAt(0); return (a+b).toUpperCase()||'?'; }
 
+  var PAGE={proprietaires:1}, PS={proprietaires:10};
+  function renderPropPagination(total){ return window.GPPagination ? GPPagination.pages('proprietaires', total, PS.proprietaires, window.renderProprietairesModern) : ''; }
+  window.gpProprietairesPage=function(p){ PAGE.proprietaires=Math.max(1,Number(p)||1); if(window.GPPagination)GPPagination.state.proprietaires=PAGE.proprietaires; return window.renderProprietairesModern(); };
+
   window.renderProprietairesModern = function(){
     var shell = document.getElementById('gpProprietairesModern');
     if(!shell) return;
-    var all   = Array.isArray(window.DB&&window.DB.proprietaires) ? window.DB.proprietaires : [];
+    var canonical = (window.GPDB && typeof window.GPDB.load === 'function') ? window.GPDB.load() : (window.DB || {});
+    var all   = Array.isArray(canonical.proprietaires) ? canonical.proprietaires : [];
     var q     = (document.getElementById('gpPropSearch')  ? document.getElementById('gpPropSearch').value  : '').toLowerCase().trim();
     var fstat = (document.getElementById('gpPropStatus') ? document.getElementById('gpPropStatus').value : '').toLowerCase();
 
@@ -22,6 +27,10 @@
       return match;
     });
 
+    var pg = window.GPPagination ? GPPagination.normalize('proprietaires', data.length, PS.proprietaires) : {page:PAGE.proprietaires,start:(PAGE.proprietaires-1)*PS.proprietaires};
+    PAGE.proprietaires=pg.page;
+    var visible = data.slice(pg.start, pg.start+PS.proprietaires);
+
     shell.innerHTML = '\n'
       + '<div class="prop-desktop-wrap">'
 
@@ -32,12 +41,12 @@
       + '<div class="prop-stat-card"><div class="prop-stat-icon blue"><span class="material-symbols-rounded">home_work</span></div><div class="prop-stat-info"><strong>' + totalBiens + '</strong><span>Biens associés</span><em>Tous propriétaires</em></div></div>'
       + '<div class="prop-stat-card"><div class="prop-stat-icon green"><span class="material-symbols-rounded">verified_user</span></div><div class="prop-stat-info"><strong>' + actifs + '</strong><span>Actifs</span><em>Comptes actifs</em></div></div>'
       + '</div>'
-      + '<button class="prop-btn-primary" onclick="openNouvelProprietaireDrawer()"><span class="material-symbols-rounded" style="font-size:18px">add</span> Nouveau propriétaire</button>'
+      + '<button class="prop-btn-primary" onclick="navigate(\'nv-proprietaire\')"><span class="material-symbols-rounded" style="font-size:18px">add</span> Nouveau propriétaire</button>'
       + '</div>'
 
       // Toolbar
       + '<div class="prop-toolbar-row">'
-      + '<label class="prop-search-box"><span class="material-symbols-rounded">search</span><input id="gpPropSearch" value="' + esc(q) + '" placeholder="Rechercher un propriétaire…" oninput="renderProprietairesModern()"></label>'
+      + '<label class="prop-search-box"><span class="material-symbols-rounded">search</span><input id="gpPropSearch" value="' + esc(q) + '" placeholder="Rechercher un propriétaire…" oninput="gpProprietairesPage(1)"></label>'
       + '<div style="margin-left:auto;display:flex;align-items:center;gap:8px">'
       + '<div class="gp-export-wrap" id="exportWrap-proprietaires" style="position:relative"><button class="prop-btn-sm-outline" onclick="toggleExportMenu(\'proprietaires\')"><span class="material-symbols-rounded" style="font-size:14px">file_download</span> Exporter</button><div class="gp-export-menu" id="exportMenu-proprietaires"><div class="gp-export-item" onclick="exportListePDF(\'proprietaires\');toggleExportMenu(\'proprietaires\')"><span class="material-symbols-rounded">picture_as_pdf</span> Export PDF</div><div class="gp-export-sep"></div><div class="gp-export-item" onclick="exportExcel(\'proprietaires\');toggleExportMenu(\'proprietaires\')"><span class="material-symbols-rounded">table_view</span> Export Excel</div></div></div>'
       + '<button class="prop-btn-sm-outline" onclick="openImportModal(\'proprietaires\')"><span class="material-symbols-rounded" style="font-size:14px">file_upload</span> Importer</button>'
@@ -54,7 +63,7 @@
           + '<th style="text-align:center">Statut</th>'
           + '<th style="text-align:center">Actions</th>'
           + '</tr></thead><tbody>'
-          + data.map(function(p){
+          + visible.map(function(p){
               var idx = all.indexOf(p);
               var fullName = (typeof window.getProprietaireFullName==='function')
                 ? window.getProprietaireFullName(p)
@@ -64,7 +73,7 @@
                 : initials(p.prenom, p.nom);
               var biens = (typeof window.getProprietaireBiens==='function') ? window.getProprietaireBiens(p).length : 0;
               return '<tr onclick="openProprietaireDetail('+idx+')">'
-                + '<td><div class="prop-person-cell"><div class="prop-avatar">'+photo+'</div><div><div class="prop-person-name">'+esc(fullName)+'</div><div class="prop-person-sub">'+esc(p.email||'—')+'</div></div></div></td>'
+                + '<td style="text-align:left"><div class="prop-person-cell"><div class="prop-avatar">'+photo+'</div><div><div class="prop-person-name">'+esc(fullName)+'</div></div></div></td>'
                 + '<td><div class="prop-contact-cell"><div class="prop-contact-phone"><span class="material-symbols-rounded">call</span>'+esc(p.tel||'—')+'</div><div class="prop-contact-email"><span class="material-symbols-rounded">mail</span>'+esc(p.email||'—')+'</div></div></td>'
                 + '<td style="font-size:13px;color:#374151">'+esc(p.adresse||'—')+'</td>'
                 + '<td><span class="prop-biens-badge"><span class="material-symbols-rounded" style="font-size:14px">home_work</span>'+biens+'</span></td>'
@@ -72,14 +81,15 @@
                 + '<td><div class="prop-actions" onclick="event.stopPropagation()">'
                 + '<button class="prop-action-btn view" title="Voir" onclick="openProprietaireDetail('+idx+')"><span class="material-symbols-rounded">visibility</span></button>'
                 + '<button class="prop-action-btn edit" title="Modifier" onclick="editRow(\'proprietaires\','+idx+')"><span class="material-symbols-rounded">edit</span></button>'
+                + '<button class="prop-action-btn mandat" title="Mandat de gérance" onclick="generateMandatGerance('+idx+')"><span class="material-symbols-rounded">description</span></button>'
                 + '<button class="prop-action-btn docs" title="Documents" onclick="openEntityDocs(\'proprietaires\','+idx+')"><span class="material-symbols-rounded">folder</span></button>'
                 + '<button class="prop-action-btn del" title="Supprimer" onclick="delRow(\'proprietaires\','+idx+')"><span class="material-symbols-rounded">delete</span></button>'
                 + '</div></td>'
                 + '</tr>';
             }).join('')
           + '</tbody></table>'
-          + '<div class="prop-table-footer"><span>Affichage de 1 à '+data.length+' sur '+data.length+' propriétaire'+(data.length>1?'s':'')+'</span>'
-          + '<div class="prop-page-btns"><button class="prop-page-btn"><span class="material-symbols-rounded" style="font-size:14px">chevron_left</span></button><button class="prop-page-btn active">1</button><button class="prop-page-btn"><span class="material-symbols-rounded" style="font-size:14px">chevron_right</span></button></div></div>'
+          + '<div class="prop-table-footer gp-common-footer"><span>Affichage de '+(data.length?pg.start+1:0)+' à '+Math.min(pg.start+PS.proprietaires,data.length)+' sur '+data.length+' propriétaire'+(data.length>1?'s':'')+'</span>'
+          + renderPropPagination(data.length)+'</div>'
         : '<div class="prop-empty"><span class="material-symbols-rounded">person_off</span>Aucun propriétaire trouvé</div>')
       + '</div></div>';
 

@@ -170,18 +170,35 @@
 
       setRevision(nextRev);
 
-      if (!options.silent) {
+      // Toute écriture locale non explicitement marquée comme issue du cloud
+      // est considérée comme une modification à synchroniser. On ne l'efface
+      // qu'après confirmation du serveur.
+      if (!options.skipCloud) {
         try { localStorage.setItem('gp_data_dirty_at', new Date().toISOString()); } catch(ignore) {}
+      }
+      if (!options.silent) {
         emit('gp:db:saved', { db: incoming, revision: nextRev });
       }
 
-      if (!options.skipCloud && !options.silent && window.GPSupabase &&
+      var syncEnabled = false;
+      try {
+        syncEnabled = !!(window.GPSupabase && window.GPSupabase.status &&
+          window.GPSupabase.status().autosync === true);
+      } catch(ignoreSyncFlag) {}
+      if (!options.skipCloud && !options.silent && syncEnabled && window.GPSupabase &&
           typeof window.GPSupabase.push === 'function' &&
           typeof window.GPSupabase.available === 'function' && window.GPSupabase.available() &&
           window.GPSupabase.currentUid && window.GPSupabase.currentUid()) {
-        window.GPSupabase.push(incoming).catch(function(e){
-          console.warn('[GPDB] Synchronisation Supabase échouée:', e && (e.message || e));
-          try { if(window.toast) window.toast('Donnée locale enregistrée ; synchronisation Supabase à vérifier.', 'err'); } catch(ignore) {}
+        window.GPSupabase.push(incoming).then(function(){
+          try { localStorage.removeItem('gp_data_dirty_at'); } catch(ignore) {}
+          try { localStorage.setItem('gp_last_cloud_sync_at', new Date().toISOString()); } catch(ignore) {}
+        }).catch(function(e){
+          var msg = e && (e.message || String(e)) || 'Erreur inconnue';
+          console.warn('[GPDB] Synchronisation Supabase échouée:', msg);
+          try { localStorage.setItem('gp_last_sync_error', msg); } catch(ignoreStore) {}
+          // La donnée locale reste la version active. Elle ne doit jamais être
+          // remplacée silencieusement par une ancienne copie cloud.
+          try { if(window.toast) window.toast('Modification locale enregistrée. Synchronisation en attente.', 'warn'); } catch(ignore) {}
         });
       }
       return true;
@@ -197,6 +214,35 @@
     if (typeof mutator === 'function') mutator(db);
     save(db, options);
     return db;
+  }
+
+  // Canonical record commit: load the latest local revision, modify exactly one
+  // record, persist it once, then read the two local stores back immediately.
+  // This avoids stale whole-DB snapshots and makes CRUD forms independent from
+  // legacy wrappers or cloud refreshers.
+  function commitRecord(collectionName, id, record, options){
+    options = options || {};
+    var db = load();
+    if (!Array.isArray(db[collectionName])) db[collectionName] = [];
+    var key = String(id || (record && record.id) || '');
+    if (!key) return false;
+    var idx = db[collectionName].findIndex(function(row){ return String(row && row.id) === key; });
+    if (idx >= 0) db[collectionName][idx] = Object.assign({}, db[collectionName][idx], record || {}, {id:key});
+    else db[collectionName].push(Object.assign({}, record || {}, {id:key}));
+    var ok = save(db, options);
+    if (ok === false) return false;
+    try {
+      var auth = safeParse(localStorage.getItem(AUTHORITATIVE_KEY), null);
+      var raw = safeParse(localStorage.getItem(STORAGE_KEY), null);
+      var a = (auth && Array.isArray(auth[collectionName])) ? auth[collectionName].find(function(row){ return String(row && row.id) === key; }) : null;
+      var r = (raw && Array.isArray(raw[collectionName])) ? raw[collectionName].find(function(row){ return String(row && row.id) === key; }) : null;
+      if (!a || !r) return false;
+      var expected = record || {};
+      return Object.keys(expected).every(function(k){ return JSON.stringify(a[k]) === JSON.stringify(expected[k]) && JSON.stringify(r[k]) === JSON.stringify(expected[k]); });
+    } catch(e) {
+      console.error('[GPDB] commitRecord verification failed', e);
+      return false;
+    }
   }
 
   function collection(name){
@@ -319,6 +365,7 @@
     load: load,
     save: save,
     update: update,
+    commitRecord: commitRecord,
     collection: collection,
     findById: findById,
     upsert: upsert,

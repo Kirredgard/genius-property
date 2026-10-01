@@ -38,11 +38,9 @@
     return bestScore>=35?best:null;
   }
   function countOwnerBiens(p){
+    try{ if(window.GPRelationsV52&&typeof window.GPRelationsV52.propertiesForOwner==='function') return window.GPRelationsV52.propertiesForOwner(db(),p).length; }catch(e){}
     var keys=[p.id,p.uid,p.key,p.email,p.tel,p.phone,p.telephone,p.nom,fullName(p),[p.prenom,p.nom].filter(Boolean).join(' '),[p.nom,p.prenom].filter(Boolean).join(' ')].map(norm).filter(Boolean);
-    return arr('biens').filter(function(b){
-      var vals=ownerKeys(b).map(norm);
-      return vals.some(function(v){return v && keys.some(function(k){return v===k || v.indexOf(k)>-1 || k.indexOf(v)>-1;});});
-    }).length;
+    return arr('biens').filter(function(b){var vals=ownerKeys(b).map(norm);return vals.some(function(v){return v && keys.some(function(k){return v===k || v.indexOf(k)>-1 || k.indexOf(v)>-1;});});}).length;
   }
   function ownerHtmlFinal(b){
     var p=findOwnerForBien(b);

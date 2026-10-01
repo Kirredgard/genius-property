@@ -27,7 +27,7 @@
     enabled: true,
     agencyOnly: true,
     commercial: false,
-    localAuth: true,
+    localAuth: false,
     isCommercialPage: isCommercialPage,
     applyUI: applyUI
   };

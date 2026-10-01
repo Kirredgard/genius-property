@@ -26,8 +26,8 @@
     locatives:{name:'Locations', icon:'key', subtitle:'Suivez les locations en cours et les affectations'},
     contrats:{name:'Contrats', icon:'description', subtitle:'Gérez les contrats et documents associés'},
     paiements:{name:'Paiements', icon:'payments', subtitle:'Suivez les encaissements et règlements'},
-    avenir:{name:'Paiements à venir', icon:'event_upcoming', subtitle:'Anticipez les prochaines échéances'},
     depenses:{name:'Dépenses', icon:'receipt_long', subtitle:'Suivez les charges et sorties financières'},
+    situation:{name:'Situation propriétaires', icon:'request_quote', subtitle:'Encaissements, commission et reversements par propriétaire'},
     fichiers:{name:'Fichiers', icon:'folder', subtitle:'Centralisez vos documents importants'},
     messages:{name:'Messages', icon:'chat', subtitle:'Consultez et envoyez vos communications'},
     'agenda-employes':{name:'Agenda employés', icon:'event', subtitle:'Suivez les missions et rendez-vous de l’équipe'},
@@ -53,7 +53,7 @@
     employes: function(){ return typeof window.renderEmployesModern==='function' ? window.renderEmployesModern() : call('renderTable', 'employes'); },
     proprietaires: function(){ return typeof window.renderProprietairesModern==='function' ? window.renderProprietairesModern() : call('renderProprietairesCards'); },
     locataires: function(){ return call('renderLocatairesModern'); },
-    biens: function(){ return callAny(['renderBiensFinal','renderBiensCards']); },
+    biens: function(){ return call('renderBiensFinal'); },
     locatives: function(){ return callAny(['renderLocativesFinal','renderLocativesModernAligned','renderLocativesModern','renderLocativesModernV11']) || call('renderTable', 'locatives'); },
     contrats: function(){ return callAny(['renderContratsFinal','renderContratsModern','renderContrats']); },
     paiements: function(){
@@ -61,12 +61,12 @@
       if(typeof window.renderPaiementsFinal === 'function') return window.renderPaiementsFinal();
       return call('renderPaiements');
     },
-    avenir: function(){ return call('renderAvenir'); },
     depenses: function(){
       // Appelle renderDepensesFinal en priorité (nouvelle UI), fallback sur renderDepenses
       if(typeof window.renderDepensesFinal === 'function') return window.renderDepensesFinal();
       return call('renderDepenses');
     },
+    situation: function(){ return call('renderSituationProprietaires'); },
     fichiers: function(){ return call('renderFichiers'); },
     messages: function(){ return call('renderMessages'); },
     'agenda-employes': function(){ return call('renderEmployeeAgenda'); },
@@ -74,13 +74,13 @@
     rapports: function(){ return call('renderRapports'); },
     journal: function(){ call('renderJournalEmployeGrid'); call('renderMissionDoneInbox'); return call('renderEmployeeAgenda'); },
     droits: function(){ return call('renderDroitsPage'); },
-    'nv-bien': function(){ return callAny(['openNouveauBienDrawer','openNouvelBienDrawer','resetBienForm','fillProprioBien']); },
-    'bien-detail': function(){ call('renderBienDetailDocuments'); return call('switchBienTab', document.getElementById('bdTab-infos'), 'infos'); },
+    'nv-bien': function(){ return window.GPV10 && window.GPV10.renderBien ? window.GPV10.renderBien(window.GPV10.bienId || null) : null; },
+    'bien-detail': function(){ if(typeof window.openBienDetail==='function' && Number.isFinite(Number(window._bienDetailIdx))) return window.openBienDetail(Number(window._bienDetailIdx)); return null; },
     'nv-locative': function(){ return call('fillLocativeSelects'); },
     'nv-contrat': function(){ return call('fillContratSelects'); },
-    'nv-employe': function(){ return call('resetEmployeForm'); },
+    'nv-employe': function(){ return typeof window.openNouvelEmployeDrawer==='function' ? window.openNouvelEmployeDrawer() : call('resetEmployeForm'); },
     'nv-locataire': function(){ return callAny(['openNouvelLocataireDrawer','resetLocataireForm']); },
-    'nv-proprietaire': function(){ return callAny(['openNouvelProprietaireDrawer','openNouveauProprietaireDrawer','resetProprietaireForm']); },
+    'nv-proprietaire': function(){ return window.GPV10 && window.GPV10.renderOwner ? window.GPV10.renderOwner(window.GPV10.ownerId || null) : null; },
     'proprietaire-detail': function(){ call('renderProprietaireDocuments'); return call('switchProprietaireTab', document.getElementById('pdTab-infos'), 'infos'); },
     parametres: function(){ return call('renderParametres'); },
     sync: function(){ return window.GPSyncPage && window.GPSyncPage.render ? window.GPSyncPage.render() : null; },
@@ -165,6 +165,8 @@
 
   function navigate(page){
     if(!page) page = 'dashboard';
+    // Ancienne route 'avenir' supprimée : les échéances sont désormais dans Encaissements.
+    if(page === 'avenir') page = 'paiements';
     if(!canOpen(page)){
       if(typeof window.toast === 'function') window.toast("Accès refusé — vous n'avez pas les droits pour cette section", 'err');
       page = 'dashboard';

@@ -1,1 +1,1 @@
-window.GP_FIREBASE_CONFIG = { workspaceId: 'auto', autosync: true };
+/* Supabase V22 — legacy Firebase config removed. */

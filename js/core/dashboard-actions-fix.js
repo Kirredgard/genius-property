@@ -21,11 +21,11 @@
 
   function renderKnown(page){
     if(page === 'dashboard') return call('renderDashboard');
-    if(page === 'biens') return call('renderBiensFinal') || call('renderBiensFinal2') || call('renderBiensCards') || call('renderBiens');
+    if(page === 'biens') return call('renderBiensFinal');
     if(page === 'locataires') return call('renderLocatairesModern') || call('renderLocataires');
     if(page === 'paiements') return call('renderPaiementsFinal') || call('renderPaiements');
     if(page === 'depenses') return call('renderDepensesFinal') || call('renderDepenses');
-    if(page === 'avenir') return call('renderAvenir');
+    if(page === 'avenir') return call('renderPaiementsFinal') || call('renderPaiements');
     if(window.GPNavigation && typeof window.GPNavigation.renderPage === 'function'){
       try{ return window.GPNavigation.renderPage(page); }catch(e){ console.error('[dashboard-actions-fix] renderPage', e); }
     }
@@ -50,12 +50,7 @@
   function openPayments(kind){
     try{ sessionStorage.setItem('gp_paiements_filter', kind || ''); }catch(_){ }
     if(kind === 'late' || kind === 'retard'){
-      go('avenir');
-      setTimeout(function(){
-        call('filterAvenir', 'retard');
-        var b = document.getElementById('av-btn-retard');
-        if(b) b.classList.add('btn-primary');
-      }, 80);
+      go('paiements');
       return;
     }
     go('paiements');
@@ -67,7 +62,7 @@
     setTimeout(function(){
       var input = document.getElementById('gpBienSearch') || document.getElementById('biensSearch');
       if(input && type){ input.value = type; }
-      call('renderBiensFinal') || call('renderBiensFinal2') || call('renderBiensCards', true) || call('renderBiens');
+      call('renderBiensFinal');
     }, 80);
   }
 
@@ -77,6 +72,7 @@
 
   document.addEventListener('click', function(e){
     var kpi = e.target.closest('#page-dashboard .gd-kpi');
+    if(kpi && kpi.dataset && kpi.dataset.gpTarget){ e.preventDefault(); e.stopPropagation(); go(kpi.dataset.gpTarget); return; }
     if(kpi){
       var text = (kpi.textContent || '').toLowerCase();
       if(text.indexOf('bien') !== -1){ e.preventDefault(); e.stopPropagation(); go('biens'); return; }

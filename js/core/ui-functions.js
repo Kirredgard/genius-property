@@ -23,11 +23,8 @@
     return e ? e.value : '';
   }
   function genId(p) {
-    var map = { EP: 'employes', PR: 'proprietaires', LC: 'locataires', BI: 'biens' };
-    var key = map[p];
-    var db = window.GPDB && window.GPDB.load ? window.GPDB.load() : (window.DB || {});
-    var count = key && Array.isArray(db[key]) ? db[key].length + 1 : 1;
-    return p + new Date().getFullYear().toString().slice(-2) + '-' + String(count).padStart(3, '0');
+    var prefix = String(p || 'ID').toUpperCase();
+    return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
   }
 
   /* ── Thème jour/nuit ─────────────────────────────────────── */
@@ -50,12 +47,49 @@
     if (!drop) return;
     var isOpen = drop.classList.contains('open');
     closeAllPanels();
+    drop.style.display = isOpen ? 'none' : 'block';
     if (!isOpen) {
       drop.classList.add('open');
       var inp = drop.querySelector('input');
       if (inp) setTimeout(function () { inp.focus(); }, 50);
     }
   };
+
+  /* ── Recherche topbar ───────────────────────────────────── */
+
+  function closeTopbarSearch() {
+    var drop = document.getElementById('topbarSearchDrop');
+    if (drop) { drop.classList.remove('open'); drop.style.display = 'none'; }
+    var inp = document.getElementById('topbarSearchInput');
+    if (inp) inp.value = '';
+    var out = document.getElementById('topbarSearchResults');
+    if (out) out.innerHTML = '<div style="padding:16px;text-align:center;font-size:12px;color:#9ca3af">Tapez pour rechercher…</div>';
+  }
+
+  function runTopbarSearch(query) {
+    var out = document.getElementById('topbarSearchResults');
+    if (!out) return;
+    var q = String(query || '').trim().toLowerCase();
+    if (!q) {
+      out.innerHTML = '<div style="padding:16px;text-align:center;font-size:12px;color:#9ca3af">Tapez pour rechercher…</div>';
+      return;
+    }
+    var d = window.GPDB && typeof window.GPDB.load === 'function' ? (window.GPDB.load() || {}) : (window.DB || {});
+    var groups = [
+      ['Propriétaires','proprietaires','proprietaires',function(x){return [x.prenom,x.nom,x.email,x.tel,x.adresse].join(' ')}],
+      ['Locataires','locataires','locataires',function(x){return [x.prenom,x.nom,x.email,x.tel,x.adresse].join(' ')}],
+      ['Biens','biens','biens',function(x){return [x.nom,x.adresse,x.proprio,x.proprietaire].join(' ')}],
+      ['Locations','locatives','locatives',function(x){return [x.nom,x.bien,x.locataire,x.occupant,x.uniteNom].join(' ')}]
+    ];
+    var hits=[];
+    groups.forEach(function(g){
+      (Array.isArray(d[g[1]])?d[g[1]]:[]).forEach(function(x,i){
+        if (String(g[3](x)||'').toLowerCase().indexOf(q)!==-1) hits.push({label:g[0],page:g[2],idx:i,text:(x.nom||[x.prenom,x.nom].filter(Boolean).join(' ')||x.bien||x.email||'Résultat')});
+      });
+    });
+    if(!hits.length){out.innerHTML='<div style="padding:16px;text-align:center;font-size:12px;color:#9ca3af">Aucun résultat</div>';return;}
+    out.innerHTML=hits.slice(0,12).map(function(h){return '<button type="button" style="display:flex;width:100%;align-items:center;gap:8px;border:0;background:#fff;padding:9px 12px;text-align:left;cursor:pointer" onclick="closeTopbarSearch();if(window.navigate)navigate(\''+h.page+'\');setTimeout(function(){if(window.openProprietaireDetail&&\''+h.page+'\'===\'proprietaires\')openProprietaireDetail('+h.idx+');else if(window.viewRow&&\''+h.page+'\'===\'locataires\')viewRow(\'locataires\','+h.idx+');else if(window.openBienDetail&&\''+h.page+'\'===\'biens\')openBienDetail('+h.idx+');},120)"><span class="material-symbols-rounded" style="font-size:16px;color:#D4AF37">search</span><span><b style="display:block;font-size:12px;color:#111">'+String(h.text).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})+'</b><small style="color:#9ca3af">'+h.label+'</small></span></button>';}).join('');
+  }
 
   /* ── Panneaux (notifs / aide) ────────────────────────────── */
 
@@ -96,6 +130,45 @@
     if (p) p.classList.remove('open');
   }
 
+  function renderNotifPanel() {
+    var list = document.getElementById('notifList');
+    if (!list) return;
+    var d = window.GPDB && typeof window.GPDB.load === 'function' ? (window.GPDB.load() || {}) : (window.DB || {});
+    var rows = [];
+    if (typeof window.getPaiementEcheances === 'function') {
+      try { rows = window.getPaiementEcheances().filter(function(x){return x.cat==='retard';}).slice(0,8); } catch(e) {}
+    }
+    if (!rows.length) {
+      list.innerHTML='<div class="notif-empty"><span class="material-symbols-rounded">notifications_off</span>Aucune notification</div>';
+      return;
+    }
+    list.innerHTML=rows.map(function(r){
+      var label=r.locataire||r.tenant||r.bien||'Échéance';
+      var amount=r.reste||r.impaye||r.solde||r.montant||'';
+      return '<div style="padding:9px 12px;border-bottom:1px solid #f3f4f6;cursor:pointer" onclick="closeNotifPanel();if(window.navigate)navigate(\'paiements\')"><b style="font-size:11px;display:block">Paiement en retard</b><small style="color:#64748b">'+String(label).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})+'</small><strong style="display:block;color:#b91c1c;font-size:11px">'+String(amount)+'</strong></div>';
+    }).join('');
+  }
+
+  function markAllRead() {
+    var dot=document.getElementById('notifDot'), count=document.getElementById('notifCount');
+    if(dot) dot.style.display='none';
+    if(count) count.style.display='none';
+  }
+
+  function switchHelpTab(tab, btn) {
+    document.querySelectorAll('#helpPanel .help-section').forEach(function(x){x.classList.toggle('active',x.id==='help-'+tab);});
+    document.querySelectorAll('#helpPanel .help-tab').forEach(function(x){x.classList.remove('active');});
+    if(btn) btn.classList.add('active');
+  }
+
+  function toggleFaq(el) {
+    if(!el) return;
+    el.classList.toggle('open');
+    var body=el.querySelector('.help-faq-answer');
+    if(body) body.style.display=el.classList.contains('open')?'block':'none';
+  }
+
+
   // Fermer les panneaux au clic extérieur
   document.addEventListener('click', function (e) {
     if (
@@ -127,11 +200,18 @@
   }
 
   function getPhotoData(inputId) {
+    if (window.GPMedia && typeof window.GPMedia.readImage === 'function') {
+      return window.GPMedia.readImage(inputId).catch(function(err){
+        if(window.toast) window.toast(err && err.message ? err.message : 'Impossible de lire la photo.', 'err');
+        return '';
+      });
+    }
     var input = document.getElementById(inputId);
     if (!input || !input.files[0]) return Promise.resolve(null);
     return new Promise(function (res) {
       var r = new FileReader();
       r.onload = function (e) { res(e.target.result); };
+      r.onerror = function(){res('');};
       r.readAsDataURL(input.files[0]);
     });
   }
@@ -150,6 +230,7 @@
   }
 
   function resetEmployeForm() {
+    if (typeof window.openNouvelEmployeDrawer === 'function') { window.openNouvelEmployeDrawer(); return; }
     ['e-civ', 'e-nom', 'e-prenom', 'e-naiss', 'e-fonction', 'e-adresse', 'e-tel',
       'e-piece', 'e-numpiece', 'e-lieu', 'e-deldeb', 'e-delexp', 'e-matri',
       'e-enfants', 'e-contrat', 'e-email', 'e-pass'].forEach(function (id) {
@@ -201,7 +282,7 @@
 
     var droitsEl = document.querySelectorAll('#droits-list .toggle-switch input[type=checkbox]');
     var droitsLabels = ['employes', 'proprietaires', 'locataires', 'bail', 'contrats',
-      'paiements', 'avenir', 'depenses', 'fichiers', 'messages',
+      'paiements', 'depenses', 'fichiers', 'messages',
       'rapports', 'journal', 'superAdmin'];
     var droits = {};
     droitsEl.forEach(function (cb, i) { droits[droitsLabels[i]] = cb.checked; });
@@ -235,9 +316,38 @@
     if (window.toast) window.toast(authUser ? 'Employé enregistré et accès créé ✓' : 'Employé enregistré ✓');
   }
 
+  /* ── Topbar : branchement unique des actions ─────────────── */
+  function bindTopbarActions(){
+    var set=function(id,fn){var el=document.getElementById(id);if(!el)return;el.onclick=fn;el.__gpTopbarBound=true;};
+    set('topbarSearchBtn',function(e){toggleTopbarSearch(e);});
+    set('helpBtn',function(e){toggleHelpPanel(e);});
+    set('topbarAgendaBtn',function(){if(typeof window.navigate==='function')window.navigate('agenda');});
+    set('topbarMessagesBtn',function(){if(typeof window.navigate==='function')window.navigate('messages');});
+    set('notifBtn',function(e){toggleNotifPanel(e);});
+    set('themeIcon',function(){toggleTheme();});
+  }
+
+  // Filet de sécurité : même si un autre ancien script remplace un bouton,
+  // les actions topbar restent fonctionnelles.
+  document.addEventListener('click', function(e){
+    var t=e.target&&e.target.closest ? e.target.closest('#topbarSearchBtn,#helpBtn,#topbarAgendaBtn,#topbarMessagesBtn,#notifBtn,#themeIcon') : null;
+    if(!t || t.__gpTopbarDelegated) return;
+    // Le onclick moderne est la source principale ; ce garde-fou ne s'exécute
+    // que si aucun gestionnaire n'est installé.
+    if(t.__gpTopbarBound) return;
+    t.__gpTopbarDelegated=true;
+    if(t.id==='topbarSearchBtn') toggleTopbarSearch(e);
+    else if(t.id==='helpBtn') toggleHelpPanel(e);
+    else if(t.id==='topbarAgendaBtn' && typeof window.navigate==='function') window.navigate('agenda');
+    else if(t.id==='topbarMessagesBtn' && typeof window.navigate==='function') window.navigate('messages');
+    else if(t.id==='notifBtn') toggleNotifPanel(e);
+    else if(t.id==='themeIcon') toggleTheme();
+  }, true);
+
   /* ── Restaurer le thème sauvegardé au chargement ─────────── */
 
   document.addEventListener('DOMContentLoaded', function () {
+    bindTopbarActions();
     var saved = localStorage.getItem('geniusproperty_theme');
     if (saved === 'dark') {
       document.body.classList.add('dark');
@@ -250,7 +360,13 @@
 
   Object.assign(window, {
     toggleTheme: toggleTheme,
+    closeTopbarSearch: closeTopbarSearch,
+    runTopbarSearch: runTopbarSearch,
     toggleNotifPanel: toggleNotifPanel,
+    renderNotifPanel: renderNotifPanel,
+    markAllRead: markAllRead,
+    switchHelpTab: switchHelpTab,
+    toggleFaq: toggleFaq,
     closeNotifPanel: closeNotifPanel,
     toggleHelpPanel: toggleHelpPanel,
     closeHelpPanel: closeHelpPanel,
@@ -402,7 +518,7 @@
     setTimeout(function(){run(document);},160);
     return r;
   };
-  ['openNouvelLocataireDrawer','openNouvelProprietaireDrawer','openNouvelEmployeDrawer','openEmployeeDrawer'].forEach(function(name){
+  ['openNouvelLocataireDrawer','openNouvelEmployeDrawer','openEmployeeDrawer'].forEach(function(name){
     var fn=window[name];
     if(typeof fn==='function'){
       window[name]=function(){var r=fn.apply(this,arguments);setTimeout(function(){run(document);},30);setTimeout(function(){run(document);},180);return r;};

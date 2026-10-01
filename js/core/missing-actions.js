@@ -7,7 +7,6 @@
  *  - Employés      : icône dossier (openEntityDocs)
  *  - Propriétaires : icône voir (openProprietaireDetail) + dossier
  *  - Locataires    : icône voir manquante + icône dossier
- *  - Biens         : clic carte (openBienDetail)
  *  - Contrats      : icône PDF (generateContratPDF)
  *  - Dépenses      : icône facture (openDepFacture)
  *
@@ -404,263 +403,27 @@
      3. openProprietaireDetail(idx) — bouton "Voir" propriétaires
   ───────────────────────────────────────────────────────────── */
   window.openProprietaireDetail = function(idx) {
-    if (typeof window.viewRow === 'function') {
-      window.viewRow('proprietaires', idx);
-    }
-  };
-
-  /* ─────────────────────────────────────────────────────────────
-     4. openBienDetail(idx) — clic carte biens → page détail complète
-  ───────────────────────────────────────────────────────────── */
-
-  /* --- helpers bien-detail --- */
-  function _bd_esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-  function _bd_clean(v){return String(v==null?'':v).trim();}
-  function _bd_norm(v){return _bd_clean(v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
-  function _bd_money(v){if(v==null||v==='')return '—';if(/FCFA|€|\$/i.test(String(v)))return _bd_esc(v);var n=Number(String(v).replace(/[^0-9,.-]/g,'').replace(',','.'));return Number.isFinite(n)?Math.round(n).toLocaleString('fr-FR')+' FCFA':_bd_esc(v);}
-  function _bd_similar(a,b){a=_bd_norm(a);b=_bd_norm(b);if(!a||!b)return false;return a===b||a.indexOf(b)>-1||b.indexOf(a)>-1;}
-  function _bd_keyVals(o,keys){return keys.map(function(k){return _bd_clean(o&&o[k]);}).filter(Boolean);}
-  function _bd_namePerson(p){return _bd_clean([p&&p.prenom,p&&p.nom].filter(Boolean).join(' '))||_bd_clean(p&&p.nom)||_bd_clean(p&&p.name)||_bd_clean(p&&p.fullName)||_bd_clean(p&&p.email)||_bd_clean(p&&p.tel)||'';}
-  function _bd_bienName(b){return _bd_clean(b&&(b.nom||b.name||b.designation||b.adresse||b.id));}
-  function _bd_locName(l){return _bd_clean(l&&(l.nom||l.name||l.location||l.bien||l.locative||l.id));}
-  function _bd_arr(k){var d=db();return Array.isArray(d[k])?d[k]:[];}
-  function _bd_ownerKeys(b){return _bd_keyVals(b,['proprietaireId','ownerId','proprioId','proprio','proprietaire','owner','nomProprietaire','proprietaireNom','ownerName']);}
-  function _bd_findOwner(b){
-    var keys=_bd_ownerKeys(b);if(!keys.length)return null;
-    var owners=_bd_arr('proprietaires'),best=null,score=0;
-    owners.forEach(function(p){
-      var vals=_bd_keyVals(p,['id','uid','key','email','tel','phone','telephone','nom','prenom','name','fullName','raisonSociale']);vals.push(_bd_namePerson(p));
-      var s=0;keys.forEach(function(k){vals.forEach(function(v){if(_bd_norm(k)&&_bd_norm(v)){if(_bd_norm(k)===_bd_norm(v))s=Math.max(s,100);else if(_bd_similar(k,v))s=Math.max(s,70);}});});
-      if(s>score){score=s;best=p;}
-    });
-    return score>=50?best:null;
-  }
-  function _bd_countOwnerBiens(p){
-    var vals=_bd_keyVals(p,['id','uid','key','email','tel','phone','telephone','nom','prenom','name','fullName']);vals.push(_bd_namePerson(p));
-    return _bd_arr('biens').filter(function(b){return _bd_ownerKeys(b).some(function(k){return vals.some(function(v){return _bd_similar(k,v);});});}).length;
-  }
-  function _bd_locativesForBien(b){
-    var bid=_bd_clean(b.id||b.uid||b.key),bn=_bd_bienName(b),adr=_bd_clean(b.adresse);
-    return _bd_arr('locatives').filter(function(l){
-      var vals=_bd_keyVals(l,['bienId','idBien','bien_id','bien','nomBien','bienNom','immeuble','propriete','location','locative']);
-      if(bid&&vals.some(function(v){return _bd_norm(v)===_bd_norm(bid);}))return true;
-      if(bn&&vals.some(function(v){return _bd_similar(v,bn);}))return true;
-      if(adr&&vals.some(function(v){return _bd_similar(v,adr);}))return true;
-      return false;
-    });
-  }
-  function _bd_unitsOf(b){
-    if(Array.isArray(b.unites)&&b.unites.length)return b.unites.map(function(u,i){return typeof u==='string'?{nom:u}:Object.assign({nom:'Appartement '+(i+1)},u);});
-    var n=parseInt(b.nbAppart||b.nbAppartement||b.nbAppartements||b.nombreUnites||0,10);
-    if(!n||n<1)n=1;
-    return Array.from({length:n},function(_,i){return{nom:n>1?'Appartement '+(i+1):(b.nom||'Unité principale')};});
-  }
-  function _bd_locataireFor(loc){
-    var keys=_bd_keyVals(loc,['locataireId','tenantId','locataire','occupant','nomLocataire']);
-    var tenants=_bd_arr('locataires');
-    for(var i=0;i<tenants.length;i++){
-      var t=tenants[i],vals=_bd_keyVals(t,['id','uid','key','email','tel','phone','telephone','nom','prenom','name','fullName']);vals.push(_bd_namePerson(t));
-      if(keys.some(function(k){return vals.some(function(v){return _bd_similar(k,v);});}))return t;
-    }
-    return null;
-  }
-  function _bd_locMatchesUnit(loc,u){
-    var un=_bd_clean(u.nom||u.name||u.numero||u.label||u.id),uid=_bd_clean(u.id||u.uid||u.key||u.numero);
-    var vals=_bd_keyVals(loc,['uniteId','unitId','appartementId','unite','unit','appartement','numero','lot','nom','location','locative']);
-    if(uid&&vals.some(function(v){return _bd_norm(v)===_bd_norm(uid);}))return true;
-    if(un&&vals.some(function(v){return _bd_similar(v,un);}))return true;
-    return false;
-  }
-  function _bd_statusFor(b){
-    var units=_bd_unitsOf(b),locs=_bd_locativesForBien(b).filter(function(l){return !/dispon|libre|annul|resil/i.test(String(l.statut||''));});
-    if(!locs.length)return 'Disponible';
-    if(locs.length>=units.length)return 'Loué';
-    return 'Partiellement loué';
-  }
-  function _bd_statusBadge(s){
-    var bg=s==='Loué'?'#dcfce7':(s==='Partiellement loué'?'#fef3c7':'#eff6ff');
-    var c=s==='Loué'?'#15803d':(s==='Partiellement loué'?'#b45309':'#2563eb');
-    return '<span class="bd-status-pill" style="background:'+bg+';color:'+c+';display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800">'+_bd_esc(s)+'</span>';
-  }
-  function _bd_renderOwner(b){
-    var p=_bd_findOwner(b),wanted=_bd_ownerKeys(b).join(' / ')||'—';
-    if(!p)return '<div class="bd-empty-state" style="display:grid;place-items:center;text-align:center;gap:6px;border:1px dashed #cbd5e1;border-radius:16px;padding:28px;color:#94a3b8"><span class="material-symbols-rounded" style="font-size:42px;color:#D4AF37">person_off</span><b>Propriétaire non trouvé</b><small>'+_bd_esc(wanted)+'</small></div>';
-    var n=_bd_namePerson(p)||'Propriétaire',initials=n.split(/\s+/).map(function(x){return x[0];}).join('').slice(0,2).toUpperCase();
-    return '<div style="display:flex;align-items:center;gap:14px;background:#f8fafc;border:1px solid #edf2f7;border-radius:16px;padding:15px;margin-bottom:12px"><div style="width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,#D4AF37,#ffe38a);display:grid;place-items:center;font-size:22px;font-weight:950;overflow:hidden;flex-shrink:0">'+(p.photo?'<img src="'+_bd_esc(p.photo)+'" style="width:100%;height:100%;object-fit:cover">':_bd_esc(initials))+'</div><div><h3 style="margin:0;font-size:17px;font-weight:900">'+_bd_esc(n)+'</h3><p style="margin:3px 0 0;color:#64748b;font-size:13px">'+_bd_esc(p.adresse||'Adresse non renseignée')+'</p></div></div>'+
-      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px"><div style="background:#f8fafc;border:1px solid #edf2f7;border-radius:12px;padding:12px"><label style="display:block;color:#64748b;font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:4px">Téléphone</label><b>'+_bd_esc(p.tel||p.phone||p.telephone||'—')+'</b></div><div style="background:#f8fafc;border:1px solid #edf2f7;border-radius:12px;padding:12px"><label style="display:block;color:#64748b;font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:4px">Email</label><b>'+_bd_esc(p.email||'—')+'</b></div><div style="background:#f8fafc;border:1px solid #edf2f7;border-radius:12px;padding:12px"><label style="display:block;color:#64748b;font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:4px">Nb biens</label><b>'+_bd_countOwnerBiens(p)+'</b></div></div>';
-  }
-  function _bd_renderLocataires(b){
-    var locs=_bd_locativesForBien(b);
-    if(!locs.length)return '<div class="bd-empty-state" style="display:grid;place-items:center;text-align:center;gap:6px;border:1px dashed #cbd5e1;border-radius:16px;padding:28px;color:#94a3b8"><span class="material-symbols-rounded" style="font-size:42px;color:#D4AF37">groups</span><b>Aucun locataire lié</b><small>Créez une location liée à ce bien pour l\'afficher ici.</small></div>';
-    return locs.map(function(l){
-      var t=_bd_locataireFor(l),n=_bd_namePerson(t)||_bd_clean(l.locataire||l.occupant||l.nomLocataire)||'Locataire';
-      return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:14px;margin-bottom:10px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px;font-weight:800"><span class="material-symbols-rounded" style="color:#D4AF37">person</span>'+_bd_esc(n)+'</div>'+_bd_statusBadge(l.statut||'Loué')+'</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px"><div style="background:#f8fafc;border-radius:10px;padding:10px"><label style="display:block;font-size:11px;color:#9ca3af;font-weight:700;margin-bottom:3px">Location</label><b style="font-size:13px">'+_bd_esc(_bd_locName(l)||'—')+'</b></div><div style="background:#f8fafc;border-radius:10px;padding:10px"><label style="display:block;font-size:11px;color:#9ca3af;font-weight:700;margin-bottom:3px">Date entrée</label><b style="font-size:13px">'+_bd_esc(l.dateEntree||l.date||l.debut||'—')+'</b></div><div style="background:#f8fafc;border-radius:10px;padding:10px"><label style="display:block;font-size:11px;color:#9ca3af;font-weight:700;margin-bottom:3px">Loyer</label><b style="font-size:13px">'+_bd_money(l.loyer||l.montant)+'</b></div></div></div>';
-    }).join('');
-  }
-  function _bd_renderUnits(b){
-    var locs=_bd_locativesForBien(b),used={};
-    return _bd_unitsOf(b).map(function(u,i){
-      var loc=locs.find(function(l,j){if(used[j])return false;return _bd_locMatchesUnit(l,u);});
-      if(!loc&&_bd_unitsOf(b).length===1)loc=locs[0];
-      if(loc){used[locs.indexOf(loc)]=true;}
-      var t=loc&&_bd_locataireFor(loc),s=loc?'Loué':'Disponible';
-      return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:14px;margin-bottom:10px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px;font-weight:800"><span class="material-symbols-rounded" style="color:#D4AF37">meeting_room</span>'+_bd_esc(u.nom||('Unité '+(i+1)))+'</div>'+_bd_statusBadge(s)+'</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px"><div style="background:#f8fafc;border-radius:10px;padding:10px"><label style="display:block;font-size:11px;color:#9ca3af;font-weight:700;margin-bottom:3px">Locataire</label><b style="font-size:13px">'+_bd_esc((t&&_bd_namePerson(t))||(loc&&(loc.locataire||loc.occupant))||'—')+'</b></div><div style="background:#f8fafc;border-radius:10px;padding:10px"><label style="display:block;font-size:11px;color:#9ca3af;font-weight:700;margin-bottom:3px">Loyer</label><b style="font-size:13px">'+_bd_money(loc&&(loc.loyer||loc.montant)||u.loyer)+'</b></div></div></div>';
-    }).join('');
-  }
-  function _bd_renderDocs(b){
-    if(!Array.isArray(b.documents))b.documents=[];
-    var list=b.documents;
-    return '<div style="display:flex;gap:10px;align-items:center;background:#f8fafc;border:1px solid #edf2f7;border-radius:14px;padding:12px;margin-bottom:12px"><input id="bdDocName" placeholder="Nom du document" style="flex:1;height:38px;border:1px solid #e5e7eb;border-radius:10px;padding:0 12px;background:#fff;font-size:13px"><input id="bdDocFile" type="file" style="height:38px;border:1px solid #e5e7eb;border-radius:10px;padding:0 8px;background:#fff;font-size:12px"><button type="button" onclick="gpAddBienDetailDocument()" style="height:38px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-weight:800;padding:0 14px;display:inline-flex;align-items:center;gap:6px;cursor:pointer"><span class="material-symbols-rounded" style="font-size:16px">add</span>Ajouter</button></div>'+
-      (list.length?list.map(function(d,i){return '<div style="display:flex;align-items:center;gap:12px;border:1px solid #e5e7eb;background:#fff;border-radius:13px;padding:12px;margin-bottom:8px"><div style="width:38px;height:38px;border-radius:11px;background:#fff7dd;display:grid;place-items:center;flex-shrink:0"><span class="material-symbols-rounded" style="color:#D4AF37">folder</span></div><div style="flex:1;min-width:0"><b style="display:block;font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_bd_esc(d.nom||d.name||d.fileName||'Document')+'</b><small style="color:#94a3b8;font-size:11px">'+_bd_esc(d.fileName||'')+'</small></div><div style="display:flex;gap:7px"><button type="button" onclick="gpOpenBienDoc('+i+')" style="width:33px;height:33px;border:1px solid #e5e7eb;border-radius:9px;background:#fff;display:grid;place-items:center;cursor:pointer"><span class="material-symbols-rounded" style="font-size:17px;color:#D4AF37">visibility</span></button><button type="button" onclick="gpDeleteBienDoc('+i+')" style="width:33px;height:33px;border:1px solid #fecaca;border-radius:9px;background:#fff1f2;display:grid;place-items:center;cursor:pointer"><span class="material-symbols-rounded" style="font-size:17px;color:#ef4444">delete</span></button></div></div>';}).join('')
-      :'<div style="display:grid;place-items:center;text-align:center;gap:6px;border:1px dashed #cbd5e1;border-radius:14px;padding:28px;color:#94a3b8"><span class="material-symbols-rounded" style="font-size:40px;color:#D4AF37">folder_off</span><b>Aucun document</b><small>Ajoutez les documents liés au bien.</small></div>');
-  }
-  function _bd_injectCSS(){
-    if(document.getElementById('gp-bd-restored-css'))return;
-    var s=document.createElement('style');s.id='gp-bd-restored-css';
-    s.textContent='#page-bien-detail{padding:18px 22px 40px!important;background:#f5f6f8!important}.bd-restored{display:block}.bd-restored-head{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:14px 18px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,.04)}.bd-restored-title{flex:1;min-width:0}.bd-restored-title h2{margin:0;font-size:20px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bd-restored-title p{margin:3px 0 0;color:#64748b;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bd-restored-actions{display:flex;gap:8px;flex-shrink:0}.bd-top-btn{height:36px;border:1px solid #e5e7eb;background:#fff;border-radius:10px;padding:0 13px;display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:13px;cursor:pointer;color:#374151}.bd-top-btn:hover{background:#f9fafb}.bd-top-btn.edit{background:#dbeafe;color:#1e40af;border-color:#bfdbfe}.bd-top-btn.danger{background:#fee2e2;color:#dc2626;border-color:#fecaca}.bd-restored-hero{display:flex;gap:18px;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,.04)}.bd-restored-photo{flex-shrink:0;width:120px;height:110px;border-radius:14px;background:#f3f4f6;overflow:hidden;border:1px solid #e5e7eb;display:grid;place-items:center}.bd-restored-photo img{width:100%;height:100%;object-fit:cover}.bd-restored-photo .material-symbols-rounded{font-size:44px;color:#D4AF37}.bd-restored-main{flex:1;min-width:0}.bd-restored-main h1{margin:6px 0 4px;font-size:22px;font-weight:900}.bd-restored-main>p{margin:0;color:#64748b;font-size:13px;display:flex;align-items:center;gap:5px}.bd-restored-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}.bd-restored-kpis>div{background:#f9fafb;border:1px solid #f0f0f0;border-radius:10px;padding:10px 12px}.bd-restored-kpis small{display:block;font-size:10px;color:#9ca3af;text-transform:uppercase;font-weight:700;margin-bottom:3px}.bd-restored-kpis b{font-size:14px;font-weight:900;color:#111827}.bd-restored-tabs{display:flex;gap:6px;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:8px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,.04)}.bd-restored-tab{height:40px;border:0;background:transparent;border-radius:10px;padding:0 14px;display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:13px;color:#64748b;cursor:pointer;white-space:nowrap}.bd-restored-tab .material-symbols-rounded{font-size:18px;color:#D4AF37}.bd-restored-tab.active{background:#fff7dd;color:#92400e}.bd-restored-panel{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,.04)}.bd-restored-panel h3{margin:0 0 14px;font-size:15px;font-weight:900}.bd-info-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}@media(max-width:900px){.bd-restored-head{flex-direction:column;align-items:stretch}.bd-restored-hero{flex-direction:column}.bd-restored-kpis{grid-template-columns:repeat(2,1fr)}.bd-info-grid-4{grid-template-columns:repeat(2,1fr)}.bd-restored-tabs{overflow-x:auto}}';
-    document.head.appendChild(s);
-  }
-
-  window.gpSwitchBienDetailTabClean = function(tab, btn) {
-    document.querySelectorAll('#page-bien-detail .bd-restored-panel').forEach(function(p){p.style.display='none';});
-    var p = document.getElementById('bdRestored-'+tab); if(p) p.style.display='block';
-    document.querySelectorAll('#page-bien-detail .bd-restored-tab').forEach(function(b){b.classList.remove('active');});
-    if(btn) btn.classList.add('active');
-  };
-
-  window.gpBackToBiens = function() {
-    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');p.style.display='';});
-    try{ if(typeof window.navigate==='function') window.navigate('biens'); }catch(e){}
-    setTimeout(function(){
-      var p = document.getElementById('page-biens');
-      if(p){p.classList.add('active');p.style.display='';}
-      window.GP_CURRENT_PAGE='biens';
-      try{
-        if(window.renderBiensFinal) window.renderBiensFinal();
-        else if(window.renderBiensFinal2) window.renderBiensFinal2();
-        else if(window.renderBiens) window.renderBiens();
-      }catch(e){console.error(e);}
-    }, 20);
-  };
-  window.closeBienDetail = window.gpBackToBiens;
-
-  window.gpAddBienDetailDocument = function() {
-    var b = _bd_arr('biens')[Number(window._bienDetailIdx)]; if(!b) return;
-    var f = document.getElementById('bdDocFile'), file = f&&f.files&&f.files[0];
-    var name = _bd_clean((document.getElementById('bdDocName')||{}).value)||(file&&file.name)||'Document';
-    if(!file){ if(window.toast) window.toast('Choisissez un fichier','err'); return; }
-    var r = new FileReader();
-    r.onload = function(){
-      if(!Array.isArray(b.documents)) b.documents=[];
-      b.documents.push({id:'DOC-'+Date.now(),nom:name,fileName:file.name,type:file.type||'',data:r.result,date:new Date().toISOString()});
-      try{if(window.GPDB&&window.GPDB.save)window.GPDB.save(d);else if(window.saveDB)window.saveDB();}catch(e){}
-      window.openBienDetail(window._bienDetailIdx,'docs');
-    };
-    r.readAsDataURL(file);
-  };
-  window.gpOpenBienDoc = function(i) {
-    var b=_bd_arr('biens')[Number(window._bienDetailIdx)];
-    var doc=b&&Array.isArray(b.documents)&&b.documents[i];
-    if(doc&&doc.data) window.open(doc.data,'_blank');
-  };
-  window.gpDeleteBienDoc = function(i) {
-    var b=_bd_arr('biens')[Number(window._bienDetailIdx)];
-    if(!b||!confirm('Supprimer ce document ?')) return;
-    if(Array.isArray(b.documents)) b.documents.splice(i,1);
-    try{if(window.GPDB&&window.GPDB.save)window.GPDB.save(d);else if(window.saveDB)window.saveDB();}catch(e){}
-    window.openBienDetail(window._bienDetailIdx,'docs');
-  };
-
-  window.openBienDetail = function(idx, tab) {
-    idx = Number(idx);
-    var b = _bd_arr('biens')[idx];
-    if(!b){ if(window.toast) window.toast('Bien introuvable','err'); return; }
-    window._bienDetailIdx = idx;
-    _bd_injectCSS();
-
-    var page = document.getElementById('page-bien-detail'); if(!page) return;
-    var st = _bd_statusFor(b);
-    var locs = _bd_locativesForBien(b);
-    var units = _bd_unitsOf(b);
-    var owner = _bd_findOwner(b);
-
-    page.innerHTML =
-      '<div class="bd-restored">' +
-        /* ── Header ── */
-        '<div class="bd-restored-head">' +
-          '<button type="button" class="bd-top-btn" onclick="gpBackToBiens()"><span class="material-symbols-rounded">arrow_back</span> Retour</button>' +
-          '<div class="bd-restored-title"><h2>'+_bd_esc(b.nom||'Bien')+'</h2><p>'+_bd_esc([b.type,b.adresse].filter(Boolean).join(' · ')||'Détails du bien')+'</p></div>' +
-          '<div class="bd-restored-actions">' +
-            '<button type="button" class="bd-top-btn edit" onclick="editRow&&editRow(\'biens\','+idx+')"><span class="material-symbols-rounded">edit</span> Modifier</button>' +
-            '<button type="button" class="bd-top-btn danger" onclick="deleteRow&&deleteRow(\'biens\','+idx+')"><span class="material-symbols-rounded">delete</span> Supprimer</button>' +
-          '</div>' +
-        '</div>' +
-        /* ── Hero ── */
-        '<div class="bd-restored-hero">' +
-          '<div class="bd-restored-photo">'+(b.photo?'<img src="'+_bd_esc(b.photo)+'">':'<span class="material-symbols-rounded">home_work</span>')+'</div>' +
-          '<div class="bd-restored-main">' +
-            '<div>'+_bd_statusBadge(st)+'</div>' +
-            '<h1>'+_bd_esc(b.nom||'—')+'</h1>' +
-            '<p><span class="material-symbols-rounded">location_on</span>'+_bd_esc(b.adresse||'Adresse non renseignée')+'</p>' +
-            '<div class="bd-restored-kpis">' +
-              '<div><small>Type</small><b>'+_bd_esc(b.type||'—')+'</b></div>' +
-              '<div><small>Unités</small><b>'+units.length+'</b></div>' +
-              '<div><small>Locations</small><b>'+locs.length+'</b></div>' +
-              '<div><small>Propriétaire</small><b>'+_bd_esc((owner&&_bd_namePerson(owner))||_bd_ownerKeys(b)[0]||'—')+'</b></div>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        /* ── Onglets ── */
-        '<div class="bd-restored-tabs">' +
-          '<button class="bd-restored-tab active" onclick="gpSwitchBienDetailTabClean(\'infos\',this)"><span class="material-symbols-rounded">info</span> Informations</button>' +
-          '<button class="bd-restored-tab" onclick="gpSwitchBienDetailTabClean(\'locataires\',this)"><span class="material-symbols-rounded">groups</span> Locataires</button>' +
-          '<button class="bd-restored-tab" onclick="gpSwitchBienDetailTabClean(\'proprio\',this)"><span class="material-symbols-rounded">person</span> Propriétaire</button>' +
-          '<button class="bd-restored-tab" onclick="gpSwitchBienDetailTabClean(\'docs\',this)"><span class="material-symbols-rounded">folder</span> Documents</button>' +
-        '</div>' +
-        /* ── Panel Infos ── */
-        '<section id="bdRestored-infos" class="bd-restored-panel">' +
-          '<h3>Caractéristiques</h3>' +
-          '<div class="bd-info-grid-4">' +
-            '<div style="background:#f9fafb;border-radius:10px;padding:12px"><label style="display:block;font-size:10px;color:#9ca3af;text-transform:uppercase;font-weight:700;margin-bottom:4px">Type</label><b>'+_bd_esc(b.type||'—')+'</b></div>' +
-            '<div style="background:#f9fafb;border-radius:10px;padding:12px"><label style="display:block;font-size:10px;color:#9ca3af;text-transform:uppercase;font-weight:700;margin-bottom:4px">Adresse</label><b>'+_bd_esc(b.adresse||'—')+'</b></div>' +
-            '<div style="background:#f9fafb;border-radius:10px;padding:12px"><label style="display:block;font-size:10px;color:#9ca3af;text-transform:uppercase;font-weight:700;margin-bottom:4px">Vente</label><b>'+_bd_esc(b.vente||'Non')+'</b></div>' +
-            '<div style="background:#f9fafb;border-radius:10px;padding:12px"><label style="display:block;font-size:10px;color:#9ca3af;text-transform:uppercase;font-weight:700;margin-bottom:4px">Nb unités</label><b>'+units.length+'</b></div>' +
-            '<div style="background:#f9fafb;border-radius:10px;padding:12px"><label style="display:block;font-size:10px;color:#9ca3af;text-transform:uppercase;font-weight:700;margin-bottom:4px">Statut</label><b>'+_bd_esc(st)+'</b></div>' +
-            '<div style="background:#fef9ec;border:1px solid #fde68a;border-radius:10px;padding:12px"><label style="display:block;font-size:10px;color:#92400e;text-transform:uppercase;font-weight:700;margin-bottom:4px">Valeur estimée</label><b style="color:#D4AF37;font-size:15px;font-weight:900">'+_bd_money(b.valeur||b.loyer||b.prix)+'</b></div>' +
-          '</div>' +
-          '<h3 style="margin-top:18px">Unités</h3>' +
-          _bd_renderUnits(b) +
-        '</section>' +
-        /* ── Panel Locataires ── */
-        '<section id="bdRestored-locataires" class="bd-restored-panel" style="display:none">' +
-          '<h3>Locataires</h3>' +
-          _bd_renderLocataires(b) +
-        '</section>' +
-        /* ── Panel Propriétaire ── */
-        '<section id="bdRestored-proprio" class="bd-restored-panel" style="display:none">' +
-          '<h3>Propriétaire</h3>' +
-          _bd_renderOwner(b) +
-        '</section>' +
-        /* ── Panel Documents ── */
-        '<section id="bdRestored-docs" class="bd-restored-panel" style="display:none">' +
-          '<h3>Documents</h3>' +
-          _bd_renderDocs(b) +
-        '</section>' +
-      '</div>';
-
-    /* Activer la page */
-    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');p.style.display='';});
-    page.classList.add('active');
-    page.style.display = '';
-    window.GP_CURRENT_PAGE = 'bien-detail';
-
-    /* Aller sur le bon onglet si demandé */
-    if(tab){
-      setTimeout(function(){
-        var btn = [].find.call(document.querySelectorAll('.bd-restored-tab'),function(x){return x.textContent.toLowerCase().indexOf(tab)>-1;});
-        window.gpSwitchBienDetailTabClean(tab, btn);
-      }, 0);
-    }
+    var d = (window.GPDB && typeof window.GPDB.load === 'function') ? (window.GPDB.load() || {}) : (window.DB || {});
+    var props = Array.isArray(d.proprietaires) ? d.proprietaires : [];
+    var p = props[Number(idx)];
+    if (!p) return;
+    var esc2 = function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]});};
+    var full = [p.prenom,p.nom].filter(Boolean).join(' ') || p.nom || p.email || 'Propriétaire';
+    var biens = typeof window.getProprietaireBiens === 'function' ? (window.getProprietaireBiens(p)||[]) : (Array.isArray(d.biens)?d.biens.filter(function(b){return String(b.proprietaireId||b.proprioId||'')===String(p.id||'') || String(b.proprio||b.proprietaire||'').trim()===full.trim();}):[]);
+    var photo = p.photo ? '<img src="'+esc2(p.photo)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">' : '<span class="material-symbols-rounded" style="font-size:28px;color:#8a6400">person</span>';
+    var old=document.getElementById('gpOwnerViewDrawer'); if(old) old.remove();
+    var html='<div id="gpOwnerViewDrawer" style="position:fixed;inset:0;z-index:10020;background:rgba(15,23,42,.38);display:flex;justify-content:flex-end" onclick="if(event.target===this)this.remove()">'+
+      '<aside style="width:min(560px,94vw);height:100%;background:#fff;box-shadow:-18px 0 45px rgba(15,23,42,.18);display:flex;flex-direction:column">'+
+      '<div style="padding:16px 18px;border-bottom:1px solid #eef2f7;display:flex;align-items:center;justify-content:space-between"><div><h3 style="margin:0;font-size:16px">Fiche propriétaire</h3><small style="color:#64748b">Informations et biens associés</small></div><button type="button" onclick="document.getElementById(\'gpOwnerViewDrawer\').remove()" style="width:32px;height:32px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;cursor:pointer"><span class="material-symbols-rounded">close</span></button></div>'+
+      '<div style="flex:1;overflow:auto;padding:18px">'+
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px"><div style="width:64px;height:64px;border-radius:50%;overflow:hidden;background:#fef3c7;display:flex;align-items:center;justify-content:center">'+photo+'</div><div><h2 style="margin:0;font-size:18px">'+esc2(full)+'</h2><span style="font-size:11px;color:#16a34a;font-weight:700">Actif</span></div></div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+      '<div style="padding:11px;border:1px solid #eef2f7;border-radius:10px"><small style="display:block;color:#94a3b8;font-size:10px">Téléphone</small><b style="font-size:12px">'+esc2(p.tel||'—')+'</b></div>'+
+      '<div style="padding:11px;border:1px solid #eef2f7;border-radius:10px"><small style="display:block;color:#94a3b8;font-size:10px">Email</small><b style="font-size:12px">'+esc2(p.email||'—')+'</b></div>'+
+      '<div style="padding:11px;border:1px solid #eef2f7;border-radius:10px;grid-column:1/-1"><small style="display:block;color:#94a3b8;font-size:10px">Adresse</small><b style="font-size:12px">'+esc2(p.adresse||'—')+'</b></div></div>'+
+      '<div style="margin-top:20px"><h4 style="margin:0 0 10px;font-size:13px">Biens associés <span style="color:#D4AF37">('+biens.length+')</span></h4>'+ (biens.length?'<div style="display:flex;flex-direction:column;gap:8px">'+biens.map(function(b){return '<div style="padding:11px;border:1px solid #eef2f7;border-radius:10px;display:flex;align-items:center;justify-content:space-between"><div><b style="font-size:12px">'+esc2(b.nom||'Bien')+'</b><small style="display:block;color:#94a3b8">'+esc2(b.adresse||b.type||'')+'</small></div><span style="font-size:10px;font-weight:700;color:#64748b">'+esc2(b.statut||'—')+'</span></div>';}).join('')+'</div>':'<div style="padding:14px;border:1px dashed #e5e7eb;border-radius:10px;color:#94a3b8;font-size:12px">Aucun bien associé.</div>')+'</div></div>'+
+      '<div style="padding:12px 18px;border-top:1px solid #eef2f7;display:flex;justify-content:flex-end;gap:8px"><button type="button" onclick="document.getElementById(\'gpOwnerViewDrawer\').remove()" style="height:36px;padding:0 14px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:600">Fermer</button>'+(typeof window.generateMandatGerance==='function'?'<button type="button" onclick="document.getElementById(\'gpOwnerViewDrawer\').remove();setTimeout(function(){generateMandatGerance('+Number(idx)+')},40)" style="height:36px;padding:0 14px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:600;display:inline-flex;align-items:center;gap:6px"><span class="material-symbols-rounded" style="font-size:16px">description</span>Mandat de gérance</button>':'')+'<button type="button" onclick="document.getElementById(\'gpOwnerViewDrawer\').remove();setTimeout(function(){editRow(\'proprietaires\','+Number(idx)+')},40)" style="height:36px;padding:0 14px;border:0;background:#111;color:#fff;border-radius:8px;font-weight:700">Modifier</button></div></aside></div>';
+    document.body.insertAdjacentHTML('beforeend',html);
   };
 
   /* ─────────────────────────────────────────────────────────────
@@ -731,8 +494,11 @@
     setTimeout(function() { win.print(); }, 400);
   }
 
-  window.generateContratPDF = buildContratPDF;
-  window.genererPDFContrat  = buildContratPDF;
+  /* v81 : le générateur de contrats (contrats-generateur.js) a la priorité sur l'ancien rendu */
+  if (!window.GPContrat) {
+    window.generateContratPDF = buildContratPDF;
+    window.genererPDFContrat  = buildContratPDF;
+  }
 
   /* ─────────────────────────────────────────────────────────────
      6. openDepFacture(idx) — icône facture sur la page dépenses
