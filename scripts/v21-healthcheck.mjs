@@ -11,7 +11,6 @@ const required = [
   'js/safe-bootstrap.js',
   'js/core/navigation.js',
   'js/pages/biens.js',
-  'js/pages/paiements.js',
   'js/v21/ui/ui-stability.service.js',
   'styles/theme.css',
   'styles/dashboard.css',

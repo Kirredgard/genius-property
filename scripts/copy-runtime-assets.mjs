@@ -37,6 +37,4 @@ await copyDir('assets');
 await copyDir('styles');
 
 await copyFileIfExists('env.js');
-await copyFileIfExists('firebase.json');
-
-console.log('Runtime assets copied for Firebase Hosting.');
+console.log('Runtime assets copied for Vercel/static hosting.');

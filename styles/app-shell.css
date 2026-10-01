@@ -1261,3 +1261,32 @@ body.dark .genius-desk-v34 .gd-type-select option{
   background:#ffffff !important;
   color:#0f172a !important;
 }
+
+/* ===== SIMPLIFIED SIDEBAR / NAVIGATION ===== */
+.sidebar .menu .menu-section {
+  height:18px !important;
+  min-height:18px !important;
+  max-height:18px !important;
+  margin:8px 6px 0 !important;
+  padding:0 2px !important;
+  display:flex !important;
+  align-items:flex-end !important;
+  font-size:8px !important;
+  line-height:14px !important;
+  letter-spacing:.08em !important;
+  font-weight:800 !important;
+  color:#9ca3af !important;
+  background:transparent !important;
+  cursor:default !important;
+  border-radius:0 !important;
+}
+.sidebar .menu .menu-section:hover {
+  background:transparent !important;
+  color:#9ca3af !important;
+}
+.sidebar .menu .menu-section[hidden] { display:none !important; }
+.sidebar .menu > li[data-page] { position:relative; }
+.sidebar .menu > li[data-page] .material-symbols-rounded { flex-shrink:0; }
+@media (max-width:760px){
+  .sidebar .menu .menu-section { margin-top:6px !important; font-size:8px !important; }
+}
