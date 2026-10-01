@@ -1,0 +1,104 @@
+{
+  "source": "genius-property-v76-agenda-locataire-photo-topbar(2).zip",
+  "pass": "safe-cleanup-pass-1",
+  "removed": [
+    {
+      "path": "styles/v30-bureau-theme-pages.css",
+      "bytes": 32397,
+      "sha256": "b3e8bec3032bcfcdb646a7ee0b99732b920723c8dbf8770616dc32d831f72746"
+    },
+    {
+      "path": "styles/admin-saas.css",
+      "bytes": 3678,
+      "sha256": "53086ac613b0b445eaeb108ad6d020fc0e2cee1c4dc1508c58c7de4dade1ef8f"
+    },
+    {
+      "path": "styles/license-manager.css",
+      "bytes": 3022,
+      "sha256": "1e7ce0f9f4cd80035829155f505fba288bccc37518ac063769741edfcc1ec463"
+    },
+    {
+      "path": "styles/simple-license-dashboard.css",
+      "bytes": 8567,
+      "sha256": "dbd358f01ed621adc3b2a5958d49137b791ae308fb837c1ee18788a1a6cedc89"
+    },
+    {
+      "path": "styles/v21.css",
+      "bytes": 2272,
+      "sha256": "738d381a99fb687fe069e82dfb79e61a204b914540fffba1597fc54482fce964"
+    },
+    {
+      "path": "styles/v21/payments.css",
+      "bytes": 518,
+      "sha256": "ae97d99c3b7c28eaac700d498a97cf0cd517fa4301b906294aa37c25f15ced8b"
+    },
+    {
+      "path": "styles/components/drawers-modals.css",
+      "bytes": 340,
+      "sha256": "f7237399ccd3286121d66cb6168f7efacedbd08b6be6a754d4b1c1dcaa667f59"
+    },
+    {
+      "path": "styles/bundle.optimized.css",
+      "bytes": 403671,
+      "sha256": "cf267b66a3b36595daa9667d7ad6b3ccc232829a765a60658c68f17fb793182f"
+    }
+  ],
+  "unchanged_runtime_checks": [
+    {
+      "path": "index.html",
+      "sha256_original": "94284c65a0e941ec3813fe0f7008b8573e969223c359e18c8a1298bbe5586072",
+      "sha256_cleaned": "94284c65a0e941ec3813fe0f7008b8573e969223c359e18c8a1298bbe5586072",
+      "unchanged": true
+    },
+    {
+      "path": "js/core/navigation.js",
+      "sha256_original": "52dd5bc9e47b59464c10154aef539633f3940d1eb0298e7ce56554ed35832dc8",
+      "sha256_cleaned": "52dd5bc9e47b59464c10154aef539633f3940d1eb0298e7ce56554ed35832dc8",
+      "unchanged": true
+    },
+    {
+      "path": "js/core/runtime.js",
+      "sha256_original": "e5e874f3788bf81fbff4bc3af99eb81ef4100f45db6c3d9470d47b9882779ff9",
+      "sha256_cleaned": "e5e874f3788bf81fbff4bc3af99eb81ef4100f45db6c3d9470d47b9882779ff9",
+      "unchanged": true
+    },
+    {
+      "path": "js/core/renderers.js",
+      "sha256_original": "66ed62160f554a2d92c45d24bc9cb749ebdd0e0a278b6512dcda26908543aa2f",
+      "sha256_cleaned": "66ed62160f554a2d92c45d24bc9cb749ebdd0e0a278b6512dcda26908543aa2f",
+      "unchanged": true
+    },
+    {
+      "path": "js/pages/dashboard-desktop.js",
+      "sha256_original": "11b6c746d79b7df19fea9f762ee9254725f2e7cd5c9d20e9157036f134c3a5cf",
+      "sha256_cleaned": "11b6c746d79b7df19fea9f762ee9254725f2e7cd5c9d20e9157036f134c3a5cf",
+      "unchanged": true
+    },
+    {
+      "path": "js/core/locations-page-restorer.js",
+      "sha256_original": "9e1be3c89c779c5cee178e9037b7d6f61a83a34bb68df4cc8908b3fad3d22424",
+      "sha256_cleaned": "9e1be3c89c779c5cee178e9037b7d6f61a83a34bb68df4cc8908b3fad3d22424",
+      "unchanged": true
+    },
+    {
+      "path": "styles/app-shell.css",
+      "sha256_original": "ab5b532cf7177bbb91db0c19db1ef4914064e9f28cf3da47962e8972d0cb3042",
+      "sha256_cleaned": "ab5b532cf7177bbb91db0c19db1ef4914064e9f28cf3da47962e8972d0cb3042",
+      "unchanged": true
+    },
+    {
+      "path": "styles/bureau-theme-pages.css",
+      "sha256_original": "b3e8bec3032bcfcdb646a7ee0b99732b920723c8dbf8770616dc32d831f72746",
+      "sha256_cleaned": "b3e8bec3032bcfcdb646a7ee0b99732b920723c8dbf8770616dc32d831f72746",
+      "unchanged": true
+    }
+  ],
+  "verification": {
+    "original_file_count": 745,
+    "cleaned_file_count": 737,
+    "removed_count": 8,
+    "npm_tests": "not run: node_modules absent in supplied archive",
+    "build": "not run: node_modules absent in supplied archive",
+    "static_css_reference_scan": "all 8 removed CSS paths had no references in runtime/source files"
+  }
+}

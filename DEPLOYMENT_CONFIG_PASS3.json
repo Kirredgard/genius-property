@@ -1,0 +1,7 @@
+{
+  "pass": 3,
+  "change": "firebase.json hosting.public: . -> dist",
+  "reason": "Align Firebase Hosting with Vite build output and package script deploy:hosting. Do not switch Firestore/Storage rules to V21.",
+  "unchanged": ["firebase.v21.json", "firestore.rules", "storage.rules", "vite.config.js", ".github/workflows/deploy.yml"],
+  "validation": ["firebase.json parses as valid JSON", "dist is the configured Vite outDir", "deploy:hosting runs npm run build then firebase deploy --only hosting"]
+}
