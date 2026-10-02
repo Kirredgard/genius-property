@@ -166,5 +166,5 @@
   }
 
   window.renderSituationProprietaires = render;
-  window.GPSituation = { compute, render };
+  window.GPSituation = { compute, render, exportRows: function(){ return lines(compute(db(), st.month)); }, month: function(){ return st.month; } };
 })();

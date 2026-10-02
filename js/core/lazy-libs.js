@@ -14,7 +14,7 @@
       const s = document.createElement('script');
       s.src = CDN[key]; s.async = true; s.crossOrigin = 'anonymous';
       s.onload = ()=> resolve(window[globalName]);
-      s.onerror = ()=> reject(new Error('Impossible de charger '+key));
+      s.onerror = ()=> { delete cache[key]; s.remove(); reject(new Error('Impossible de charger '+key)); };
       document.head.appendChild(s);
     });
     return cache[key];
@@ -38,20 +38,25 @@
   LazyChart.prototype.destroy = function(){ this._pendingDestroy = true; if(this._chart && this._chart.destroy) this._chart.destroy(); };
   window.Chart = window.Chart || LazyChart;
 
-  function lazyHtml2Pdf(){
-    const state = { element:null, options:null };
-    const api = {
-      from(el){ state.element = el; return api; },
-      set(opts){ state.options = opts; return api; },
-      save(){
-        return window.ensureHtml2Pdf().then(real => {
-          const inst = real();
-          if (state.element) inst.from(state.element);
-          if (state.options) inst.set(state.options);
-          return inst.save();
-        });
-      }
-    };
+  /* Proxy différé de html2pdf.
+     IMPORTANT : le Worker html2pdf est immuable (chaque from()/set() renvoie un NOUVEAU worker).
+     On enregistre donc la chaîne d'appels puis on la rejoue en réutilisant le worker retourné. */
+  function lazyHtml2Pdf(src, opt){
+    const queue = [];
+    if (src) queue.push(['from', [src]]);
+    if (opt) queue.push(['set', [opt]]);
+    const replay = (terminal, args) => window.ensureHtml2Pdf().then(real => {
+      let w = real();
+      queue.forEach(([m, a]) => { w = w[m].apply(w, a); });
+      return w[terminal].apply(w, args || []);
+    });
+    const api = {};
+    ['from','set','to','toContainer','toCanvas','toImg','toPdf','get','using'].forEach(m => {
+      api[m] = function(){ queue.push([m, Array.prototype.slice.call(arguments)]); return api; };
+    });
+    ['save','output','outputPdf','outputImg'].forEach(m => {
+      api[m] = function(){ return replay(m, Array.prototype.slice.call(arguments)); };
+    });
     return api;
   }
   lazyHtml2Pdf.__lazyStub = true;
