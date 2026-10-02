@@ -41,8 +41,8 @@
     } catch (_) { return window.DB || {}; }
   }
 
-  function findEmployee(user) {
-    var list = (getDB().employes || []);
+  function findEmployee(user, dbObj) {
+    var list = ((dbObj || getDB()).employes || []);
     var mail = String(user.email || '').toLowerCase();
     for (var i = 0; i < list.length; i++) {
       var e = list[i] || {};
@@ -50,6 +50,15 @@
       if (mail && String(e.email || '').toLowerCase() === mail) return e;
     }
     return null;
+  }
+
+  // Compte sans fiche employé (ex. l'administrateur) : la photo est rangée dans
+  // les paramètres, sous l'id de l'utilisateur, donc synchronisée avec le reste.
+  function fallbackPhoto(user, dbObj) {
+    try {
+      var m = ((dbObj || getDB()).settings || {}).userPhotos || {};
+      return (user && user.id && m[user.id]) || '';
+    } catch (_) { return ''; }
   }
 
   function initials(name) {
@@ -181,8 +190,9 @@
     var img = $('profilAvatarImg');
     var ini = $('profilAvatarInitial');
     if (ini) ini.textContent = initials(name).charAt(0);
-    if (emp && emp.photo && img) {
-      img.src = emp.photo; img.style.display = 'block';
+    var curPhoto = (emp && emp.photo) || fallbackPhoto(user);
+    if (curPhoto && img) {
+      img.src = curPhoto; img.style.display = 'block';
       if (ini) ini.style.display = 'none';
     } else {
       if (img) { img.removeAttribute('src'); img.style.display = 'none'; }
@@ -283,7 +293,7 @@
     // username-lock.js remet le nom verrouillé : on le met à jour d'abord.
     if (window.GPUserName && typeof window.GPUserName.lock === 'function') window.GPUserName.lock(name);
     document.querySelectorAll('.user-name,.user-menu-name,#gpUName').forEach(function (el) { el.textContent = name; });
-    var photo = emp && emp.photo ? emp.photo : '';
+    var photo = (emp && emp.photo) || fallbackPhoto(user);
     paintAvatar($('topbarAvatar'), photo, name);
     paintAvatar($('menuAvatar'), photo, name);
     setText('profilDisplayName', name);
@@ -293,7 +303,11 @@
   window.saveProfilUser = async function () {
     if (saving) return;
     var user = window.currentUser || {};
-    var emp = findEmployee(user);
+    // IMPORTANT : GPDB.load() renvoie un NOUVEL objet à chaque appel. On charge
+    // la base UNE seule fois et on modifie la fiche employé à l'intérieur de CETTE
+    // base, sinon la photo est écrite sur un objet jeté et jamais sauvegardée.
+    var d = getDB();
+    var emp = findEmployee(user, d);
 
     var prenom = getVal('profil-prenom');
     var nom = getVal('profil-nom');
@@ -318,15 +332,32 @@
         emp.adresse = adresse;
         if (pendingPhoto) emp.photo = pendingPhoto;
         try {
-          var d = getDB();
-          if (window.GPDB && typeof window.GPDB.save === 'function') await window.GPDB.save(d);
-          else if (typeof window.saveDB === 'function') await window.saveDB();
+          if (window.GPDB && typeof window.GPDB.save === 'function') {
+            var okSave = await window.GPDB.save(d);
+            if (okSave === false) throw new Error('écriture refusée (données obsolètes ou stockage plein). Rechargez la page puis réessayez.');
+          } else if (typeof window.saveDB === 'function') await window.saveDB();
         } catch (err) {
           notify("Enregistrement impossible : " + ((err && err.message) || 'erreur inconnue'), 'err');
           return;
         }
         pendingPhoto = null;
         refreshIdentityUI(emp, user);
+      }
+
+      // 2bis) Pas de fiche employé : on enregistre au moins la photo (jusqu'ici ignorée en silence).
+      if (!emp && pendingPhoto && user.id) {
+        try {
+          d.settings = d.settings || {};
+          d.settings.userPhotos = d.settings.userPhotos || {};
+          d.settings.userPhotos[user.id] = pendingPhoto;
+          var okPhoto = await window.GPDB.save(d);
+          if (okPhoto === false) throw new Error('écriture refusée. Rechargez la page puis réessayez.');
+          pendingPhoto = null;
+          refreshIdentityUI(null, user);
+        } catch (err) {
+          notify('Photo non enregistrée : ' + ((err && err.message) || 'erreur inconnue'), 'err');
+          return;
+        }
       }
 
       // 3) Mot de passe (réel, via Supabase).

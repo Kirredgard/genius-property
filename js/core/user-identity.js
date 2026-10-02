@@ -42,6 +42,7 @@
     var name = emp ? [emp.prenom, emp.nom].filter(Boolean).join(' ').trim() : '';
     name = name || user.full_name || String(user.email||'').split('@')[0] || 'Utilisateur';
     var photo = emp && emp.photo ? emp.photo : '';
+    if (!photo) { try { photo = ((db().settings || {}).userPhotos || {})[user.id] || ''; } catch(_) {} }
     var role = String(user.role||'').toLowerCase();
     var roleLabel = ROLE_LABELS[role] || (emp && emp.role) || 'Utilisateur';
 

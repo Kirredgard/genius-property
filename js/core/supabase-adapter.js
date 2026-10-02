@@ -10,11 +10,13 @@
     client: null,
     loading: null,
     configured: false,
-    autosync: false,
+    autosync: true,
     table: 'gp_app_data',
     rowId: 'main',
-    serverVersion: 1
+    serverVersion: 1,
+    versionKnown: false
   };
+  var pushChain = Promise.resolve();
 
   function readConfig(){
     var env = window.GPV22_ENV || {};
@@ -102,6 +104,7 @@
     if(result.error) throw result.error;
     var row = Array.isArray(result.data) ? result.data[0] : result.data;
     state.serverVersion = Number(row && row.version || 1);
+    state.versionKnown = true;
     var data = row && row.payload ? row.payload : null;
     if(options.applyToLocal && data && window.GPDB && typeof window.GPDB.save === 'function') {
       window.GPDB.save(data, {silent:true, skipCloud:true});
@@ -109,14 +112,17 @@
     return data;
   }
 
-  async function push(data){
+  async function doPush(data){
     var sb = await ready();
+    // Sans pull préalable dans cette session, la version serveur est inconnue :
+    // on la récupère d'abord, sinon le 1er envoi est rejeté (stale_data).
+    if(!state.versionKnown){ try { await pull({applyToLocal:false}); } catch(_) {} }
     var payload = data || window.DB || {};
     var expected = Number(state.serverVersion || 1);
     var result = await sb.rpc('gp_update_app_data', {p_payload: payload, p_expected_version: expected});
     if(result.error) {
       if(/stale_data/i.test(result.error.message || '')) {
-        state.serverVersion = null;
+        state.versionKnown = false;
         try { await pull({applyToLocal:false}); } catch(_) {}
         throw new Error('Les données ont changé sur un autre poste. Rechargez les données avant de réessayer.');
       }
@@ -124,7 +130,16 @@
     }
     var row = Array.isArray(result.data) ? result.data[0] : result.data;
     state.serverVersion = Number(row && row.version || expected + 1);
+    state.versionKnown = true;
     return row;
+  }
+
+  // Les envois sont mis en file : deux sauvegardes rapprochées n'utilisent plus
+  // la même version attendue (ce qui provoquait des rejets stale_data).
+  function push(data){
+    var run = pushChain.then(function(){ return doPush(data); });
+    pushChain = run.catch(function(){});
+    return run;
   }
 
   function status(){

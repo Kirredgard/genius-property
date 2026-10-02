@@ -84,6 +84,43 @@
     return user;
   }
 
+  function countRecords(d){
+    d = d || {};
+    return ['employes','proprietaires','locataires','biens','locatives','contrats','paiements','depenses','fichiers','messages','conversations','agenda']
+      .reduce(function(n,k){ return n + (Array.isArray(d[k]) ? d[k].length : 0); }, 0);
+  }
+
+  // Aligne les données locales et le cloud (connexion ET restauration de session).
+  async function syncData(){
+    if(!(window.GPSupabase && typeof window.GPSupabase.pull==='function')) {
+      if(window.GPDB && typeof window.GPDB.load==='function') window.GPDB.load();
+      return;
+    }
+    var local = window.GPDB && typeof window.GPDB.load==='function' ? window.GPDB.load() : (window.DB || {});
+    var localDirty = false;
+    try { localDirty = !!localStorage.getItem('gp_data_dirty_at'); } catch(_) {}
+    try {
+      // Toujours récupérer la version serveur pour initialiser le verrou de concurrence.
+      var cloud = await window.GPSupabase.pull({applyToLocal:false});
+      var cloudCount = countRecords(cloud), localCount = countRecords(local);
+      if((localDirty || cloudCount===0) && localCount>0 && window.GPSupabase.push) {
+        // Modifications locales non synchronisées (ou cloud encore vide) : on les envoie.
+        try {
+          await window.GPSupabase.push(local);
+          try { localStorage.removeItem('gp_data_dirty_at'); } catch(_) {}
+        } catch(syncErr) {
+          console.warn('[GPSupabaseAuth] Modification locale non synchronisée:', syncErr.message || syncErr);
+          if(window.toast) window.toast('Une modification locale n’a pas pu être synchronisée. Vos données locales sont conservées.', 'err');
+        }
+      } else if(cloud && cloudCount>0 && window.GPDB && typeof window.GPDB.save==='function') {
+        // Sans modification locale en attente, le cloud est la source de vérité.
+        // force:true : sinon la révision locale (plus élevée) bloque l'écriture.
+        window.GPDB.save(cloud,{silent:true,skipCloud:true,force:true});
+        try { window.dispatchEvent(new CustomEvent('gp:supabase:pulled')); } catch(_) {}
+      }
+    } catch(e) { console.warn('[GPSupabaseAuth] Chargement données:', e.message || e); }
+  }
+
   async function login(ev){
     if(ev && ev.preventDefault) ev.preventDefault();
     setError('');
@@ -101,32 +138,7 @@
         throw new Error(msg);
       }
       await hydrateCurrentUser(r.data.user);
-      var localBeforeLogin = window.GPDB && typeof window.GPDB.load==='function' ? window.GPDB.load() : (window.DB || {});
-      var localDirty = false;
-      try { localDirty = !!localStorage.getItem('gp_data_dirty_at'); } catch(_) {}
-      if(window.GPSupabase && typeof window.GPSupabase.pull==='function') {
-        try {
-          // Toujours récupérer la version serveur pour initialiser le verrou de concurrence.
-          var cloud=await window.GPSupabase.pull({applyToLocal:false});
-          if(localDirty && cloud && window.GPSupabase.push) {
-            // Une modification locale non synchronisée est prioritaire sur une
-            // simple reconnexion. Le push vérifie la version serveur et refuse
-            // proprement le cas où quelqu'un a modifié les données entre-temps.
-            try {
-              await window.GPSupabase.push(localBeforeLogin);
-              try { localStorage.removeItem('gp_data_dirty_at'); } catch(_) {}
-            } catch(syncErr) {
-              console.warn('[GPSupabaseAuth] Modification locale non synchronisée:', syncErr.message || syncErr);
-              if(window.toast) window.toast('Une modification locale n’a pas pu être synchronisée. Vos données locales sont conservées.', 'err');
-            }
-          } else if(cloud && window.GPDB && typeof window.GPDB.save==='function') {
-            // Sans modification locale en attente, le cloud est la source de vérité.
-            window.GPDB.save(cloud,{silent:true,skipCloud:true});
-          }
-        } catch(e) { console.warn('[GPSupabaseAuth] Chargement données:', e.message || e); }
-      } else if(window.GPDB && typeof window.GPDB.load==='function') {
-        window.GPDB.load();
-      }
+      await syncData();
       if(typeof window._showApp==='function') await window._showApp();
       return true;
     } catch(e) {
@@ -143,7 +155,9 @@
       var r=await sb.auth.getSession();
       if(r.error) throw r.error;
       if(!r.data || !r.data.session) return null;
-      return await hydrateCurrentUser(r.data.session.user);
+      var restored = await hydrateCurrentUser(r.data.session.user);
+      if(restored) await syncData();
+      return restored;
     } catch(e) {
       if(window.GPV22_ENV && window.GPV22_ENV.supabasePublishableKey) console.warn('[GPSupabaseAuth] restoreSession:', e.message || e);
       return null;
@@ -151,6 +165,17 @@
   }
 
   async function signOut(){
+    // Avant d'effacer le cache local, on envoie les modifications en attente.
+    var dirtyNow = false;
+    try { dirtyNow = !!localStorage.getItem('gp_data_dirty_at'); } catch(_) {}
+    if(dirtyNow && window.GPSupabase && window.GPSupabase.available && window.GPSupabase.available() && window.GPDB) {
+      try {
+        await window.GPSupabase.push(window.GPDB.load());
+        try { localStorage.removeItem('gp_data_dirty_at'); } catch(_) {}
+      } catch(flushErr) {
+        if(!confirm('Des modifications ne sont pas encore synchronisées et seront PERDUES si vous vous déconnectez maintenant. Se déconnecter quand même ?')) return false;
+      }
+    }
     try { if(window.GPSupabase && window.GPSupabase.available()) await window.GPSupabase.client().auth.signOut(); } catch(_) {}
     window._supabaseCurrentUser=null;
     window.currentUser=null;
