@@ -9,12 +9,18 @@
 
   /* ───────── 1. Location ⇄ contrats ───────── */
 
-  // Contrats rattachés à UNE location (lien explicite par id, sinon par nom + locataire).
+  // Contrats rattachés à UNE location : lien par id, puis (si le lien est absent ou périmé)
+  // par unité + locataire, puis par nom.
   function contractsOfLocation(d, loc) {
     var lid = String(loc.id || ''), ln = norm(loc.nom), lb = norm(loc.bien), lt = norm(loc.locataire || loc.occupant);
+    var locIds = {}; (d.locatives || []).forEach(function (l) { locIds[String(l.id)] = 1; });
+    var lu = String(loc.uniteId || loc.unitId || ''), ltid = String(loc.locataireId || loc.tenantId || '');
     return (d.contrats || []).filter(function (c) {
       var cid = String(c.locationId || c.locativeId || c.idLocation || '');
-      if (cid && lid) return cid === lid;
+      if (cid && lid && cid === lid) return true;
+      if (cid && locIds[cid]) return false;            // appartient à une AUTRE location existante
+      var cu = String(c.uniteId || c.unitId || ''), ctid = String(c.locataireId || c.tenantId || '');
+      if (cu && lu && cu === lu && (!ctid || !ltid || ctid === ltid)) return true;
       var cl = norm(c.locative || c.location || '');
       if (!cl || (cl !== ln && cl !== lb)) return false;
       var ct = norm(c.locataire);
@@ -48,7 +54,7 @@
   }
 
   function rerender() {
-    ['renderLocativesFinal', 'renderLocativesModern', 'renderBiensFinal', 'renderPaiementsFinal', 'renderContratsFinal', 'renderDashboard']
+    ['renderLocativesFinal', 'renderLocativesModern', 'renderBiensFinal', 'renderBiensCards', 'renderPaiementsFinal', 'renderAvenir', 'renderContratsFinal', 'renderDashboard']
       .forEach(function (n) { try { if (typeof window[n] === 'function') window[n](); } catch (_) {} });
     try { if (typeof window.updateSidebarBadges === 'function') window.updateSidebarBadges(); } catch (_) {}
   }
@@ -64,6 +70,7 @@
     if (!window.confirm(msg)) return false;
     d.contrats = (d.contrats || []).filter(function (c) { return cs.indexOf(c) < 0; });
     d.locatives = d.locatives.filter(function (l) { return l !== loc; });
+    try { if (typeof window.GPResyncBienStatuses === 'function') window.GPResyncBienStatuses(d); } catch (_) {}
     if (!(await persist(d))) { notify('Suppression non enregistrée. Rechargez puis réessayez.', 'err'); return false; }
     rerender();
     notify('Location supprimée ✓', 'ok');
@@ -76,6 +83,7 @@
     if (key === 'locatives') return deleteLocation(idx);
     return typeof prevDel === 'function' ? prevDel.apply(this, arguments) : false;
   };
+  window.delRow.__liveFix = true; // runtime.js ne doit pas remplacer ce wrapper
   var prevModal = window.deleteFromModal;
   window.deleteFromModal = async function () {
     if (window._modalKey === 'locatives') {
@@ -85,6 +93,8 @@
     }
     return typeof prevModal === 'function' ? prevModal.apply(this, arguments) : undefined;
   };
+
+  window.deleteFromModal.__liveFix = true;
 
   window.GPCascade = {
     orphanContracts: orphanContracts,
