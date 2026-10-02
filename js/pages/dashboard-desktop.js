@@ -84,7 +84,8 @@
     });
     return counts;
   }
-  function stats(){ var data=db(), p=period(); return {biens:(data.biens||[]).length, locataires:(data.locataires||[]).length, rev:p.rev, dep:p.dep, late:p.late}; }
+  function activeLocations(data){ return (data.locatives||[]).filter(function(l){ return !/resil|termin|annul|dispon|libre/i.test(String(l.statut||l.status||'')); }).length; }
+  function stats(){ var data=db(), p=period(); return {biens:(data.biens||[]).length, locataires:(data.locataires||[]).length, locations:activeLocations(data), rev:p.rev, dep:p.dep, late:p.late}; }
 
   function lastPayments(){
     return (db().paiements||[]).slice().sort(function(a,b){return new Date(b.date||b.datePaiement||b.echeance)-new Date(a.date||a.datePaiement||a.echeance);}).slice(0,3);
@@ -125,7 +126,7 @@
       '<section class="gd-hero"><div><h1><em>Bonjour, <span>'+esc(uname())+'</span> 👋</em></h1><p>Voici un aperçu de votre activité.</p></div>'+dashboardDateWidget()+'</section>'+
       '<section class="gd-kpis">'+
         card('home','Biens',s.biens,'biens','Biens')+
-        card('groups','Locataires',s.locataires,'locataires','Locataires')+
+        card('door_front','Locations',s.locations,'','locatives')+
         card('account_balance_wallet','Loyers (mois)',money(s.rev),'','Loyers')+
         card('payments','Dépenses (mois)',money(s.dep),'','Dépenses')+
         '<article class="gd-kpi gd-alert-kpi" onclick="window.gdOpenPayments&&window.gdOpenPayments(\'late\')"><div class="gd-kpi-icon red"><span class="material-symbols-rounded">notifications</span></div><div><h3>Alertes <b>'+s.late+'</b></h3><p>'+s.late+' loyer'+(s.late>1?'s':'')+' en retard</p></div><span class="material-symbols-rounded gd-arrow">chevron_right</span></article>'+ 
@@ -138,7 +139,7 @@
       '</section>'+
     '</div>';
   }
-  function card(icon,label,value,sub,page){ var target=String(page||'').toLowerCase(); if(target==='loyers') target='paiements'; if(target==='dépenses'||target==='depenses') target='depenses'; if(target==='locatives'||target==='location') target='locataires'; var safeLabel=(target==='locataires'?'Locataires':label); return '<article class="gd-kpi" data-gp-target="'+esc(target)+'" onclick="if(window.gpDashboardGo)gpDashboardGo(this.dataset.gpTarget);else if(window.navigate)navigate(this.dataset.gpTarget)"><div class="gd-kpi-icon"><span class="material-symbols-rounded">'+icon+'</span></div><div><h3>'+esc(safeLabel)+'</h3><strong>'+esc(value)+'</strong><p class="'+(sub?'':'gd-kpi-sub-empty')+'">'+esc(sub)+'</p></div></article>';}
+  function card(icon,label,value,sub,page){ var target=String(page||'').toLowerCase(); if(target==='loyers') target='paiements'; if(target==='dépenses'||target==='depenses') target='depenses'; if(target==='location'||target==='locataires') target='locatives'; var safeLabel=label; return '<article class="gd-kpi" data-gp-target="'+esc(target)+'" onclick="if(window.gpDashboardGo)gpDashboardGo(this.dataset.gpTarget);else if(window.navigate)navigate(this.dataset.gpTarget)"><div class="gd-kpi-icon"><span class="material-symbols-rounded">'+icon+'</span></div><div><h3>'+esc(safeLabel)+'</h3><strong>'+esc(value)+'</strong><p class="'+(sub?'':'gd-kpi-sub-empty')+'">'+esc(sub)+'</p></div></article>';}
 
   function chartData(months){
     var labels=[], vals=[], deps=[], dates=[], now=new Date();
