@@ -79,7 +79,7 @@
 
   async function logout(){
     _appShown = false; // permet une reconnexion propre
-    try { if(window.GPSupabaseAuth && window.GPSupabaseAuth.signOut) await window.GPSupabaseAuth.signOut(); }
+    try { if(window.GPSupabaseAuth && window.GPSupabaseAuth.signOut) { var so = await window.GPSupabaseAuth.signOut(); if(so === false){ _appShown = true; return; } } }
     catch(e){ console.warn('[legacy-safe] logout Supabase:', e && (e.message||e)); }
     window.currentUser=null;
     try { localStorage.removeItem('gp_session_name'); } catch(e){}
