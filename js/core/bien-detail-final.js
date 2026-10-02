@@ -220,6 +220,16 @@
     var active=[];
     try{ if(window.GPRelationsV52 && GPRelationsV52.activeContractsForBien) active=GPRelationsV52.activeContractsForBien(d,b)||[]; }catch(e){}
     var locs=(d.locatives||[]).filter(function(l){ return bid && String(l.bienId||l.propertyId||'')===bid; });
+    /* Contrats actifs dont la location a déjà été supprimée : ils bloquaient le bien à tort. */
+    if(active.length && !locs.length && window.GPCascade){
+      var orph=window.GPCascade.orphanContracts(d), orphActive=active.filter(function(c){ return orph.some(function(o){ return String(o.id)===String(c.id); }); });
+      if(orphActive.length===active.length){
+        if(!confirm(active.length+' contrat(s) actif(s) sont rattachés à une location qui n’existe plus. Les supprimer puis supprimer « '+(b.nom||'ce bien')+' » ?')) return;
+        var okC=await window.GPCascade.removeContracts(orphActive);
+        if(!okC) return (typeof window.toast==='function') && window.toast('Suppression des contrats non enregistrée.','err');
+        return window.gpDeleteBien(idx);
+      }
+    }
     if(active.length||locs.length){
       var msg='Impossible de supprimer « '+(b.nom||'ce bien')+' » : '+(active.length?active.length+' contrat(s) actif(s)':'')+(active.length&&locs.length?' et ':'')+(locs.length?locs.length+' location(s) rattachée(s)':'')+'. Clôturez ou supprimez-les d\u2019abord.';
       return (typeof window.toast==='function') ? window.toast(msg,'err') : alert(msg);
