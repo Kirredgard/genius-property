@@ -47,6 +47,10 @@
     gestionnaire: ['admin-stockage:view']
   };
 
+  // Multi-agences : actions réservées au super_admin, même pour un admin d'agence ('*').
+  var SUPER_ONLY_ACTIONS = ['admin-stockage:view'];
+  function isSuperAdmin(){ var u = window.currentUser; return !!(u && u.isSuperAdmin); }
+
   var HIDE_SELECTORS_BY_ROLE = {
     gestionnaire: ['#sideMenu li[data-page="admin-stockage"]'],
     agent: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="droits"]'],
@@ -71,6 +75,7 @@
   function has(role, action){
     role = role || currentRole();
     action = normalizeAction(action);
+    if(SUPER_ONLY_ACTIONS.indexOf(action) !== -1 && !isSuperAdmin()) return false;
     if((ROLE_DENY[role] || []).indexOf(action) !== -1) return false;
     var list = ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS.lecture;
     return list.indexOf('*') !== -1 || list.indexOf(action) !== -1;

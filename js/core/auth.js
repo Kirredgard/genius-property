@@ -5,6 +5,9 @@
   'use strict';
 
   var ADMIN_ONLY = ['admin-stockage'];
+  // Multi-agences : ces pages sont réservées au super_admin (propriétaire de la plateforme),
+  // pas aux administrateurs d'agence.
+  var SUPER_ONLY = ['admin-stockage'];
   var ROLE_LABELS = {
     admin: 'Administrateur',
     gestionnaire: 'Gestionnaire',
@@ -29,6 +32,11 @@
     return !!(u && u.isAdmin);
   }
 
+  function isSuperAdmin(){
+    var u = getUser();
+    return !!(u && u.isSuperAdmin);
+  }
+
   function role(){
     var u = getUser();
     if(!u) return null;
@@ -47,6 +55,7 @@
   }
 
   function can(page){
+    if(SUPER_ONLY.indexOf(page) !== -1) return isSuperAdmin();
     if(ADMIN_ONLY.indexOf(page) !== -1) return isAdmin();
     if(window.GPPermissions && typeof window.GPPermissions.canPage === 'function'){
       return !!window.GPPermissions.canPage(page);
@@ -59,8 +68,8 @@
   }
 
   function requireAdmin(page){
-    if(isAdmin()) return true;
-    if(typeof window.toast === 'function') window.toast('Accès réservé à l’administrateur.', 'err');
+    if(SUPER_ONLY.indexOf(page) !== -1 ? isSuperAdmin() : isAdmin()) return true;
+    if(typeof window.toast === 'function') window.toast(SUPER_ONLY.indexOf(page) !== -1 ? 'Accès réservé au propriétaire de la plateforme.' : 'Accès réservé à l’administrateur.', 'err');
     if(window.GPNavigation && typeof window.GPNavigation.navigate === 'function'){
       window.GPNavigation.navigate('dashboard');
     }
@@ -68,12 +77,17 @@
   }
 
   function protectMenus(){
-    var state = isAdmin() ? 'admin' : 'user';
+    var state = (isAdmin() ? 'admin' : 'user') + (isSuperAdmin() ? '-super' : '');
     if(_lastMenuState === state) return;
     _lastMenuState = state;
-    document.querySelectorAll('[data-admin-only="true"], #sideMenu li[data-page="admin-stockage"]').forEach(function(el){
-      el.style.display = state === 'admin' ? '' : 'none';
-      el.setAttribute('aria-hidden', state === 'admin' ? 'false' : 'true');
+    document.querySelectorAll('[data-admin-only="true"]').forEach(function(el){
+      el.style.display = isAdmin() ? '' : 'none';
+      el.setAttribute('aria-hidden', isAdmin() ? 'false' : 'true');
+    });
+    // Maintenance & Sécurité : super_admin uniquement.
+    document.querySelectorAll('#sideMenu li[data-page="admin-stockage"]').forEach(function(el){
+      el.style.display = isSuperAdmin() ? '' : 'none';
+      el.setAttribute('aria-hidden', isSuperAdmin() ? 'false' : 'true');
     });
   }
 
@@ -137,7 +151,7 @@
   });
   document.addEventListener('click', function(e){
     var t = e.target.closest('[data-page="admin-stockage"], [data-gp-nav="admin-stockage"]');
-    if(t && !isAdmin()){
+    if(t && !isSuperAdmin()){
       e.preventDefault();
       e.stopPropagation();
       requireAdmin('admin-stockage');
@@ -149,6 +163,7 @@
     getUser: getUser,
     isLoggedIn: isLoggedIn,
     isAdmin: isAdmin,
+    isSuperAdmin: isSuperAdmin,
     role: role,
     roleLabel: function(){ return ROLE_LABELS[role()] || 'Session'; },
     source: function(){ var u=getUser(); return u && u.source || (window.GPSupabaseAuth && window.GPSupabaseAuth.available && window.GPSupabaseAuth.available() ? 'supabase' : 'local'); },
