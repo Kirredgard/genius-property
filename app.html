@@ -701,7 +701,7 @@
           <div class="profil-field"><label>Prénom</label><input id="profil-prenom" placeholder="Prénom"></div>
           <div class="profil-field"><label>Nom</label><input id="profil-nom" placeholder="Nom"></div>
           <div class="profil-field full"><label>Fonction / Rôle</label><input id="profil-fonction" placeholder="Ex: Gestionnaire immobilier" readonly style="background:#f9fafb;color:#888;cursor:not-allowed"></div>
-          <div class="profil-field full"><label>Email (identifiant)</label><input id="profil-email" type="email" placeholder="email@agence.com" readonly style="background:#f9fafb;color:#888;cursor:not-allowed"></div>
+          <div class="profil-field full"><label>Email (identifiant)</label><input id="profil-email" type="email" autocomplete="off" name="gp_profil_identifiant" placeholder="email@agence.com" readonly style="background:#f9fafb;color:#888;cursor:not-allowed"></div>
           <div class="profil-field"><label>Téléphone</label><input id="profil-tel" placeholder="77 000 00 00"></div>
           <div class="profil-field"><label>Adresse</label><input id="profil-adresse" placeholder="Adresse"></div>
         </div>
@@ -713,7 +713,7 @@
           <div class="profil-field full">
             <label>Nouveau mot de passe</label>
             <div class="profil-pass-wrap">
-              <input id="profil-newpass" type="password" placeholder="Laisser vide pour ne pas changer">
+              <input id="profil-newpass" type="password" autocomplete="new-password" placeholder="Laisser vide pour ne pas changer">
               <span class="profil-pass-eye" onclick="tglPassField('profil-newpass','profil-pass-eye-icon')"><span class="material-symbols-rounded" id="profil-pass-eye-icon" style="font-size:18px">visibility</span></span>
             </div>
           </div>
@@ -1026,16 +1026,16 @@
 <script src="js/core/storage-adapter.js" defer></script>
 <!-- Supabase adapter -->
 
-<script src="js/core/supabase-adapter.js?v=supabase-v290" defer></script>
+<script src="js/core/supabase-adapter.js?v=supabase-v291" defer></script>
 <script src="js/core/db.js?v=db-v280-owner-commit" defer></script>
 <script src="js/core/auth.js?v=multi-agences-2" defer></script>
 <script src="js/core/permissions.js?v=multi-agences-2" defer></script>
-<script src="js/core/supabase-auth.js?v=supabase-v290" defer></script>
+<script src="js/core/supabase-auth.js?v=supabase-v291" defer></script>
 <script src="js/core/agencies.js?v=multi-agences-1" defer></script>
 <script src="js/core/username-lock.js" defer></script>
-<script src="js/core/user-identity.js?v=1" defer></script>
-<script src="js/core/user-menu.js?v=user-menu-1" defer></script>
-<script src="js/safe-bootstrap.js?v=supabase-v1" defer></script>
+<script src="js/core/user-identity.js?v=2" defer></script>
+<script src="js/core/user-menu.js?v=user-menu-2" defer></script>
+<script src="js/safe-bootstrap.js?v=supabase-v2" defer></script>
 <script src="js/core/renderers.js" defer></script>
 <script src="js/core/ui-functions.js?v=v76-topbar" defer></script>
 <script src="js/core/topbar-patch.js" defer></script>
@@ -1054,7 +1054,7 @@
 <script src="js/core/mobile.js" defer></script>
 <script src="js/pages/mobile-pages.js?v=clean-v1" defer></script>
 <script src="js/core/legacy-bridge.js" defer></script>
-<script src="js/pages/dashboard-desktop.js?v=clean" defer></script>
+<script src="js/pages/dashboard-desktop.js?v=clean-2" defer></script>
 <script src="js/v21/ui/ui-stability.service.js?v=20260526" defer></script>
 <script src="js/pages/compact-layout.js?v=v82-owner-mandat" defer></script>
 <script src="js/core/form-stability-fixes.js?v=local-lite-1" defer></script>
@@ -1141,9 +1141,10 @@ window.gpSupabaseDiagnostic = async function(){
 <script src="js/core/encaissements-v2.js?v=v62-canonical-receipt"></script>
 <script src="js/core/relations-v52.js?v=v63-owner-relations"></script>
 <script src="js/core/biens-renderer-canonical.js?v=v68-canonical"></script>
-<script src="js/core/bien-detail-final.js?v=v83-fix"></script>
+<script src="js/core/bien-detail-final.js?v=v83-fix2"></script>
 <script src="js/core/situation-proprietaires.js?v=v83-fix"></script>
 <script src="js/core/contrats-generateur.js?v=v81-contrats" defer></script>
 <script src="js/core/mandat-generateur.js?v=v83-fix" defer></script>
+<script src="js/core/gp-cascade-fix.js?v=1" defer></script>
 </body>
 </html>
