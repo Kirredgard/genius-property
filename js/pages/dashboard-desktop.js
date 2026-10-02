@@ -22,6 +22,8 @@
     if(!full && u && u.displayName) full=String(u.displayName).trim();
     return full||'Utilisateur';
   }
+  function paidOf(p){ return (window.GPFinance&&window.GPFinance.counted)?window.GPFinance.counted(p):num(p.paye||p.montantPaye||0); }
+  function livePays(){ var l=db().paiements||[]; return (window.GPFinance&&window.GPFinance.valid)?window.GPFinance.valid(l):l; }
   function normalize(s){ return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
   function firstOf(o, keys){ for(var i=0;i<keys.length;i++){ if(o&&o[keys[i]]!=null&&String(o[keys[i]]).trim()!=='') return o[keys[i]]; } return ''; }
   function dateText(d){ try{return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});}catch(e){return d||'—';} }
@@ -63,9 +65,9 @@
 
   function period(){
     var data=db(), now=new Date(), y=now.getFullYear(), m=now.getMonth();
-    var pays=(data.paiements||[]).filter(function(p){var d=new Date(p.date||p.datePaiement||p.echeance);return !isNaN(d)&&d.getFullYear()===y&&d.getMonth()===m;});
+    var pays=livePays().filter(function(p){var d=new Date(p.date||p.datePaiement||p.echeance);return !isNaN(d)&&d.getFullYear()===y&&d.getMonth()===m;});
     var deps=(data.depenses||[]).filter(function(p){var d=new Date(p.date);return !isNaN(d)&&d.getFullYear()===y&&d.getMonth()===m;});
-    var rev=pays.reduce(function(s,p){return s+num(p.paye||p.montantPaye||p.montant||p.loyer);},0);
+    var rev=pays.reduce(function(s,p){return s+paidOf(p);},0);
     var dep=deps.reduce(function(s,p){return s+num(p.montant);},0);
     var late=typeof window.getPaiementEcheances==='function'
       ? window.getPaiementEcheances().filter(function(r){return r.cat==='retard';}).length
@@ -88,7 +90,7 @@
   function stats(){ var data=db(), p=period(); return {biens:(data.biens||[]).length, locataires:(data.locataires||[]).length, locations:activeLocations(data), rev:p.rev, dep:p.dep, late:p.late}; }
 
   function lastPayments(){
-    return (db().paiements||[]).slice().sort(function(a,b){return new Date(b.date||b.datePaiement||b.echeance)-new Date(a.date||a.datePaiement||a.echeance);}).slice(0,3);
+    return livePays().filter(function(p){return paidOf(p)>0;}).sort(function(a,b){return new Date(b.date||b.datePaiement||b.echeance)-new Date(a.date||a.datePaiement||a.echeance);}).slice(0,3);
   }
   function alertRows(){
     if(typeof window.getPaiementEcheances==='function'){
@@ -110,7 +112,7 @@
     var pays=lastPayments().map(function(p){
       var loc=firstOf(p,['locataire','tenant','nomLocataire'])||'Locataire';
       var bien=firstOf(p,['bien','logement','bienNom'])||'Bien';
-      var amount=num(p.paye||p.montantPaye||p.montant||p.loyer);
+      var amount=paidOf(p);
       return '<tr class="gd-click-row" onclick="window.gdOpenPayments&&window.gdOpenPayments(\'paid\')"><td><span class="gd-avatar">'+esc(String(loc).slice(0,2).toUpperCase())+'</span>'+esc(loc)+'</td><td>'+esc(bien)+'</td><td>'+money(amount)+'</td><td>'+dateText(p.date||p.datePaiement||p.echeance)+'</td><td><span class="gd-paid">Payé</span></td></tr>';
     }).join('') || '<tr><td colspan="5" class="gd-empty-row">Aucun loyer encaissé pour le moment</td></tr>';
     var alerts=alertRows().map(function(p){
@@ -152,11 +154,11 @@
         labels.push(i+' '+d.toLocaleDateString('fr-FR',{month:'short'}).replace('.',''));
         vals.push(0); deps.push(0); dates.push(d);
       }
-      (db().paiements||[]).forEach(function(p){
+      livePays().forEach(function(p){
         var pd=new Date(p.date||p.datePaiement||p.echeance); if(isNaN(pd)) return;
         if(pd.getMonth()===month&&pd.getFullYear()===year){
           var idx=pd.getDate()-1;
-          if(idx>=0&&idx<daysInMonth) vals[idx]+=num(p.paye||p.montantPaye||p.montant||p.loyer);
+          if(idx>=0&&idx<daysInMonth) vals[idx]+=paidOf(p);
         }
       });
       (db().depenses||[]).forEach(function(p){
@@ -173,11 +175,11 @@
         var mStr=d.toLocaleDateString('fr-FR',{month:'short'}).replace('.',''); mStr=mStr.charAt(0).toUpperCase()+mStr.slice(1); var lbl=mStr+' '+String(d.getFullYear()).slice(2);
         labels.push(lbl); vals.push(0); deps.push(0); dates.push(d);
       }
-      (db().paiements||[]).forEach(function(p){
+      livePays().forEach(function(p){
         var pd=new Date(p.date||p.datePaiement||p.echeance); if(isNaN(pd)) return;
         for(var j=0;j<months;j++){
           if(pd.getMonth()===dates[j].getMonth()&&pd.getFullYear()===dates[j].getFullYear())
-            vals[j]+=num(p.paye||p.montantPaye||p.montant||p.loyer);
+            vals[j]+=paidOf(p);
         }
       });
       (db().depenses||[]).forEach(function(p){
@@ -346,9 +348,11 @@
   window.gdOpenBienType=setBienTypeFilter; window.gdOpenPayments=setPaymentFilter; window.gdSetRentMonths=setRentMonths; window.gdToggleCalendar=toggleCalendar; window.gdCloseCalendar=closeCalendar; window.gdToggleRentMonths=function(){setRentMonths(rentMonths()===6?12:6);}; window.gdApplyDashboardFilters=applyDashboardFilters;
   var _lastRenderAt=0, _lastSignature='', _chartPreloadStarted=false;
   function startChartPreload(){ if(_chartPreloadStarted) return; _chartPreloadStarted=true; try{ if(window.ensureChart) window.ensureChart(); }catch(e){} }
-  function dashboardSignature(){ var d=db()||{}; return [uname(), (d.biens||[]).length, (d.locataires||[]).length, (d.locatives||[]).length, (d.paiements||[]).length, (d.depenses||[]).length, rentMonths()].join('|'); }
+  function dashboardSignature(){ var d=db()||{}; return [uname(), (d.biens||[]).length, (d.locataires||[]).length, (d.locatives||[]).length, (d.paiements||[]).length, (d.depenses||[]).length, rentMonths(), (d.paiements||[]).reduce(function(a,p){return a+paidOf(p);},0), (d.depenses||[]).reduce(function(a,p){return a+num(p.montant);},0)].join('|'); }
   function render(opts){ opts=opts||{}; var page=document.getElementById('page-dashboard'); if(!page) return; startChartPreload(); var active=page.classList.contains('active') || !document.querySelector('.page.active'); if(!active && !opts.force) return; var now=Date.now(), sig=dashboardSignature(); if(!opts.force && page.querySelector('.genius-desk-v34') && sig===_lastSignature && (now-_lastRenderAt)<900){ enhanceTopbarUser(); updateDateTime(); draw(); return; } _lastRenderAt=now; _lastSignature=sig; page.classList.add('gd-rendering'); page.innerHTML=build(); enhanceTopbarUser(); updateDateTime(); requestAnimationFrame(function(){ draw(); page.classList.remove('gd-rendering'); page.classList.add('no-anim'); }); }
   window.renderDashboard=render;
+  function refreshIfActive(){ var pg=document.getElementById('page-dashboard'); if(pg&&pg.classList.contains('active')) setTimeout(function(){render({force:true});},40); }
+  window.addEventListener('gp:db:saved',refreshIfActive); window.addEventListener('gp:data-changed',refreshIfActive);
   document.addEventListener('DOMContentLoaded',function(){ startChartPreload(); enhanceTopbarUser(); if(document.getElementById('page-dashboard')&&document.getElementById('page-dashboard').classList.contains('active')&&!document.querySelector('#page-dashboard .genius-desk-v34')) render(); setTimeout(applyDashboardFilters,120); setInterval(enhanceTopbarUser,1500); setInterval(updateDateTime,1000); document.addEventListener('click',function(e){ var pop=document.getElementById('gdCalendarPop'); if(pop && pop.classList.contains('show') && !e.target.closest('.gd-date-widget') && !e.target.closest('.gd-calendar-pop')) closeCalendar(); }); });
   window.addEventListener('load',function(){ enhanceTopbarUser(); startChartPreload(); if(document.getElementById('page-dashboard')&&document.getElementById('page-dashboard').classList.contains('active')&&!document.querySelector('#page-dashboard .genius-desk-v34')) render(); });
   window.addEventListener('gp:auth-changed',function(){ setTimeout(function(){enhanceTopbarUser(); if(document.getElementById('page-dashboard')&&document.getElementById('page-dashboard').classList.contains('active')) render({force:true});},50); });

@@ -52,8 +52,8 @@
     const locatives = list('locatives');
     const contrats = list('contrats');
 
-    const totalAttendu = paiements.reduce((sum, p) => sum + parseAmount(p.montant || p.total || p.loyer), 0);
-    const totalEncaisse = paiements.reduce((sum, p) => sum + parseAmount(p.paye || p.encaisse || p.montantPaye || p.montant), 0);
+    const totalAttendu = paiements.filter(p => !(window.GPFinance && window.GPFinance.isOrphan(p))).reduce((sum, p) => sum + parseAmount(p.montant || p.total || p.loyer), 0);
+    const totalEncaisse = window.GPFinance ? window.GPFinance.totalPaid(paiements) : paiements.reduce((sum, p) => sum + parseAmount(p.paye || p.encaisse || p.montantPaye), 0);
     const totalDepenses = depenses.reduce((sum, d) => sum + parseAmount(d.montant || d.total), 0);
     const reste = Math.max(0, totalAttendu - totalEncaisse);
     const solde = totalEncaisse - totalDepenses;

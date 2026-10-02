@@ -41,7 +41,7 @@
     const locatives = list('locatives');
     const contrats = list('contrats');
     const totalAttendu = paiements.reduce((s, p) => s + num(p.montant || p.total || p.loyer), 0);
-    const totalEncaisse = paiements.reduce((s, p) => s + num(p.paye || p.encaisse || p.montantPaye || p.montant), 0);
+    const totalEncaisse = window.GPFinance ? window.GPFinance.totalPaid(paiements) : paiements.reduce((s, p) => s + num(p.paye || p.encaisse || p.montantPaye), 0);
     const totalDepenses = depenses.reduce((s, d) => s + num(d.montant || d.total), 0);
     const occupees = locatives.filter(l => ['occupe','occupee','loue','louee'].includes(norm(l.statut))).length;
     const actifs = contrats.filter(c => !c.statut || ['actif','en cours','valide'].includes(norm(c.statut))).length;
