@@ -4,7 +4,7 @@
  *   marches[]       { id, client, titre, activiteId, total, apport, apportDate, debut, fin, statut, notes,
  *                     paiements[{ id, date, montant, mode, ref, libelle }],
  *                     documents[{ id, nom, cat, path, taille, type, date }] }   (fichiers dans Supabase Storage, bucket gp-activites)
- *   revenusAutres[] { id, date, activiteId, client, montant, mode, note }
+ *   revenusAutres[] { id, date, activiteId, client, montant, mode, note, documents[] (même forme que marchés) }
  * Règles : encaissé = apport + paiements ; reste = total − encaissé (toujours calculé) ;
  *          un revenu est rattaché au mois de sa DATE d'encaissement (comme les commissions).
  * Lien Situation : window.GPActivites.revenue(from,to) → { marches, autres, total } */
@@ -113,7 +113,7 @@
   }
   function autres(d) {
     const w = canWrite(), list = d.revenusAutres.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
-    $('gpaBody').innerHTML = '<div class="gpa-box">' + (list.length ? '<table><thead><tr><th>Date</th><th>Activité</th><th>Client / note</th><th>Mode</th><th class="rt">Montant</th><th></th></tr></thead><tbody>' + list.map(r => '<tr><td>' + fdate(r.date) + '</td><td>' + esc(actName(d, r.activiteId)) + '</td><td>' + esc(r.client || '') + '<span class="sub">' + esc(r.note || '') + '</span></td><td>' + esc(r.mode || '—') + '</td><td class="rt gpa-g"><b>' + fmt(num(r.montant)) + '</b></td><td class="rt">' + (w ? '<button class="gpa-btn sm" data-editr="' + r.id + '"><span class="material-symbols-rounded">edit</span></button> <button class="gpa-btn sm del" data-delr="' + r.id + '"><span class="material-symbols-rounded">delete</span></button>' : '') + '</td></tr>').join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun revenu. Saisissez ici vos revenus ponctuels (conseil, honoraires…).</div>') + '</div>';
+    $('gpaBody').innerHTML = '<div class="gpa-box">' + (list.length ? '<table><thead><tr><th>Date</th><th>Activité</th><th>Client / note</th><th>Mode</th><th class="rt">Montant</th><th></th></tr></thead><tbody>' + list.map(r => '<tr><td>' + fdate(r.date) + '</td><td>' + esc(actName(d, r.activiteId)) + '</td><td>' + esc(r.client || '') + '<span class="sub">' + esc(r.note || '') + ((r.documents || []).length ? ' 📎 ' + r.documents.length : '') + '</span></td><td>' + esc(r.mode || '—') + '</td><td class="rt gpa-g"><b>' + fmt(num(r.montant)) + '</b></td><td class="rt">' + (w ? '<button class="gpa-btn sm" data-editr="' + r.id + '"><span class="material-symbols-rounded">edit</span></button> <button class="gpa-btn sm del" data-delr="' + r.id + '"><span class="material-symbols-rounded">delete</span></button>' : '') + '</td></tr>').join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun revenu. Saisissez ici vos revenus ponctuels (conseil, honoraires…).</div>') + '</div>';
   }
 
   /* ── documents (Supabase Storage, bucket privé gp-activites) ── */
@@ -122,6 +122,8 @@
   const agencyId = () => (window.currentUser && currentUser.agencyId) || '';
   const fsize = n => n > 1048576 ? (n / 1048576).toFixed(1) + ' Mo' : Math.max(1, Math.round(n / 1024)) + ' Ko';
   const safeName = n => String(n).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9._-]+/g, '_').slice(-80);
+  const holder = (d, id) => d.marches.find(x => x.id === id) || d.revenusAutres.find(x => x.id === id);
+  const reopen = id => (ensure(db()).revenusAutres.some(x => x.id === id) ? revDrawer(id) : viewDrawer(id));
   async function storage() {
     if (window.GPSupabase && GPSupabase.ready) { try { await GPSupabase.ready(); } catch (_) {} }
     const c = sbc(); if (!c) throw new Error('Supabase non connecté : reconnectez-vous');
@@ -133,7 +135,7 @@
     const big = files.find(f => f.size > MAX); if (big) return notify(big.name + ' dépasse 20 Mo', 'err');
     const cat = val('gpDocCat') || 'Autre', btn = $('gpDocBtn'); if (btn) { btn.disabled = true; btn.textContent = 'Envoi…'; }
     try {
-      const bucket = await storage(), d = ensure(db()), m = d.marches.find(x => x.id === mid); if (!m) return; m.documents = m.documents || [];
+      const bucket = await storage(), d = ensure(db()), m = holder(d, mid); if (!m) return; m.documents = m.documents || [];
       const added = [];
       for (const f of files) {
         const id = uid('dc'), path = agencyId() + '/' + mid + '/' + id + '_' + safeName(f.name);
@@ -141,24 +143,24 @@
         if (r.error) throw new Error(r.error.message || 'Échec de l’envoi');
         added.push({ id, nom: f.name, cat, path, taille: f.size, type: f.type || '', date: today() });
       }
-      m.documents.push(...added); await save(d); render(); viewDrawer(mid); notify(added.length + ' document(s) ajouté(s) ✓');
+      m.documents.push(...added); await save(d); render(); reopen(mid); notify(added.length + ' document(s) ajouté(s) ✓');
     } catch (err) { console.error('[Activités] upload', err); notify('Envoi impossible : ' + (err.message || err) + (/bucket|not found|policy|row-level/i.test(String(err.message)) ? ' — le bucket est-il créé (migration 004) ?' : ''), 'err'); if (btn) { btn.disabled = false; btn.textContent = 'Ajouter'; } }
   }
   async function openDoc(mid, did, dl) {
-    const m = ensure(db()).marches.find(x => x.id === mid), doc = m && (m.documents || []).find(x => x.id === did); if (!doc) return;
+    const m = holder(ensure(db()), mid), doc = m && (m.documents || []).find(x => x.id === did); if (!doc) return;
     try {
       const r = await (await storage()).createSignedUrl(doc.path, 120, dl ? { download: doc.nom } : undefined);
       if (r.error) throw new Error(r.error.message); const a = document.createElement('a'); a.href = r.data.signedUrl; a.target = '_blank'; a.rel = 'noopener'; if (dl) a.download = doc.nom; document.body.appendChild(a); a.click(); a.remove();
     } catch (err) { notify('Ouverture impossible : ' + (err.message || err), 'err'); }
   }
   async function delDoc(mid, did) {
-    if (!canWrite()) return notify('Action non autorisée', 'err'); const d = ensure(db()), m = d.marches.find(x => x.id === mid), doc = m && (m.documents || []).find(x => x.id === did); if (!doc || !confirm('Supprimer « ' + doc.nom + ' » ?')) return;
+    if (!canWrite()) return notify('Action non autorisée', 'err'); const d = ensure(db()), m = holder(d, mid), doc = m && (m.documents || []).find(x => x.id === did); if (!doc || !confirm('Supprimer « ' + doc.nom + ' » ?')) return;
     try { const r = await (await storage()).remove([doc.path]); if (r.error) throw new Error(r.error.message); } catch (err) { return notify('Suppression impossible : ' + (err.message || err), 'err'); }
-    m.documents = m.documents.filter(x => x.id !== did); await save(d); render(); viewDrawer(mid); notify('Document supprimé ✓');
+    m.documents = m.documents.filter(x => x.id !== did); await save(d); render(); reopen(mid); notify('Document supprimé ✓');
   }
   function docsBox(m, w) {
     const docs = (m.documents || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
-    return '<div class="gpa-box"><h4>Documents (' + docs.length + ')</h4>' +
+    return '<div class="gpa-box"><h4>' + (m.total !== undefined ? 'Documents' : 'Justificatifs') + ' (' + docs.length + ')</h4>' +
       (w ? '<div style="display:flex;gap:6px;padding:10px 12px;border-bottom:1px solid var(--l);flex-wrap:wrap"><select id="gpDocCat" style="height:34px;border:1px solid #e5e7eb;border-radius:9px;font-size:12px;padding:0 8px">' + CATS.map(c => '<option>' + c + '</option>').join('') + '</select><input id="gpDocFile" type="file" multiple style="flex:1;min-width:150px;font-size:11px"><button class="gpa-btn pri sm" id="gpDocBtn" data-updoc="' + m.id + '">Ajouter</button></div>' : '') +
       (docs.length ? '<table><tbody>' + docs.map(x => '<tr><td><b>' + esc(x.nom) + '</b><span class="sub">' + esc(x.cat) + ' · ' + fsize(x.taille || 0) + ' · ' + fdate(x.date) + '</span></td><td class="rt" style="white-space:nowrap"><button class="gpa-btn sm" data-opendoc="' + m.id + '|' + x.id + '" title="Voir"><span class="material-symbols-rounded">visibility</span></button> <button class="gpa-btn sm" data-dldoc="' + m.id + '|' + x.id + '" title="Télécharger"><span class="material-symbols-rounded">download</span></button>' + (w ? ' <button class="gpa-btn sm del" data-deldoc="' + m.id + '|' + x.id + '"><span class="material-symbols-rounded">delete</span></button>' : '') + '</td></tr>').join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun document pour ce marché</div>') + '</div>';
   }
@@ -231,7 +233,7 @@
   function revDrawer(id) {
     const d = ensure(db()), r = d.revenusAutres.find(x => x.id === id) || { date: today(), mode: 'Espèces' };
     drawer(id ? 'Modifier le revenu' : 'Nouveau revenu', fd('Montant (FCFA) *', '<input id="gr-m" type="number" min="0" value="' + (r.montant || '') + '">') + '<div class="gpa-g2">' + fd('Date', '<input id="gr-d" type="date" value="' + esc(r.date) + '">') + fd('Activité', '<select id="gr-a">' + actOpts(d, r.activiteId) + '</select>') + '</div>' +
-      fd('Client / source', '<input id="gr-c" value="' + esc(r.client || '') + '">') + fd('Mode', '<select id="gr-mode">' + MODES.map(x => '<option' + (x === r.mode ? ' selected' : '') + '>' + x + '</option>').join('') + '</select>') + fd('Note', '<textarea id="gr-n">' + esc(r.note || '') + '</textarea>'),
+      fd('Client / source', '<input id="gr-c" value="' + esc(r.client || '') + '">') + fd('Mode', '<select id="gr-mode">' + MODES.map(x => '<option' + (x === r.mode ? ' selected' : '') + '>' + x + '</option>').join('') + '</select>') + fd('Note', '<textarea id="gr-n">' + esc(r.note || '') + '</textarea>') + (id ? docsBox(r, canWrite()) : '<p class="sub">Enregistrez le revenu pour pouvoir y joindre un justificatif.</p>'),
       '<button class="gpa-btn" data-x>Annuler</button><button class="gpa-btn pri" data-saver="' + (id || '') + '">Enregistrer</button>');
   }
   async function saveRev(id) {
@@ -243,7 +245,7 @@
   async function del(kind, a, b) {
     if (!canWrite()) return notify('Action non autorisée', 'err'); const d = ensure(db());
     if (kind === 'm') { const m = d.marches.find(x => x.id === a); if (!m || !confirm('Supprimer le marché « ' + m.client + ' » , ses ' + ((m.paiements || []).length) + ' paiement(s) et ses ' + ((m.documents || []).length) + ' document(s) ?')) return; if ((m.documents || []).length) { try { await (await storage()).remove(m.documents.map(x => x.path)); } catch (_) { notify('Certains fichiers n’ont pas pu être supprimés du stockage', 'err'); } } d.marches = d.marches.filter(x => x.id !== a); }
-    if (kind === 'r') { if (!confirm('Supprimer ce revenu ?')) return; d.revenusAutres = d.revenusAutres.filter(x => x.id !== a); }
+    if (kind === 'r') { const r0 = d.revenusAutres.find(x => x.id === a); if (!confirm('Supprimer ce revenu' + (r0 && (r0.documents || []).length ? ' et ses ' + r0.documents.length + ' justificatif(s)' : '') + ' ?')) return; if (r0 && (r0.documents || []).length) { try { await (await storage()).remove(r0.documents.map(x => x.path)); } catch (_) { notify('Certains fichiers n’ont pas pu être supprimés du stockage', 'err'); } } d.revenusAutres = d.revenusAutres.filter(x => x.id !== a); }
     if (kind === 'p') { if (!confirm('Supprimer ce paiement ?')) return; const m = d.marches.find(x => x.id === a); m.paiements = m.paiements.filter(x => x.id !== b); }
     await save(d); render(); if (kind === 'p') viewDrawer(a); notify('Supprimé ✓');
   }
