@@ -195,6 +195,21 @@
     };
   }
 
+  /* ───────── groupes d'encaissement (un encaissement peut couvrir plusieurs mois) ───────── */
+  const groupOf = p => p.groupe || ('LEG|' + [p.recuNo || '', p.date || '', p.periode || '', p.paye || '', p.createdAt || ''].join('|'));
+  const rowsOfGroup = (d, gid) => (d.paiements || []).filter(p => groupOf(p) === gid);
+  const without = (d, gid) => Object.assign({}, d, { paiements: (d.paiements || []).filter(p => groupOf(p) !== gid) });
+  function canWrite() {
+    try { const P = window.GPPermissions; return !(P && typeof P.has === 'function') || !!P.has(null, 'paiements:write'); } catch (_) { return true; }
+  }
+  function pushAudit(d, action, detail) {
+    try {
+      d.meta = d.meta || {}; d.meta.encaissementsLog = d.meta.encaissementsLog || [];
+      d.meta.encaissementsLog.unshift({ at: new Date().toISOString(), action, ...detail });
+      d.meta.encaissementsLog.length = Math.min(d.meta.encaissementsLog.length, 200);
+    } catch (_) {}
+  }
+
   /* ───────── enregistrement d'un encaissement ───────── */
   function recalcPeriod(d, c, k) {
     const due = monthlyDue(d, c);
@@ -206,40 +221,82 @@
       p.reste = String(i === rows.length - 1 ? Math.max(0, Math.round(due - total)) : 0);
     });
   }
+  /** Recalcule une période et garde la quittance cohérente : émise si soldée, retirée sinon. */
+  function syncPeriod(d, c, k, now) {
+    const rows = d.paiements.filter(p => belongs(p, c) && p.periode === k);
+    if (!rows.length) return null;
+    recalcPeriod(d, c, k);
+    const due = monthlyDue(d, c), total = rows.reduce((s, p) => s + num(p.paye), 0);
+    if (total >= due && due > 0) {
+      const qNo = rows.find(p => p.quittanceNo)?.quittanceNo || nextQuittance(d);
+      rows.forEach(p => { p.quittanceNo = qNo; p.quittanceAt = p.quittanceAt || now; });
+      return { periode: k, quittanceNo: qNo, due };
+    }
+    rows.forEach(p => { delete p.quittanceNo; delete p.quittanceAt; });
+    return null;
+  }
   function refreshProchain(d, c) {
     const first = schedule(d, c, addM(nowKey(), 24)).find(e => e.solde > 0);
     if (first) { if (!validDay(c.jourEcheance)) c.jourEcheance = String(dueDay(c) || first.dueDate.getDate()); c.prochain = iso(first.dueDate); }
   }
-  async function saveEncaissement(cKey, amount, date, mode, ref) {
+  /** Enregistre un encaissement. opts.replace = id de groupe à remplacer (modification) :
+   *  tout est validé AVANT de toucher aux données, donc une erreur ne casse rien. */
+  async function saveEncaissement(cKey, amount, date, mode, ref, opts) {
+    opts = opts || {};
     const d = prepareRelations(db()), c = activeContracts(d).find(x => cid(x) === cKey || String(x.num || '') === String(cKey));
     if (!c) return { error: 'Contrat introuvable' };
     if (!(amount > 0)) return { error: 'Saisissez un montant supérieur à 0' };
-    const al = allocate(d, c, amount);
+    const old = opts.replace ? rowsOfGroup(d, opts.replace) : [];
+    if (opts.replace && !old.length) return { error: 'Encaissement introuvable (déjà supprimé ?)' };
+    const al = allocate(opts.replace ? without(d, opts.replace) : d, c, amount);
     if (!al.rows.length) return { error: 'Aucune échéance à solder pour ce contrat' };
     if (al.leftover > 0) return { error: 'Le montant dépasse ce qui peut être imputé (' + fmt(amount - al.leftover) + ' max)' };
+    /* ── validation OK : on peut modifier ── */
     const loc = findLoc(d, c) || {};
-    const recuNo = nextRecu(d), groupe = 'ENC-' + Date.now().toString(36), now = new Date().toISOString();
     if (!Array.isArray(d.paiements)) d.paiements = [];
+    const oldPeriods = old.map(p => p.periode).filter(validKey);
+    const keep = old[0] || {};
+    if (opts.replace) d.paiements = d.paiements.filter(p => groupOf(p) !== opts.replace);
+    const recuNo = keep.recuNo || nextRecu(d), groupe = keep.groupe || ('ENC-' + Date.now().toString(36)), now = new Date().toISOString();
     al.rows.slice().reverse().forEach(a => {
       d.paiements.unshift({
         locataire: c.locataire, locative: c.locative, bien: c.bien || loc.bien || '',
         contratId: c.id, contractId: c.id, contrat: c.num || c.id, locationId: c.locationId || '', bienId: c.bienId || '', proprietaireId: c.proprietaireId || '', locataireId: c.locataireId || '', periode: a.k,
         montant: String(Math.round(a.due)), paye: String(Math.round(a.amount)), reste: '0',
-        date, mode, ref: ref || '', recuNo, groupe, createdAt: now
+        date, mode, ref: ref || '', recuNo, groupe, createdAt: keep.createdAt || now,
+        ...(opts.replace ? { modifiedAt: now } : {})
       });
     });
-    al.rows.forEach(a => recalcPeriod(d, c, a.k));
-    const settledPeriods = [];
-    al.rows.filter(a => a.soldeApres <= 0).forEach(a => {
-      const periodRows = d.paiements.filter(p => belongs(p, c) && p.periode === a.k);
-      let qNo = periodRows.find(p => p.quittanceNo)?.quittanceNo || nextQuittance(d);
-      periodRows.forEach(p => { p.quittanceNo = qNo; p.quittanceAt = p.quittanceAt || now; });
-      settledPeriods.push({ periode: a.k, quittanceNo: qNo, due: a.due });
-    });
+    const touched = Array.from(new Set(al.rows.map(a => a.k).concat(oldPeriods)));
+    const settled = {};
+    touched.forEach(k => { const r = syncPeriod(d, c, k, now); if (r) settled[k] = r; });
+    const settledPeriods = al.rows.map(a => settled[a.k]).filter(Boolean);
     refreshProchain(d, c);
+    pushAudit(d, opts.replace ? 'modification' : 'creation', { recuNo, contrat: c.num || c.id, locataire: c.locataire, montant: Math.round(amount), avant: old.reduce((s, p) => s + num(p.paye), 0) });
     await saveDb(d);
     try { localStorage.setItem('gpe_last_mode', mode); } catch (_) {}
-    return { recuNo, rows: al.rows, settledPeriods };
+    return { recuNo, rows: al.rows, settledPeriods, cKey: cid(c) };
+  }
+
+  /** Supprime un encaissement complet (toutes ses lignes) puis recalcule soldes / quittances. */
+  async function deleteEncaissement(gid) {
+    if (!canWrite()) return notify('Action non autorisée pour votre rôle', 'err');
+    const d = prepareRelations(db()), rows = rowsOfGroup(d, gid);
+    if (!rows.length) return notify('Encaissement introuvable', 'err');
+    const c = (d.contrats || []).find(x => belongs(rows[0], x));
+    const total = rows.reduce((s, p) => s + num(p.paye), 0);
+    const periods = Array.from(new Set(rows.map(p => p.periode).filter(validKey))).sort().map(monthLabel).join(', ');
+    const msg = 'Supprimer cet encaissement ?\n\n' + (rows[0].locataire || '') + ' — ' + fmt(total) + (periods ? '\nPériode(s) : ' + periods : '') + (rows[0].recuNo ? '\nReçu : ' + rows[0].recuNo : '') +
+      '\n\nLes soldes seront recalculés. Cette action est enregistrée dans le journal.';
+    if (!window.confirm(msg)) return false;
+    const now = new Date().toISOString(), oldPeriods = Array.from(new Set(rows.map(p => p.periode).filter(validKey)));
+    d.paiements = d.paiements.filter(p => groupOf(p) !== gid);
+    if (c) { oldPeriods.forEach(k => syncPeriod(d, c, k, now)); refreshProchain(d, c); }
+    pushAudit(d, 'suppression', { recuNo: rows[0].recuNo || '', contrat: c ? (c.num || c.id) : '', locataire: rows[0].locataire || '', montant: Math.round(total) });
+    await saveDb(d);
+    refreshAll();
+    notify('Encaissement supprimé ✓');
+    return true;
   }
 
   /* ───────── styles ───────── */
@@ -394,8 +451,10 @@
   }
 
   /* — encaissement rapide — */
-  const pay = { key: '' };
+  const pay = { key: '', replace: '' };
+  const viewDb = d => (pay.replace ? without(d, pay.replace) : d);
   function openPay(key) {
+    pay.replace = '';
     injectStyle(); migrate();
     const d = db(), cs = activeContracts(d);
     if (!cs.length) return notify('Aucun contrat actif : créez d\'abord une location avec contrat.', 'err');
@@ -416,10 +475,33 @@
     if (pay.key) presetAmount('oldest');
     payContext(); payPreview();
   }
+  /** Ouvre le formulaire pré-rempli pour corriger un encaissement existant. */
+  function openEdit(gid) {
+    if (!canWrite()) return notify('Action non autorisée pour votre rôle', 'err');
+    injectStyle(); migrate();
+    const d = prepareRelations(db()), rows = rowsOfGroup(d, gid);
+    if (!rows.length) return notify('Encaissement introuvable', 'err');
+    const c = activeContracts(d).find(x => belongs(rows[0], x));
+    if (!c) return notify('Contrat introuvable ou terminé : modification impossible', 'err');
+    pay.key = cid(c); pay.replace = gid;
+    const first = rows[rows.length - 1], total = rows.reduce((s, p) => s + num(p.paye), 0);
+    const dt = parseD(first.date), modes = ['Espèces', 'Wave', 'Orange Money', 'Mobile Money', 'Virement', 'Chèque'];
+    if (first.mode && !modes.includes(first.mode)) modes.push(first.mode);
+    const body = '<div class="gpe-banner">Vous modifiez l’encaissement <b>' + esc(first.recuNo || '') + '</b>. Le montant sera réimputé automatiquement aux échéances ; le même numéro de reçu est conservé.</div>' +
+      '<div class="gpe-info" id="gpePayCtx"></div>' +
+      '<div class="fd"><label>Montant encaissé (FCFA) *</label><input class="amt" id="gpePayAmt" type="number" min="0" inputmode="numeric" value="' + Math.round(total) + '"></div>' +
+      '<div class="g2"><div class="fd"><label>Mode de paiement</label><select id="gpePayMode">' + modes.map(x => '<option' + (x === first.mode ? ' selected' : '') + '>' + esc(x) + '</option>').join('') + '</select></div>' +
+      '<div class="fd"><label>Date de paiement</label><input id="gpePayDate" type="date" value="' + (dt ? iso(dt) : todayISO()) + '"></div></div>' +
+      '<div class="fd"><label>Référence (facultatif)</label><input id="gpePayRef" value="' + esc(first.ref || '') + '" placeholder="N° transaction Wave / N° de chèque…"></div>' +
+      '<div class="gpe-prev" id="gpePayPrev"></div>';
+    openDrawer('Modifier l’encaissement', esc(c.locataire || '') + ' · ' + esc(first.recuNo || ''), body,
+      '<button class="gpe-btn" data-close>Annuler</button><button class="gpe-btn pri" id="gpePaySave" data-save><span class="material-symbols-rounded">check</span>Enregistrer les modifications</button>');
+    payContext(); payPreview();
+  }
   function curContract() { const d = db(); return activeContracts(d).find(c => cid(c) === pay.key) || null; }
   function payContext() {
     const el = $('gpePayCtx'); if (!el) return;
-    const d = db(), c = curContract();
+    const d = viewDb(db()), c = curContract();
     if (!c) { el.innerHTML = '<span style="color:#6b7280">Sélectionnez un locataire pour voir sa situation.</span>'; return; }
     const sch = schedule(d, c, nowKey()), solde = sch.reduce((s, e) => s + e.solde, 0);
     const first = sch.find(e => e.solde > 0);
@@ -429,7 +511,7 @@
       (first ? '<div class="row"><span>Plus ancienne impayée</span><b>' + monthLabel(first.k) + '</b></div>' : '');
   }
   function presetAmount(kind) {
-    const d = db(), c = curContract(), inp = $('gpePayAmt'); if (!c || !inp) return;
+    const d = viewDb(db()), c = curContract(), inp = $('gpePayAmt'); if (!c || !inp) return;
     const sch = schedule(d, c, nowKey());
     let v = 0;
     if (kind === 'all') v = sch.reduce((s, e) => s + e.solde, 0);
@@ -440,7 +522,7 @@
   }
   function payPreview() {
     const el = $('gpePayPrev'), btn = $('gpePaySave'); if (!el) return;
-    const d = db(), c = curContract(), amount = num(($('gpePayAmt') || {}).value);
+    const d = viewDb(db()), c = curContract(), amount = num(($('gpePayAmt') || {}).value);
     if (!c || !(amount > 0)) { el.innerHTML = '<h4>Imputation</h4><span style="color:#6b7280">Saisissez un montant pour voir à quelles échéances il sera imputé.</span>'; if (btn) btn.disabled = !c; return; }
     const al = allocate(d, c, amount);
     let h = '<h4>Imputation du paiement</h4>' + al.rows.map(a => '<div class="row"><span>' + monthLabel(a.k) + '</span><span><b>' + fmt(a.amount) + '</b> ' + (a.soldeApres <= 0 ? '<span class="gpe-pill paye">soldé</span>' : '<span class="gpe-pill partiel">reste ' + fmt(a.soldeApres) + '</span>') + '</span></div>').join('');
@@ -452,11 +534,14 @@
     const btn = $('gpePaySave'); if (btn && btn.disabled) return;
     if (!pay.key) return notify('Sélectionnez un locataire', 'err');
     if (btn) btn.disabled = true;
-    const r = await saveEncaissement(pay.key, num($('gpePayAmt').value), $('gpePayDate').value || todayISO(), $('gpePayMode').value, ($('gpePayRef').value || '').trim());
+    if (!canWrite()) { if (btn) btn.disabled = false; return notify('Action non autorisée pour votre rôle', 'err'); }
+    const editing = !!pay.replace;
+    const r = await saveEncaissement(pay.key, num($('gpePayAmt').value), $('gpePayDate').value || todayISO(), $('gpePayMode').value, ($('gpePayRef').value || '').trim(), editing ? { replace: pay.replace } : {});
     if (r.error) { if (btn) btn.disabled = false; return notify(r.error, 'err'); }
+    pay.replace = '';
     refreshAll();
-    notify('Encaissement enregistré ✓ — reçu ' + r.recuNo);
-    offerPaymentDocuments(r);
+    notify(editing ? 'Encaissement modifié ✓ — reçu ' + r.recuNo : 'Encaissement enregistré ✓ — reçu ' + r.recuNo);
+    offerPaymentDocuments(r, editing);
   }
 
   /* — fiche de compte locataire — */
@@ -468,14 +553,22 @@
     const pays = contractPayments(d, c).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
     const ech = '<div class="gpe-table"><table><thead><tr><th>Période</th><th class="gpe-r">Dû</th><th class="gpe-r">Payé</th><th class="gpe-r">Solde</th><th>Statut</th><th></th></tr></thead><tbody>' +
       sch.slice().reverse().map(e => '<tr><td><b>' + monthLabel(e.k) + '</b><span class="gpe-sub">échéance ' + shortDate(e.dueDate) + (e.late ? ' · ' + e.daysLate + ' j' : '') + '</span></td><td class="gpe-r">' + fmt(e.due) + '</td><td class="gpe-r gpe-green">' + fmt(e.paid) + '</td><td class="gpe-r ' + (e.solde ? 'gpe-orange' : 'gpe-green') + '"><b>' + fmt(e.solde) + '</b></td><td>' + pill(e.statut) + '</td><td class="gpe-r">' + (e.solde > 0 ? '<button class="gpe-btn sm" data-pay="' + esc(fiche.key) + '">Encaisser</button>' : '') + '</td></tr>').join('') + '</tbody></table></div>';
-    const hist = pays.length ? '<div class="gpe-table"><table><thead><tr><th>Date</th><th>Période</th><th class="gpe-r">Montant</th><th>Mode</th><th>Reçu</th></tr></thead><tbody>' +
-      pays.map(p => '<tr><td>' + esc((parseD(p.date) ? shortDate(parseD(p.date)) : p.date) || '—') + '</td><td>' + (validKey(p.periode) ? monthLabel(p.periode) : '—') + '</td><td class="gpe-r gpe-green"><b>' + fmt(num(p.paye)) + '</b></td><td>' + esc(p.mode || '—') + (p.ref ? '<span class="gpe-sub">' + esc(p.ref) + '</span>' : '') + '</td><td>' + esc(p.recuNo || '—') + '</td></tr>').join('') + '</tbody></table></div>'
+    const groups = []; const seen = {};
+    pays.forEach(p => { const g = groupOf(p); if (!seen[g]) { seen[g] = { gid: g, rows: [] }; groups.push(seen[g]); } seen[g].rows.push(p); });
+    const hist = groups.length ? '<div class="gpe-table"><table><thead><tr><th>Date</th><th>Période(s)</th><th class="gpe-r">Montant</th><th>Mode</th><th>Reçu</th><th class="gpe-r">Actions</th></tr></thead><tbody>' +
+      groups.map(g => {
+        const p = g.rows[0], total = g.rows.reduce((s, x) => s + num(x.paye), 0);
+        const per = Array.from(new Set(g.rows.map(x => x.periode).filter(validKey))).sort().map(monthLabel).join(', ') || '—';
+        const act = canWrite() ? '<button class="gpe-btn sm" data-edit="' + esc(g.gid) + '" title="Modifier"><span class="material-symbols-rounded">edit</span></button> <button class="gpe-btn sm" data-del="' + esc(g.gid) + '" title="Supprimer" style="color:#dc2626"><span class="material-symbols-rounded">delete</span></button>' : '';
+        return '<tr><td>' + esc((parseD(p.date) ? shortDate(parseD(p.date)) : p.date) || '—') + '</td><td>' + esc(per) + '</td><td class="gpe-r gpe-green"><b>' + fmt(total) + '</b></td><td>' + esc(p.mode || '—') + (p.ref ? '<span class="gpe-sub">' + esc(p.ref) + '</span>' : '') + '</td><td>' + esc(p.recuNo || '—') + (p.modifiedAt ? '<span class="gpe-sub">modifié</span>' : '') + '</td>' +
+          '<td class="gpe-r" style="white-space:nowrap">' + (p.recuNo ? '<button class="gpe-btn sm" data-receipt="' + esc(p.recuNo) + '" title="Reçu PDF"><span class="material-symbols-rounded">receipt_long</span></button> ' : '') + act + '</td></tr>';
+      }).join('') + '</tbody></table></div>'
       : '<div class="gpe-empty">Aucun paiement enregistré pour ce contrat</div>';
     $('gpeBody').innerHTML =
       '<div class="gpe-mini"><div class="gpe-card"><small>Total dû</small><strong>' + fmt(due) + '</strong></div><div class="gpe-card"><small>Total payé</small><strong class="gpe-green">' + fmt(paid) + '</strong></div><div class="gpe-card"><small>Solde</small><strong class="' + (solde ? 'gpe-red' : 'gpe-green') + '">' + fmt(solde) + '</strong></div></div>' +
       '<div class="gpe-info"><div class="row"><span>Contrat</span><b>' + esc(c.num || '—') + '</b></div><div class="row"><span>Loyer mensuel</span><b>' + fmt(monthlyDue(d, c)) + '</b></div>' +
       '<div class="row"><span>Suivi depuis</span><input type="month" id="gpeStart" value="' + esc(startKey(d, c)) + '" style="width:150px;height:30px"></div></div>' +
-      '<div class="gpe-tabs"><button class="gpe-tab' + (fiche.tab === 'ech' ? ' on' : '') + '" data-tab="ech">Échéancier</button><button class="gpe-tab' + (fiche.tab === 'his' ? ' on' : '') + '" data-tab="his">Historique (' + pays.length + ')</button></div>' +
+      '<div class="gpe-tabs"><button class="gpe-tab' + (fiche.tab === 'ech' ? ' on' : '') + '" data-tab="ech">Échéancier</button><button class="gpe-tab' + (fiche.tab === 'his' ? ' on' : '') + '" data-tab="his">Historique (' + groups.length + ')</button></div>' +
       (fiche.tab === 'ech' ? ech : hist);
   }
   function openFiche(key) {
@@ -507,28 +600,53 @@
   const pdfInfo = (label, value) => '<div style="background:#fafaf7;border-left:3px solid #D4AF37;border-radius:4px;padding:8px 12px"><div style="font-size:7.5px;letter-spacing:.8px;color:#8a8a8a;text-transform:uppercase;font-weight:700">' + label + '</div><div style="font-size:10.5px;font-weight:700;margin-top:3px;color:#111">' + value + '</div></div>';
   const pdfKpi = (label, value, color) => '<div style="padding:10px 12px;background:#fafaf7;border-radius:6px"><div style="font-size:7.5px;letter-spacing:.8px;color:#8a8a8a;text-transform:uppercase;font-weight:700">' + label + '</div><div style="font-size:13px;font-weight:800;margin-top:3px;color:' + (color || '#111') + '">' + value + '</div></div>';
   const pdfFooter = txt => '<div style="margin-top:26px;border-top:1px solid #eee;padding-top:10px;text-align:center;font-size:8px;color:#8a8a8a;line-height:1.5">' + txt + '</div>';
-  function pdfDownload(html, filename) {
+  /** Génère le PDF en Blob puis déclenche le téléchargement ; garde un lien de secours
+   *  (certains navigateurs / WebView bloquent le téléchargement automatique). */
+  function triggerDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename; a.style.display = 'none';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => a.remove(), 0);
+    const old = $('gpePdfFallback'); old && old.remove();
+    const bar = document.createElement('div'); bar.id = 'gpePdfFallback';
+    bar.style.cssText = 'position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:10001;background:#111827;color:#fff;border-radius:12px;padding:10px 14px;font:700 12px Inter,Arial,sans-serif;display:flex;gap:12px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.3)';
+    bar.innerHTML = '<span>PDF prêt : ' + esc(filename) + '</span><a href="' + url + '" target="_blank" rel="noopener" download="' + esc(filename) + '" style="color:#D4AF37;text-decoration:underline">Ouvrir / télécharger</a><button type="button" style="background:none;border:0;color:#9ca3af;cursor:pointer;font-size:16px" aria-label="Fermer">×</button>';
+    document.body.appendChild(bar);
+    const close = () => { bar.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000); };
+    bar.querySelector('button').onclick = close; setTimeout(close, 20000);
+  }
+  async function pdfDownload(html, filename) {
     const box = document.createElement('div');
-    box.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;background:#fff;z-index:-1';
+    /* Sur l'écran (invisible) : un conteneur hors-écran donne parfois un PDF blanc. */
+    box.style.cssText = 'position:fixed;left:0;top:0;width:794px;background:#fff;z-index:-1;opacity:0;pointer-events:none';
     box.innerHTML = html; document.body.appendChild(box);
     const el = box.firstElementChild;
-    /* La capture doit couvrir TOUT le document, quel que soit le défilement ou la taille de la fenêtre. */
-    const winH = Math.max(1123, Math.ceil(el.scrollHeight) + 2);
-    const run = () => {
-      if (typeof window.html2pdf !== 'function') { box.remove(); notify('Générateur PDF indisponible', 'err'); return; }
-      window.html2pdf().set({
+    try {
+      if (window.ensureHtml2Pdf) await window.ensureHtml2Pdf();
+      const lib = window.__html2pdfReal || window.html2pdf;
+      if (typeof lib !== 'function') throw new Error('html2pdf indisponible');
+      if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (_) {} }
+      /* attendre le chargement du logo éventuel */
+      await Promise.all(Array.from(el.querySelectorAll('img')).map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+      const worker = lib().set({
         margin: 0, filename, image: { type: 'jpeg', quality: .98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#fff', scrollX: 0, scrollY: 0, windowWidth: Math.max(window.innerWidth || 0, 794), windowHeight: winH },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#fff', logging: false, scrollX: 0, scrollY: 0 },
         jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['css'], avoid: 'tr' }
-      }).from(el).save().then(() => { box.remove(); notify('PDF téléchargé ✓'); }).catch(err => { console.error(err); box.remove(); notify('Erreur génération PDF', 'err'); });
-    };
-    if (window.ensureHtml2Pdf) window.ensureHtml2Pdf().then(run).catch(err => { console.error(err); box.remove(); notify('Générateur PDF indisponible', 'err'); }); else run();
+      }).from(el);
+      const blob = await worker.outputPdf('blob');
+      if (!blob || blob.size < 1500) throw new Error('PDF vide (' + (blob ? blob.size : 0) + ' octets)');
+      triggerDownload(blob, filename);
+      notify('PDF généré ✓ — ' + filename);
+    } catch (err) {
+      console.error('[Encaissements] PDF', err);
+      notify('Erreur génération PDF : ' + (err && err.message ? err.message : 'inconnue'), 'err');
+    } finally { box.remove(); }
   }
   function paymentGroup(d, recuNo) { return (d.paiements || []).filter(p => p.recuNo === recuNo); }
   function generateReceiptPDF(recuNo) {
     const d = db(), rows = paymentGroup(d, recuNo); if (!rows.length) return notify('Reçu introuvable', 'err');
-    const ag = agencyInfo(), first = rows[0], c = activeContracts(d).find(x => cid(x) === first.contrat), loc = findLoc(d, c || {}) || {};
+    const ag = agencyInfo(), first = rows[0], c = activeContracts(d).find(x => belongs(first, x)), loc = findLoc(d, c || {}) || {};
     const total = rows.reduce((s,p) => s + num(p.paye), 0);
     const byPeriod = {};
     rows.forEach(p => { const k = p.periode || '—'; byPeriod[k] = (byPeriod[k] || 0) + num(p.paye); });
@@ -599,12 +717,12 @@
     const d=db(), c=activeContracts(d).find(x=>cid(x)===key); if(!c) return;
     openDrawer('Relevé de compte', esc(c.locataire||'Locataire')+' · PDF', '<div class="gpe-report-box">Choisissez la période du relevé. Le document reprend mois par mois le dû, le payé et le solde.</div><div class="g2" style="margin-top:14px"><div class="fd"><label>Période</label><select id="gpeRepType"><option value="mois">Mois</option><option value="trimestre">Trimestre</option><option value="annee">Année</option></select></div><div class="fd"><label>Mois / année de départ</label><input id="gpeRepAnchor" type="month" value="'+nowKey()+'"></div></div>', '<button class="gpe-btn" data-close>Annuler</button><button class="gpe-btn pri" data-report="'+esc(key)+'"><span class="material-symbols-rounded">picture_as_pdf</span>Générer le relevé</button>');
   }
-  function offerPaymentDocuments(result) {
+  function offerPaymentDocuments(result, edited) {
     const settled = result.settledPeriods || [];
-    const rows = '<div class="gpe-docs"><h4>Documents du paiement</h4><div class="gpe-doc-row"><div><b>Reçu '+pdfEscape(result.recuNo)+'</b><small>Le paiement enregistré, avec le solde restant si partiel.</small></div><button class="gpe-btn sm pri" data-receipt="'+pdfEscape(result.recuNo)+'">PDF</button></div>' +
-      (settled.length ? settled.map(x=>'<div class="gpe-doc-row"><div><b>Quittance · '+pdfEscape(monthLabel(x.periode))+'</b><small>'+pdfEscape(x.quittanceNo)+' · période soldée</small></div><button class="gpe-btn sm" data-quittance="'+pdfEscape(x.quittanceNo)+'" data-qcontract="'+pdfEscape(pay.key)+'" data-qperiod="'+pdfEscape(x.periode)+'">PDF</button></div>').join('') : '') + '</div>';
-    openDrawer('Encaissement enregistré', 'Documents disponibles', '<div class="gpe-info"><div class="row"><span>Reçu</span><b>'+pdfEscape(result.recuNo)+'</b></div><div class="row"><span>Quittances émises</span><b>'+settled.length+'</b></div></div>'+rows, '<button class="gpe-btn" data-close>Fermer</button>');
-    setTimeout(()=>generateReceiptPDF(result.recuNo), 150);
+    const rows = '<div class="gpe-docs"><h4>Documents du paiement</h4><div class="gpe-doc-row"><div><b>Reçu '+pdfEscape(result.recuNo)+'</b><small>Le paiement enregistré, avec le solde restant si partiel.</small></div><button class="gpe-btn sm pri" data-receipt="'+pdfEscape(result.recuNo)+'"><span class="material-symbols-rounded">download</span>Télécharger</button></div>' +
+      (settled.length ? settled.map(x=>'<div class="gpe-doc-row"><div><b>Quittance · '+pdfEscape(monthLabel(x.periode))+'</b><small>'+pdfEscape(x.quittanceNo)+' · période soldée</small></div><button class="gpe-btn sm" data-quittance="'+pdfEscape(x.quittanceNo)+'" data-qcontract="'+pdfEscape(result.cKey || pay.key)+'" data-qperiod="'+pdfEscape(x.periode)+'">PDF</button></div>').join('') : '') + '</div>';
+    openDrawer(edited ? 'Encaissement modifié' : 'Encaissement enregistré', 'Documents disponibles', '<div class="gpe-info"><div class="row"><span>Reçu</span><b>'+pdfEscape(result.recuNo)+'</b></div><div class="row"><span>Quittances émises</span><b>'+settled.length+'</b></div></div>'+rows, '<button class="gpe-btn" data-close>Fermer</button>');
+    /* Pas de téléchargement automatique : les navigateurs le bloquent souvent. L'utilisateur clique sur « PDF ». */
   }
 
   /* ───────── événements (délégation) ───────── */
@@ -615,7 +733,7 @@
     try { typeof window.updateSidebarBadges === 'function' && window.updateSidebarBadges(); } catch (_) {}
   }
   document.addEventListener('click', e => {
-    const t = e.target.closest('[data-pay],[data-fiche],[data-filter],[data-mo],[data-export],[data-close],[data-save],[data-q],[data-tab],[data-statement],[data-report],[data-receipt],[data-quittance]');
+    const t = e.target.closest('[data-pay],[data-fiche],[data-filter],[data-mo],[data-export],[data-close],[data-save],[data-q],[data-tab],[data-statement],[data-report],[data-receipt],[data-quittance],[data-edit],[data-del]');
     if (!t) return;
     const inPage = t.closest('#page-paiements') || t.closest('#gpeDrawer');
     if (!inPage) return;
@@ -625,6 +743,8 @@
     if (t.hasAttribute('data-tab')) { fiche.tab = t.dataset.tab; return paintFiche(); }
     if (t.hasAttribute('data-statement')) return openStatementDialog(t.dataset.statement);
     if (t.hasAttribute('data-report')) { const key=t.dataset.report, type=($('gpeRepType')||{}).value||'mois', anchor=($('gpeRepAnchor')||{}).value||nowKey(); closeDrawer(); return generateStatementPDF(key,type,anchor); }
+    if (t.hasAttribute('data-edit')) return openEdit(t.dataset.edit);
+    if (t.hasAttribute('data-del')) return deleteEncaissement(t.dataset.del);
     if (t.hasAttribute('data-receipt')) return generateReceiptPDF(t.dataset.receipt);
     if (t.hasAttribute('data-quittance')) return generateQuittancePDF(t.dataset.qcontract,t.dataset.qperiod);
     if (t.hasAttribute('data-filter')) { st.filter = t.dataset.filter; if (window.GPPagination) GPPagination.reset('encaissements'); return render(); }
@@ -659,7 +779,7 @@
   if (window.GPNavigation && typeof window.GPNavigation.registerRenderer === 'function') window.GPNavigation.registerRenderer('paiements', render);
 
   window.genererRecuPaiementPDF = generateReceiptPDFByIndex;
-  window.GPEncV2 = { render, migrate, schedule, allocate, saveEncaissement, openPay, openFiche, generateReceiptPDF, generateReceiptPDFByIndex, generateQuittancePDF, generateStatementPDF, _internals: { cid, monthlyDue, startKey, paidMap, nextRecu, nextQuittance, prepareRelations } };
+  window.GPEncV2 = { render, migrate, schedule, allocate, saveEncaissement, deleteEncaissement, openEdit, openPay, openFiche, generateReceiptPDF, generateReceiptPDFByIndex, generateQuittancePDF, generateStatementPDF, _internals: { cid, monthlyDue, startKey, paidMap, nextRecu, nextQuittance, prepareRelations } };
 
   // Si la page Encaissements est déjà affichée au chargement, on remplace l'ancien rendu.
   const pg = $('page-paiements');
