@@ -3,17 +3,24 @@
 (function(){
   'use strict';
   const RIGHTS=[
-    ['dashboard','Tableau de bord'],['employes','Équipe'],['proprietaires','Propriétaires'],
-    ['biens','Biens'],['locatives','Locations'],['paiements','Encaissements'],['depenses','Dépenses'],
-    ['fichiers','Documents'],['messages','Messages'],['journal','Journal'],['rapports','Rapports']
+    ['dashboard'],['employes'],['proprietaires'],['biens'],['locatives'],
+    ['paiements'],['situation'],['activites'],['depenses'],['fichiers'],['messages'],['journal'],['rapports']
   ];
-  const ROLE_RIGHTS={
-    'Administrateur': Object.fromEntries(RIGHTS.map(([k])=>[k,true])),
-    'Gestionnaire': Object.fromEntries(RIGHTS.map(([k])=>[k,true])),
-    'Agent': Object.fromEntries(RIGHTS.map(([k])=>[k,['dashboard','biens','locatives','messages'].includes(k)])),
-    'Comptable': Object.fromEntries(RIGHTS.map(([k])=>[k,['dashboard','paiements','depenses','rapports'].includes(k)])),
-    'Assistante': Object.fromEntries(RIGHTS.map(([k])=>[k,['dashboard','proprietaires','biens','locatives','messages'].includes(k)]))
+  /* Les droits sont définis automatiquement par le rôle (plus de cases à cocher).
+     Le rôle réellement appliqué est celui du profil Supabase (voir permissions.js). */
+  const ALL=RIGHTS.map(([k])=>k);
+  const AGENT=['dashboard','proprietaires','biens','locatives','messages'];
+  const ROLE_INFO={
+    'Administrateur':{auth:'admin',rights:ALL,text:'Accès complet : gestion de l’équipe, journal et tous les modules.'},
+    'Gestionnaire':{auth:'gestionnaire',rights:ALL.filter(k=>k!=='journal'),text:'Tous les modules sauf le Journal. Équipe et Paramètres en lecture seule.'},
+    'Agent':{auth:'agent',rights:AGENT,text:'Biens, propriétaires, locataires, locations, contrats, messages et agenda. Aucun accès aux finances.'},
+    'Comptable':{auth:'comptable',rights:['dashboard','paiements','situation','activites','depenses','rapports','messages'],text:'Encaissements, dépenses, situation propriétaires et rapports. Biens, propriétaires et Équipe en lecture seule.'},
+    'Assistante':{auth:'agent',rights:AGENT,text:'Mêmes droits qu’un agent.'}
   };
+  const ROLE_NAMES=Object.keys(ROLE_INFO);
+  function authRole(role){return (ROLE_INFO[role]||{}).auth||'lecture';}
+  function roleRights(role){const list=(ROLE_INFO[role]||{}).rights||[];return Object.fromEntries(RIGHTS.map(([k])=>[k,list.includes(k)]));}
+  function roleText(role){return (ROLE_INFO[role]||{}).text||'Choisissez un rôle : les droits sont appliqués automatiquement.';}
   let editIndex=null;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const q=(id)=>document.getElementById(id);
@@ -21,10 +28,6 @@
   const toast=(m,t='ok')=>window.toast?window.toast(m,t):console.log(m);
   function db(){try{return window.GPDB?.load?window.GPDB.load():(window.DB||{});}catch(e){return window.DB||{};}}
   async function save(d){if(window.GPDB?.save)return window.GPDB.save(d);window.DB=d;if(window.saveDB)return window.saveDB();}
-  function roleRights(role){return {...(ROLE_RIGHTS[role]||ROLE_RIGHTS.Agent)};}
-  function rightsHtml(r){return RIGHTS.map(([k,label])=>`<label class="emp18-right"><input type="checkbox" data-emp-right="${k}" ${r?.[k]!==false?'checked':''}><span>${label}</span></label>`).join('');}
-  function readRights(){const out={};document.querySelectorAll('#emp18Drawer [data-emp-right]').forEach(x=>out[x.dataset.empRight]=x.checked);return out;}
-  function applyRoleDefaults(role){const rights=roleRights(role);document.querySelectorAll('#emp18Drawer [data-emp-right]').forEach(x=>{x.checked=rights[x.dataset.empRight]!==false;});}
   function drawerHtml(r={},editing=false){
     const role=r.civ||r.role||'';
     const status=r.statut||'Actif';
@@ -41,12 +44,12 @@
           </section>
           <section class="emp18-section"><h3>Poste et accès</h3>
             <div class="emp18-grid"><label>Fonction / poste<input id="emp18Fonction" value="${esc(r.fonction)}" placeholder="Ex. Gestionnaire locatif"></label><label>Type de contrat<select id="emp18Contrat"><option ${r.contrat==='CDI'?'selected':''}>CDI</option><option ${r.contrat==='CDD'?'selected':''}>CDD</option><option ${r.contrat==='Stage'?'selected':''}>Stage</option><option ${r.contrat==='Freelance'?'selected':''}>Freelance</option></select></label></div>
-            <div class="emp18-grid"><label>Rôle *<select id="emp18Role"><option value="">Sélectionner</option>${['Administrateur','Gestionnaire','Agent','Comptable','Assistante'].map(x=>`<option ${role===x?'selected':''}>${x}</option>`).join('')}</select></label><label>Statut *<select id="emp18Status"><option ${status==='Actif'?'selected':''}>Actif</option><option ${status==='En attente'?'selected':''}>En attente</option><option ${status==='Inactif'?'selected':''}>Inactif</option></select></label></div>
+            <div class="emp18-grid"><label>Rôle *<select id="emp18Role"><option value="">Sélectionner</option>${ROLE_NAMES.map(x=>`<option ${role===x?'selected':''}>${x}</option>`).join('')}</select></label><label>Statut *<select id="emp18Status"><option ${status==='Actif'?'selected':''}>Actif</option><option ${status==='En attente'?'selected':''}>En attente</option><option ${status==='Inactif'?'selected':''}>Inactif</option></select></label></div>
+            <div class="emp18-info"><span class="material-symbols-rounded">admin_panel_settings</span><div><b>Droits du rôle</b><p id="emp18RoleText">${esc(roleText(role))}</p></div></div>
           </section>
           <section class="emp18-section"><h3>${editing?'Compte de connexion':'Accès de connexion'}</h3>
             <div class="emp18-info"><span class="material-symbols-rounded">verified_user</span><div><b>${editing?'Le compte existant est conservé':'Un compte sera créé pour cet employé'}</b><p>${editing?'Laissez le mot de passe vide pour conserver l’actuel.':'L’adresse email servira d’identifiant de connexion.'}</p></div></div>
             <div class="emp18-pass"><label>Mot de passe ${editing?'<small>(facultatif)</small>':'*'}<input id="emp18Password" type="password" placeholder="${editing?'Laisser vide pour conserver':'6 caractères minimum'}"></label><button type="button" id="emp18Generate">Générer</button></div>
-            <div class="emp18-perms-head"><b>Permissions</b><button type="button" id="emp18RoleDefaults">Appliquer le rôle</button></div><div class="emp18-rights">${rightsHtml(r.droits||roleRights(role))}</div>
           </section>
           <section class="emp18-section"><h3>Informations complémentaires</h3>
             <div class="emp18-grid"><label>Type de pièce<input id="emp18Piece" value="${esc(r.piece||'CNI')}"></label><label>N° pièce<input id="emp18NumPiece" value="${esc(r.numpiece)}"></label></div>
@@ -62,8 +65,7 @@
     const overlay=q('emp18Overlay'), drawer=q('emp18Drawer');
     overlay.onclick=close;
     q('emp18Close').onclick=close;q('emp18Cancel').onclick=close;
-    q('emp18Role').onchange=e=>applyRoleDefaults(e.target.value);
-    q('emp18RoleDefaults').onclick=()=>applyRoleDefaults(q('emp18Role').value);
+    q('emp18Role').onchange=e=>{q('emp18RoleText').textContent=roleText(e.target.value);};
     q('emp18Generate').onclick=()=>{const s='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#';let p='';for(let i=0;i<10;i++)p+=s[Math.floor(Math.random()*s.length)];q('emp18Password').value=p;q('emp18Password').type='text';};
     q('emp18PhotoBox').onclick=e=>{if(e.target.id!=='emp18Photo')q('emp18Photo').click();};
     q('emp18Photo').onchange=e=>{const f=e.target.files?.[0];if(!f)return;const rd=new FileReader();rd.onload=ev=>{q('emp18PhotoPreview').src=ev.target.result;q('emp18PhotoPreview').style.display='block';q('emp18PhotoIcon').style.display='none';q('emp18PhotoBox').querySelector('b').textContent='Changer la photo';};rd.readAsDataURL(f);};
@@ -80,17 +82,18 @@
     try{
       if(!editing){
         const mk=window.GPSupabaseAuth?.createEmployeeAccount||window.GPFirebaseAuth?.createEmployeeAccount;if(!mk)throw new Error('Le service de création de compte employé est indisponible.');
-        const auth=await mk(email,pass,{fullName:[prenom,nom].filter(Boolean).join(' '),role:role==='Gestionnaire'?'gestionnaire':role==='Comptable'?'comptable':role==='Agent'||role==='Assistante'?'agent':'lecture'});uid=auth.uid;
+        const auth=await mk(email,pass,{fullName:[prenom,nom].filter(Boolean).join(' '),role:authRole(role)});uid=auth.uid;
       }
-      const p=await photo();const emp={...(old||{}),id:old?.id||'EP-'+Date.now(),uid,supaUserId:uid,prenom,nom,email,tel:val('emp18Tel'),fonction:val('emp18Fonction'),contrat:val('emp18Contrat'),civ:role,role,statut:val('emp18Status')||'Actif',adresse:val('emp18Adresse'),piece:val('emp18Piece')||'CNI',numpiece:val('emp18NumPiece'),deldeb:val('emp18Date'),delexp:val('emp18Exp'),droits:readRights()};
+      const p=await photo();const emp={...(old||{}),id:old?.id||'EP-'+Date.now(),uid,supaUserId:uid,prenom,nom,email,tel:val('emp18Tel'),fonction:val('emp18Fonction'),contrat:val('emp18Contrat'),civ:role,role,statut:val('emp18Status')||'Actif',adresse:val('emp18Adresse'),piece:val('emp18Piece')||'CNI',numpiece:val('emp18NumPiece'),deldeb:val('emp18Date'),delexp:val('emp18Exp'),droits:roleRights(role)};
       if(p)emp.photo=p;delete emp.tempPassword;
       if(editing)d.employes[editIndex]=emp;else d.employes.push(emp);
       const saved=await save(d);if(saved===false) throw new Error('Modification non enregistrée. Rechargez puis réessayez.');window.DB=window.GPDB&&window.GPDB.load?window.GPDB.load():d;
       close();if(window.renderEmployesModern)window.renderEmployesModern();if(window.updateSidebarBadges)window.updateSidebarBadges();toast(editing?'Employé modifié ✓':'Employé créé ✓');
     }catch(e){console.error(e);toast(e?.message||'Impossible d’enregistrer l’employé','err');btn.disabled=false;btn.textContent=editing?'Enregistrer les modifications':'Créer l’employé';}
   }
-  window.openNouvelEmployeDrawer=function(){editIndex=null;mount({},false);};
+  function canEditTeam(){const P=window.GPPermissions;if(!P||typeof P.canWrite!=='function')return true;if(P.canWrite('employes'))return true;toast('Seul un administrateur peut ajouter ou modifier un employé.','err');return false;}
+  window.openNouvelEmployeDrawer=function(){if(!canEditTeam())return;editIndex=null;mount({},false);};
   window.closeNouvelEmployeDrawer=close;
-  window.__gpOpenEmployeEdit=function(idx){const d=db();const r=d.employes?.[idx];if(r){editIndex=idx;mount(r,true);}};
+  window.__gpOpenEmployeEdit=function(idx){if(!canEditTeam())return;const d=db();const r=d.employes?.[idx];if(r){editIndex=idx;mount(r,true);}};
   const oldEdit=window.editRow;window.editRow=function(key,idx){if(key==='employes'){return window.__gpOpenEmployeEdit(idx);}return oldEdit?oldEdit.apply(this,arguments):undefined;};
 })();

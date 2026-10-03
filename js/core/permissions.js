@@ -14,28 +14,55 @@
 
   var ROLE_PERMISSIONS = {
     admin: ['*'],
-    gestionnaire: ['*'],
+    // Gestionnaire : tout, sauf Journal et Maintenance. Équipe et Paramètres en lecture seule.
+    gestionnaire: [
+      'dashboard:view',
+      'employes:view',
+      'proprietaires:view','proprietaires:write',
+      'locataires:view','locataires:write',
+      'biens:view','biens:write',
+      'locatives:view','locatives:write',
+      'contrats:view','contrats:write',
+      'paiements:view','paiements:write','avenir:view',
+      'situation:view','situation:write',
+      'activites:view','activites:write',
+      'depenses:view','depenses:write',
+      'rapports:view','rapports:export',
+      'fichiers:view','fichiers:write',
+      'messages:view','messages:write',
+      'agenda:view','agenda:write','agenda-employes:view',
+      'parametres:view','sync:view'
+    ],
+    // Agent : pas d'accès aux finances (encaissements, dépenses, situation propriétaires, rapports).
     agent: [
-      'dashboard:view','biens:view','biens:write','proprietaires:view','proprietaires:write',
+      'dashboard:view',
+      'biens:view','biens:write','proprietaires:view','proprietaires:write',
       'locataires:view','locataires:write','locatives:view','locatives:write','contrats:view','contrats:write',
-      'paiements:view','avenir:view','fichiers:view','messages:view','messages:write','agenda:view','agenda:write',
-      'agenda-employes:view','journal:view','parametres:view','sync:view'
+      'fichiers:view','messages:view','messages:write','agenda:view','agenda:write',
+      'agenda-employes:view','parametres:view','sync:view'
     ],
+    // Comptable : finances en lecture/écriture, le reste en lecture. Équipe en lecture.
     comptable: [
-      'dashboard:view','biens:view','proprietaires:view','locataires:view','locatives:view','contrats:view',
-      'paiements:view','paiements:write','avenir:view','depenses:view','depenses:write','rapports:view','rapports:export',
-      'journal:view','parametres:view','sync:view'
+      'dashboard:view','employes:view',
+      'biens:view','proprietaires:view','locataires:view','locatives:view','contrats:view',
+      'paiements:view','paiements:write','avenir:view',
+      'situation:view','situation:write',
+      'activites:view','activites:write',
+      'depenses:view','depenses:write','rapports:view','rapports:export',
+      'messages:view','messages:write','agenda:view','agenda:write',
+      'parametres:view','sync:view'
     ],
+    // Rôle de secours (aucun rôle reconnu) : lecture seule, sans Journal ni Équipe.
     lecture: [
       'dashboard:view','biens:view','proprietaires:view','locataires:view','locatives:view','contrats:view',
-      'paiements:view','avenir:view','depenses:view','rapports:view','messages:view','agenda:view','journal:view','sync:view'
+      'paiements:view','avenir:view','depenses:view','rapports:view','messages:view','agenda:view','sync:view'
     ]
   };
 
   var PAGE_ACTION = {
     dashboard:'dashboard:view', employes:'employes:view', proprietaires:'proprietaires:view', locataires:'locataires:view',
     biens:'biens:view', locatives:'locatives:view', contrats:'contrats:view', paiements:'paiements:view', avenir:'avenir:view',
-    depenses:'depenses:view', activites:'activites:view', fichiers:'fichiers:view', messages:'messages:view', 'agenda-employes':'agenda-employes:view',
+    depenses:'depenses:view', situation:'situation:view', activites:'activites:view', fichiers:'fichiers:view', messages:'messages:view', 'agenda-employes':'agenda-employes:view',
     agenda:'agenda:view', rapports:'rapports:view', journal:'journal:view', droits:'droits:view', parametres:'parametres:view', sync:'sync:view',
     'admin-stockage':'admin-stockage:view', 'nv-bien':'biens:write', 'nv-locative':'locatives:write', 'nv-contrat':'contrats:write',
     'nv-employe':'employes:write', 'nv-proprietaire':'proprietaires:write', 'nv-locataire':'locataires:write',
@@ -44,7 +71,7 @@
 
   // Actions refusées même quand le rôle a '*' (gestionnaire : tout sauf Maintenance & Sécurité).
   var ROLE_DENY = {
-    gestionnaire: ['admin-stockage:view']
+    // (le gestionnaire a une liste explicite, rien à refuser ici)
   };
 
   // Multi-agences : actions réservées au super_admin, même pour un admin d'agence ('*').
@@ -52,10 +79,10 @@
   function isSuperAdmin(){ var u = window.currentUser; return !!(u && u.isSuperAdmin); }
 
   var HIDE_SELECTORS_BY_ROLE = {
-    gestionnaire: ['#sideMenu li[data-page="admin-stockage"]'],
-    agent: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="activites"]','#sideMenu li[data-page="droits"]'],
-    comptable: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="activites"]','#sideMenu li[data-page="droits"]','#sideMenu li[data-page="employes"]'],
-    lecture: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="activites"]','#sideMenu li[data-page="droits"]','#sideMenu li[data-page="employes"]',
+    gestionnaire: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="journal"]','#sideMenu li[data-page="droits"]','#sideMenu li[data-page="nv-employe"]'],
+    agent: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="activites"]','#sideMenu li[data-page="droits"]','#sideMenu li[data-page="employes"]','#sideMenu li[data-page="situation"]','#sideMenu li[data-page="journal"]'],
+    comptable: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="droits"]','#sideMenu li[data-page="journal"]','#sideMenu li[data-page="nv-employe"]'],
+    lecture: ['#sideMenu li[data-page="admin-stockage"]','#sideMenu li[data-page="activites"]','#sideMenu li[data-page="droits"]','#sideMenu li[data-page="employes"]','#sideMenu li[data-page="journal"]','#sideMenu li[data-page="situation"]',
       '#sideMenu li[data-page="nv-bien"]','#sideMenu li[data-page="nv-proprietaire"]','#sideMenu li[data-page="nv-locataire"]',
       '#sideMenu li[data-page="nv-locative"]','#sideMenu li[data-page="nv-contrat"]']
   };
@@ -98,6 +125,8 @@
     (HIDE_SELECTORS_BY_ROLE[role] || []).forEach(function(sel){
       document.querySelectorAll(sel).forEach(function(el){ el.style.display='none'; el.setAttribute('aria-hidden','true'); });
     });
+    // Équipe : sans droit d'écriture, on le signale au CSS (boutons Ajouter / Modifier masqués).
+    document.body.classList.toggle('gp-no-employes-write', !canWrite('employes'));
     // Lecture seule: désactive les boutons d'écriture marqués data-write-action.
     document.querySelectorAll('[data-write-action]').forEach(function(el){
       var domain = el.getAttribute('data-write-action');
