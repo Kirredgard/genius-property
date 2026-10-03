@@ -488,19 +488,40 @@
 
   /* ───────── documents PDF : reçu, quittance, relevé ───────── */
   function pdfEscape(v) { return esc(v == null ? '' : v); }
+  const PDF_FONT = "font-family:'Inter','Helvetica Neue',Arial,sans-serif;";
   function pdfAgencyBlock(ag) {
-    return '<div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #D4AF37;padding-bottom:18px;margin-bottom:24px">' +
-      '<div style="display:flex;gap:12px;align-items:center">' + (ag.logo ? '<img src="' + pdfEscape(ag.logo) + '" style="width:62px;height:62px;object-fit:contain;border:1px solid #eadca4;border-radius:8px;padding:3px">' : '') +
-      '<div><div style="font-size:22px;font-weight:900">' + pdfEscape(ag.agence).toUpperCase() + '</div><div style="font-size:11px;color:#666;margin-top:3px">GESTION LOCATIVE</div><div style="font-size:10px;color:#777;margin-top:5px">' + pdfEscape(ag.adresse) + (ag.tel ? ' · ' + pdfEscape(ag.tel) : '') + (ag.email ? ' · ' + pdfEscape(ag.email) : '') + '</div></div></div>' +
-      '<div style="text-align:right;font-size:10px;color:#666">' + (ag.rccm ? 'RCCM ' + pdfEscape(ag.rccm) + '<br>' : '') + (ag.ninea ? 'NINEA ' + pdfEscape(ag.ninea) : '') + '</div></div>';
+    const contact = [ag.adresse, ag.tel, ag.email].filter(Boolean).map(pdfEscape).join(' · ');
+    const legal = (ag.rccm ? 'RCCM ' + pdfEscape(ag.rccm) : '') + (ag.rccm && ag.ninea ? '<br>' : '') + (ag.ninea ? 'NINEA ' + pdfEscape(ag.ninea) : '');
+    return '<div style="display:flex;align-items:center;gap:22px;padding-bottom:16px;margin-bottom:22px;border-bottom:3px solid #D4AF37">' +
+      (ag.logo ? '<div style="flex:none;width:130px;height:110px;display:flex;align-items:center;justify-content:center"><img src="' + pdfEscape(ag.logo) + '" style="max-width:130px;max-height:110px;width:auto;height:auto;object-fit:contain"></div>' : '') +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:12px;font-weight:800;line-height:1.4;text-transform:uppercase;letter-spacing:.2px;color:#111">' + pdfEscape(ag.agence) + '</div>' +
+        '<div style="font-size:8.5px;font-weight:700;letter-spacing:1.6px;color:#9a7b14;margin-top:5px">GESTION LOCATIVE</div>' +
+        (contact ? '<div style="font-size:8.5px;color:#666;margin-top:4px;line-height:1.5">' + contact + '</div>' : '') +
+      '</div>' +
+      (legal ? '<div style="flex:none;text-align:right;font-size:8px;line-height:1.6;color:#666;white-space:nowrap">' + legal + '</div>' : '') +
+    '</div>';
   }
+  const PDF_TD = 'padding:8px 10px;border-bottom:1px solid #eceff3;font-size:10px;color:#222';
+  const PDF_TH = 'padding:8px 10px;font-size:8px;font-weight:700;letter-spacing:.8px;text-transform:uppercase';
+  const pdfInfo = (label, value) => '<div style="background:#fafaf7;border-left:3px solid #D4AF37;border-radius:4px;padding:8px 12px"><div style="font-size:7.5px;letter-spacing:.8px;color:#8a8a8a;text-transform:uppercase;font-weight:700">' + label + '</div><div style="font-size:10.5px;font-weight:700;margin-top:3px;color:#111">' + value + '</div></div>';
+  const pdfKpi = (label, value, color) => '<div style="padding:10px 12px;background:#fafaf7;border-radius:6px"><div style="font-size:7.5px;letter-spacing:.8px;color:#8a8a8a;text-transform:uppercase;font-weight:700">' + label + '</div><div style="font-size:13px;font-weight:800;margin-top:3px;color:' + (color || '#111') + '">' + value + '</div></div>';
+  const pdfFooter = txt => '<div style="margin-top:26px;border-top:1px solid #eee;padding-top:10px;text-align:center;font-size:8px;color:#8a8a8a;line-height:1.5">' + txt + '</div>';
   function pdfDownload(html, filename) {
     const box = document.createElement('div');
     box.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;background:#fff;z-index:-1';
     box.innerHTML = html; document.body.appendChild(box);
+    const el = box.firstElementChild;
+    /* La capture doit couvrir TOUT le document, quel que soit le défilement ou la taille de la fenêtre. */
+    const winH = Math.max(1123, Math.ceil(el.scrollHeight) + 2);
     const run = () => {
       if (typeof window.html2pdf !== 'function') { box.remove(); notify('Générateur PDF indisponible', 'err'); return; }
-      window.html2pdf().set({ margin: 0, filename, image: { type: 'jpeg', quality: .98 }, html2canvas: { scale: 2, useCORS: true, backgroundColor: '#fff' }, jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' } }).from(box.firstElementChild).save().then(() => { box.remove(); notify('PDF téléchargé ✓'); }).catch(err => { console.error(err); box.remove(); notify('Erreur génération PDF', 'err'); });
+      window.html2pdf().set({
+        margin: 0, filename, image: { type: 'jpeg', quality: .98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#fff', scrollX: 0, scrollY: 0, windowWidth: Math.max(window.innerWidth || 0, 794), windowHeight: winH },
+        jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css'], avoid: 'tr' }
+      }).from(el).save().then(() => { box.remove(); notify('PDF téléchargé ✓'); }).catch(err => { console.error(err); box.remove(); notify('Erreur génération PDF', 'err'); });
     };
     if (window.ensureHtml2Pdf) window.ensureHtml2Pdf().then(run).catch(err => { console.error(err); box.remove(); notify('Générateur PDF indisponible', 'err'); }); else run();
   }
@@ -515,16 +536,21 @@
       const due = c && validKey(k) ? monthlyDue(d,c) : rows.filter(p=>p.periode===k).reduce((s,p)=>s+num(p.montant),0);
       const allPaid = c && validKey(k) ? paidMap(d,c)[k] || 0 : byPeriod[k];
       const remain = Math.max(0, due - allPaid);
-      return '<tr><td style="padding:10px;border:1px solid #e5e7eb">' + pdfEscape(validKey(k) ? monthLabel(k) : k) + '</td><td style="padding:10px;border:1px solid #e5e7eb;text-align:right">' + fmt(due) + '</td><td style="padding:10px;border:1px solid #e5e7eb;text-align:right;font-weight:800">' + fmt(byPeriod[k]) + '</td><td style="padding:10px;border:1px solid #e5e7eb;text-align:right">' + fmt(remain) + '</td></tr>';
+      return '<tr><td style="' + PDF_TD + '">' + pdfEscape(validKey(k) ? monthLabel(k) : k) + '</td><td style="' + PDF_TD + ';text-align:right">' + fmt(due) + '</td><td style="' + PDF_TD + ';text-align:right;font-weight:700">' + fmt(byPeriod[k]) + '</td><td style="' + PDF_TD + ';text-align:right">' + fmt(remain) + '</td></tr>';
     }).join('');
     const partial = rows.some(p => validKey(p.periode) && c && Math.max(0, monthlyDue(d,c) - (paidMap(d,c)[p.periode] || 0)) > 0);
-    const html = '<div style="width:794px;box-sizing:border-box;padding:40px;font-family:Arial,sans-serif;color:#111;background:#fff">' + pdfAgencyBlock(ag) +
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px"><div><div style="font-size:24px;font-weight:900">Reçu de paiement</div><div style="font-size:11px;color:#666;margin-top:4px">Paiement enregistré le ' + pdfEscape(shortDate(parseD(first.date) || new Date())) + '</div></div><div style="text-align:right"><div style="font-size:10px;color:#777;text-transform:uppercase">N° de reçu</div><div style="font-size:18px;font-weight:900;color:#b18c16;margin-top:3px">' + pdfEscape(recuNo) + '</div></div></div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px"><div style="background:#fafafa;border-radius:8px;padding:12px"><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:800">Locataire</div><div style="font-size:14px;font-weight:900;margin-top:4px">' + pdfEscape(first.locataire) + '</div></div><div style="background:#fafafa;border-radius:8px;padding:12px"><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:800">Bien / location</div><div style="font-size:14px;font-weight:900;margin-top:4px">' + pdfEscape(first.bien || first.locative || (c && (c.bien || c.locative)) || '—') + '</div></div><div style="background:#fafafa;border-radius:8px;padding:12px"><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:800">Mode</div><div style="font-size:14px;font-weight:900;margin-top:4px">' + pdfEscape(first.mode || '—') + '</div></div><div style="background:#fafafa;border-radius:8px;padding:12px"><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:800">Référence</div><div style="font-size:14px;font-weight:900;margin-top:4px">' + pdfEscape(first.ref || '—') + '</div></div></div>' +
-      '<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:#111;color:#fff"><th style="padding:10px;text-align:left">Période</th><th style="padding:10px;text-align:right">Dû</th><th style="padding:10px;text-align:right">Payé</th><th style="padding:10px;text-align:right">Solde</th></tr></thead><tbody>' + detail + '</tbody></table>' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding:14px 16px;background:#f5f5f5;border-radius:9px"><div style="font-weight:900">TOTAL REÇU</div><div style="font-size:20px;font-weight:900">' + fmt(total) + '</div></div>' +
-      (partial ? '<div style="margin-top:12px;padding:11px 13px;border-radius:8px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:11px;font-weight:800">Paiement partiel : le solde restant indiqué dans le tableau reste dû.</div>' : '') +
-      '<div style="margin-top:28px;border-top:1px solid #eee;padding-top:12px;text-align:center;font-size:10px;color:#777">' + pdfEscape(ag.agence) + ' · ' + pdfEscape(ag.adresse) + (ag.email ? ' · ' + pdfEscape(ag.email) : '') + '</div></div>';
+    const html = '<div style="width:794px;box-sizing:border-box;padding:36px 40px;' + PDF_FONT + 'color:#111;background:#fff">' + pdfAgencyBlock(ag) +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px"><div><div style="font-size:16px;font-weight:800;letter-spacing:.3px">Reçu de paiement</div><div style="font-size:9px;color:#777;margin-top:4px">Paiement enregistré le ' + pdfEscape(shortDate(parseD(first.date) || new Date())) + '</div></div><div style="text-align:right"><div style="font-size:7.5px;letter-spacing:.8px;color:#8a8a8a;text-transform:uppercase;font-weight:700">N° de reçu</div><div style="font-size:13px;font-weight:800;color:#9a7b14;margin-top:3px">' + pdfEscape(recuNo) + '</div></div></div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">' +
+        pdfInfo('Locataire', pdfEscape(first.locataire)) +
+        pdfInfo('Bien / location', pdfEscape(first.bien || first.locative || (c && (c.bien || c.locative)) || '—')) +
+        pdfInfo('Mode de paiement', pdfEscape(first.mode || '—')) +
+        pdfInfo('Référence', pdfEscape(first.ref || '—')) +
+      '</div>' +
+      '<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#111;color:#fff"><th style="' + PDF_TH + ';text-align:left">Période</th><th style="' + PDF_TH + ';text-align:right">Dû</th><th style="' + PDF_TH + ';text-align:right">Payé</th><th style="' + PDF_TH + ';text-align:right">Solde</th></tr></thead><tbody>' + detail + '</tbody></table>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding:11px 14px;background:#f6f4ea;border-radius:6px"><div style="font-size:9px;font-weight:700;letter-spacing:.8px">TOTAL REÇU</div><div style="font-size:15px;font-weight:800">' + fmt(total) + '</div></div>' +
+      (partial ? '<div style="margin-top:10px;padding:8px 12px;border-radius:6px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:9px;font-weight:600">Paiement partiel : le solde restant indiqué dans le tableau reste dû.</div>' : '') +
+      pdfFooter(pdfEscape(ag.agence) + (ag.adresse ? '<br>' + pdfEscape(ag.adresse) : '') + (ag.email ? ' · ' + pdfEscape(ag.email) : '')) + '</div>';
     pdfDownload(html, 'recu_' + String(recuNo).replace(/[^a-z0-9_-]/gi,'_') + '.pdf');
   }
   function generateReceiptPDFByIndex(idx) {
@@ -559,14 +585,14 @@
     const sch=schedule(d,c,end).filter(e=>e.k>=start && e.k<=end);
     const due=sch.reduce((s,e)=>s+e.due,0), paid=sch.reduce((s,e)=>s+e.paid,0), solde=sch.reduce((s,e)=>s+e.solde,0);
     let cumul = 0;
-    const rows=sch.map(e=>{ cumul += Math.max(0, e.due - e.paid); return '<tr><td style="padding:9px;border:1px solid #e5e7eb">'+pdfEscape(monthLabel(e.k))+'</td><td style="padding:9px;border:1px solid #e5e7eb;text-align:right">'+fmt(e.due)+'</td><td style="padding:9px;border:1px solid #e5e7eb;text-align:right">'+fmt(e.paid)+'</td><td style="padding:9px;border:1px solid #e5e7eb;text-align:right;font-weight:900">'+fmt(cumul)+'</td></tr>';}).join('');
+    const rows=sch.map(e=>{ cumul += Math.max(0, e.due - e.paid); return '<tr><td style="'+PDF_TD+'">'+pdfEscape(monthLabel(e.k))+'</td><td style="'+PDF_TD+';text-align:right">'+fmt(e.due)+'</td><td style="'+PDF_TD+';text-align:right">'+fmt(e.paid)+'</td><td style="'+PDF_TD+';text-align:right;font-weight:700">'+fmt(cumul)+'</td></tr>';}).join('');
     const ag=agencyInfo(); const periodLabel=type==='annee'?'Année '+anchor:type==='trimestre'?'Trimestre à partir de '+monthLabel(anchor):monthLabel(anchor);
-    const html='<div style="width:794px;box-sizing:border-box;padding:40px;font-family:Arial,sans-serif;color:#111;background:#fff">'+pdfAgencyBlock(ag)+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px"><div><div style="font-size:24px;font-weight:900">Relevé de compte locataire</div><div style="font-size:11px;color:#666;margin-top:4px">'+pdfEscape(periodLabel)+'</div></div><div style="text-align:right;font-size:11px"><b>'+pdfEscape(c.locataire)+'</b><br>'+pdfEscape(c.bien||c.locative||'')+'</div></div>'+
-      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px"><div style="padding:11px;background:#fafafa;border-radius:8px"><div style="font-size:9px;color:#777">TOTAL DÛ</div><b style="font-size:15px">'+fmt(due)+'</b></div><div style="padding:11px;background:#fafafa;border-radius:8px"><div style="font-size:9px;color:#777">TOTAL PAYÉ</div><b style="font-size:15px;color:#166534">'+fmt(paid)+'</b></div><div style="padding:11px;background:#fafafa;border-radius:8px"><div style="font-size:9px;color:#777">SOLDE</div><b style="font-size:15px;color:'+(solde?'#b45309':'#166534')+'">'+fmt(solde)+'</b></div></div>'+
-      '<table style="width:100%;border-collapse:collapse;font-size:10.5px"><thead><tr style="background:#111;color:#fff"><th style="padding:9px;text-align:left">Mois</th><th style="padding:9px;text-align:right">Dû</th><th style="padding:9px;text-align:right">Payé</th><th style="padding:9px;text-align:right">Solde cumulé</th></tr></thead><tbody>'+rows+'</tbody></table>'+
-      '<div style="margin-top:16px;padding:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:11px;font-weight:800">Total des arriérés / solde restant sur la période : '+fmt(solde)+'</div>'+
-      '<div style="margin-top:28px;border-top:1px solid #eee;padding-top:12px;text-align:center;font-size:10px;color:#777">Relevé généré le '+pdfEscape(shortDate(new Date()))+' · '+pdfEscape(ag.agence)+'</div></div>';
+    const html='<div style="width:794px;box-sizing:border-box;padding:36px 40px;'+PDF_FONT+'color:#111;background:#fff">'+pdfAgencyBlock(ag)+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px"><div><div style="font-size:16px;font-weight:800;letter-spacing:.3px">Relevé de compte locataire</div><div style="font-size:9px;color:#777;margin-top:4px">'+pdfEscape(periodLabel)+'</div></div><div style="text-align:right;font-size:9.5px;line-height:1.5"><b style="font-size:10.5px">'+pdfEscape(c.locataire)+'</b><br><span style="color:#555">'+pdfEscape(c.bien||c.locative||'')+'</span></div></div>'+
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">'+pdfKpi('Total dû',fmt(due))+pdfKpi('Total payé',fmt(paid),'#166534')+pdfKpi('Solde',fmt(solde),solde?'#b45309':'#166534')+'</div>'+
+      '<table style="width:100%;border-collapse:collapse"><thead><tr style="background:#111;color:#fff"><th style="'+PDF_TH+';text-align:left">Mois</th><th style="'+PDF_TH+';text-align:right">Dû</th><th style="'+PDF_TH+';text-align:right">Payé</th><th style="'+PDF_TH+';text-align:right">Solde cumulé</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+      '<div style="margin-top:14px;padding:9px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;font-size:9.5px;font-weight:700;color:#7c2d12">Total des arriérés / solde restant sur la période : '+fmt(solde)+'</div>'+
+      pdfFooter('Relevé généré le '+pdfEscape(shortDate(new Date()))+' · '+pdfEscape(ag.agence))+'</div>';
     pdfDownload(html,'releve_'+String(c.locataire||'locataire').replace(/[^a-z0-9_-]/gi,'_')+'_'+type+'_'+anchor+'.pdf');
   }
   function openStatementDialog(key) {
