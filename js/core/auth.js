@@ -80,6 +80,7 @@
     var state = (isAdmin() ? 'admin' : 'user') + (isSuperAdmin() ? '-super' : '');
     if(_lastMenuState === state) return;
     _lastMenuState = state;
+    document.documentElement.classList.toggle('gp-super-admin', isSuperAdmin());
     document.querySelectorAll('[data-admin-only="true"]').forEach(function(el){
       el.style.display = isAdmin() ? '' : 'none';
       el.setAttribute('aria-hidden', isAdmin() ? 'false' : 'true');
