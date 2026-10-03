@@ -94,9 +94,16 @@
   }
   const startKey = (d, c) => (validKey(c.suiviDepuis) ? c.suiviDepuis : defaultStart(d, c));
   function endKey(c) { const f = parseD(c.fin); return f ? keyOf(f) : '9999-12'; }
+  /* Jour d'échéance : « Prochaine échéance » si renseignée, sinon « Date début ». */
+  const validDay = v => { const n = Number(v); return Number.isInteger(n) && n >= 1 && n <= 31 ? n : 0; };
+  function dueDay(c) {
+    const fixed = validDay(c.jourEcheance); if (fixed) return fixed;
+    const pr = parseD(c.prochain); if (pr) return pr.getDate();
+    const db_ = parseD(c.debut); return db_ ? db_.getDate() : 0;
+  }
   function dueDate(c, k) {
     const [y, m] = k.split('-').map(Number);
-    const day = (parseD(c.debut) || new Date(y, m - 1, 1)).getDate();
+    const day = dueDay(c) || 1;
     return new Date(y, m - 1, Math.min(day, new Date(y, m, 0).getDate()));
   }
 
@@ -201,7 +208,7 @@
   }
   function refreshProchain(d, c) {
     const first = schedule(d, c, addM(nowKey(), 24)).find(e => e.solde > 0);
-    if (first) c.prochain = iso(first.dueDate);
+    if (first) { if (!validDay(c.jourEcheance)) c.jourEcheance = String(dueDay(c) || first.dueDate.getDate()); c.prochain = iso(first.dueDate); }
   }
   async function saveEncaissement(cKey, amount, date, mode, ref) {
     const d = prepareRelations(db()), c = activeContracts(d).find(x => cid(x) === cKey || String(x.num || '') === String(cKey));

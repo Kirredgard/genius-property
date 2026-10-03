@@ -50,6 +50,7 @@
     var d=db(); if(!Array.isArray(d.locatives)) d.locatives=[]; window.DB=d;
     var all=d.locatives, q=(document.getElementById('gpLocativeSearch')||{}).value||'';
     var data=all.filter(function(l){return !q || JSON.stringify(l).toLowerCase().indexOf(q.toLowerCase())>-1;});
+    if(window.GPPagination){var pm=GPPagination.normalize('locatives',data.length,PS.locatives);PAGE.locatives=pm.page;}else{PAGE.locatives=Math.min(Math.max(1,PAGE.locatives||1),Math.max(1,Math.ceil(data.length/PS.locatives)));}
     var start=((PAGE.locatives||1)-1)*PS.locatives, slice=data.slice(start,start+PS.locatives);
     var act=all.filter(function(l){var s=String(l.statut||'Loué').toLowerCase(); return s.includes('lou')||s==='actif'||s.includes('occup');}).length;
     page.innerHTML='<div class="gp-modern-page"><div class="gp-page-top"><div class="gp-stat-grid">'+
