@@ -2,7 +2,8 @@
  * Données ajoutées (aucune clé existante modifiée) :
  *   activites[]     { id, nom }                       liste LIBRE, créée par l'agence
  *   marches[]       { id, client, titre, activiteId, total, apport, apportDate, debut, fin, statut, notes,
- *                     paiements[{ id, date, montant, mode, ref, libelle }] }
+ *                     paiements[{ id, date, montant, mode, ref, libelle }],
+ *                     documents[{ id, nom, cat, path, taille, type, date }] }   (fichiers dans Supabase Storage, bucket gp-activites)
  *   revenusAutres[] { id, date, activiteId, client, montant, mode, note }
  * Règles : encaissé = apport + paiements ; reste = total − encaissé (toujours calculé) ;
  *          un revenu est rattaché au mois de sa DATE d'encaissement (comme les commissions).
@@ -106,13 +107,60 @@
     $('gpaBody').innerHTML = '<div style="display:flex;gap:8px;margin-bottom:10px"><input id="gpaQ" placeholder="Rechercher un client, un marché…" value="' + esc(st.q) + '" style="flex:1;height:34px;border:1px solid #e5e7eb;border-radius:9px;padding:0 10px;font-size:12px"></div>' +
       '<div class="gpa-box">' + (list.length ? '<table><thead><tr><th>Marché</th><th>Activité</th><th class="rt">Total</th><th class="rt">Encaissé</th><th class="rt">Reste</th><th>Avancement</th><th>Fin</th><th>Statut</th><th></th></tr></thead><tbody>' + list.map(m => {
         const s = mStats(m);
-        return '<tr><td><b>' + esc(m.client || '—') + '</b><span class="sub">' + esc(m.titre || '') + '</span></td><td>' + esc(actName(d, m.activiteId)) + '</td><td class="rt">' + fmt(s.total) + '</td><td class="rt gpa-g">' + fmt(s.paid) + '</td><td class="rt ' + (s.reste ? 'gpa-o' : 'gpa-g') + '"><b>' + fmt(s.reste) + '</b></td><td><div class="gpa-bar"><i style="width:' + s.pct + '%"></i></div><span class="sub">' + s.pct + ' %</span></td><td>' + fdate(m.fin) + (s.late ? '<span class="sub gpa-r">en retard</span>' : '') + '</td><td><span class="gpa-pill ' + m.statut + '">' + STATUTS[m.statut] + '</span></td>' +
+        return '<tr><td><b>' + esc(m.client || '—') + '</b><span class="sub">' + esc(m.titre || '') + ((m.documents || []).length ? ' · 📎 ' + m.documents.length : '') + '</span></td><td>' + esc(actName(d, m.activiteId)) + '</td><td class="rt">' + fmt(s.total) + '</td><td class="rt gpa-g">' + fmt(s.paid) + '</td><td class="rt ' + (s.reste ? 'gpa-o' : 'gpa-g') + '"><b>' + fmt(s.reste) + '</b></td><td><div class="gpa-bar"><i style="width:' + s.pct + '%"></i></div><span class="sub">' + s.pct + ' %</span></td><td>' + fdate(m.fin) + (s.late ? '<span class="sub gpa-r">en retard</span>' : '') + '</td><td><span class="gpa-pill ' + m.statut + '">' + STATUTS[m.statut] + '</span></td>' +
           '<td class="rt" style="white-space:nowrap"><button class="gpa-btn sm" data-view="' + m.id + '" title="Détail / paiements"><span class="material-symbols-rounded">visibility</span></button>' + (w ? ' <button class="gpa-btn sm" data-editm="' + m.id + '"><span class="material-symbols-rounded">edit</span></button> <button class="gpa-btn sm del" data-delm="' + m.id + '"><span class="material-symbols-rounded">delete</span></button>' : '') + '</td></tr>';
       }).join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun marché. Cliquez sur « + Marché » pour en créer un.</div>') + '</div>';
   }
   function autres(d) {
     const w = canWrite(), list = d.revenusAutres.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
     $('gpaBody').innerHTML = '<div class="gpa-box">' + (list.length ? '<table><thead><tr><th>Date</th><th>Activité</th><th>Client / note</th><th>Mode</th><th class="rt">Montant</th><th></th></tr></thead><tbody>' + list.map(r => '<tr><td>' + fdate(r.date) + '</td><td>' + esc(actName(d, r.activiteId)) + '</td><td>' + esc(r.client || '') + '<span class="sub">' + esc(r.note || '') + '</span></td><td>' + esc(r.mode || '—') + '</td><td class="rt gpa-g"><b>' + fmt(num(r.montant)) + '</b></td><td class="rt">' + (w ? '<button class="gpa-btn sm" data-editr="' + r.id + '"><span class="material-symbols-rounded">edit</span></button> <button class="gpa-btn sm del" data-delr="' + r.id + '"><span class="material-symbols-rounded">delete</span></button>' : '') + '</td></tr>').join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun revenu. Saisissez ici vos revenus ponctuels (conseil, honoraires…).</div>') + '</div>';
+  }
+
+  /* ── documents (Supabase Storage, bucket privé gp-activites) ── */
+  const BUCKET = 'gp-activites', MAX = 20 * 1024 * 1024, CATS = ['Contrat', 'Devis', 'Facture', 'PV de réception', 'Preuve de paiement', 'Photo de chantier', 'Autre'];
+  const sbc = () => (window.GPSupabase && GPSupabase.client && GPSupabase.client()) || null;
+  const agencyId = () => (window.currentUser && currentUser.agencyId) || '';
+  const fsize = n => n > 1048576 ? (n / 1048576).toFixed(1) + ' Mo' : Math.max(1, Math.round(n / 1024)) + ' Ko';
+  const safeName = n => String(n).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9._-]+/g, '_').slice(-80);
+  async function storage() {
+    if (window.GPSupabase && GPSupabase.ready) { try { await GPSupabase.ready(); } catch (_) {} }
+    const c = sbc(); if (!c) throw new Error('Supabase non connecté : reconnectez-vous');
+    if (!agencyId()) throw new Error('Agence introuvable : reconnectez-vous');
+    return c.storage.from(BUCKET);
+  }
+  async function uploadDocs(mid) {
+    const inp = $('gpDocFile'), files = inp ? Array.from(inp.files || []) : []; if (!files.length) return notify('Choisissez un fichier', 'err');
+    const big = files.find(f => f.size > MAX); if (big) return notify(big.name + ' dépasse 20 Mo', 'err');
+    const cat = val('gpDocCat') || 'Autre', btn = $('gpDocBtn'); if (btn) { btn.disabled = true; btn.textContent = 'Envoi…'; }
+    try {
+      const bucket = await storage(), d = ensure(db()), m = d.marches.find(x => x.id === mid); if (!m) return; m.documents = m.documents || [];
+      const added = [];
+      for (const f of files) {
+        const id = uid('dc'), path = agencyId() + '/' + mid + '/' + id + '_' + safeName(f.name);
+        const r = await bucket.upload(path, f, { contentType: f.type || 'application/octet-stream', upsert: false });
+        if (r.error) throw new Error(r.error.message || 'Échec de l’envoi');
+        added.push({ id, nom: f.name, cat, path, taille: f.size, type: f.type || '', date: today() });
+      }
+      m.documents.push(...added); await save(d); render(); viewDrawer(mid); notify(added.length + ' document(s) ajouté(s) ✓');
+    } catch (err) { console.error('[Activités] upload', err); notify('Envoi impossible : ' + (err.message || err) + (/bucket|not found|policy|row-level/i.test(String(err.message)) ? ' — le bucket est-il créé (migration 004) ?' : ''), 'err'); if (btn) { btn.disabled = false; btn.textContent = 'Ajouter'; } }
+  }
+  async function openDoc(mid, did, dl) {
+    const m = ensure(db()).marches.find(x => x.id === mid), doc = m && (m.documents || []).find(x => x.id === did); if (!doc) return;
+    try {
+      const r = await (await storage()).createSignedUrl(doc.path, 120, dl ? { download: doc.nom } : undefined);
+      if (r.error) throw new Error(r.error.message); const a = document.createElement('a'); a.href = r.data.signedUrl; a.target = '_blank'; a.rel = 'noopener'; if (dl) a.download = doc.nom; document.body.appendChild(a); a.click(); a.remove();
+    } catch (err) { notify('Ouverture impossible : ' + (err.message || err), 'err'); }
+  }
+  async function delDoc(mid, did) {
+    if (!canWrite()) return notify('Action non autorisée', 'err'); const d = ensure(db()), m = d.marches.find(x => x.id === mid), doc = m && (m.documents || []).find(x => x.id === did); if (!doc || !confirm('Supprimer « ' + doc.nom + ' » ?')) return;
+    try { const r = await (await storage()).remove([doc.path]); if (r.error) throw new Error(r.error.message); } catch (err) { return notify('Suppression impossible : ' + (err.message || err), 'err'); }
+    m.documents = m.documents.filter(x => x.id !== did); await save(d); render(); viewDrawer(mid); notify('Document supprimé ✓');
+  }
+  function docsBox(m, w) {
+    const docs = (m.documents || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    return '<div class="gpa-box"><h4>Documents (' + docs.length + ')</h4>' +
+      (w ? '<div style="display:flex;gap:6px;padding:10px 12px;border-bottom:1px solid var(--l);flex-wrap:wrap"><select id="gpDocCat" style="height:34px;border:1px solid #e5e7eb;border-radius:9px;font-size:12px;padding:0 8px">' + CATS.map(c => '<option>' + c + '</option>').join('') + '</select><input id="gpDocFile" type="file" multiple style="flex:1;min-width:150px;font-size:11px"><button class="gpa-btn pri sm" id="gpDocBtn" data-updoc="' + m.id + '">Ajouter</button></div>' : '') +
+      (docs.length ? '<table><tbody>' + docs.map(x => '<tr><td><b>' + esc(x.nom) + '</b><span class="sub">' + esc(x.cat) + ' · ' + fsize(x.taille || 0) + ' · ' + fdate(x.date) + '</span></td><td class="rt" style="white-space:nowrap"><button class="gpa-btn sm" data-opendoc="' + m.id + '|' + x.id + '" title="Voir"><span class="material-symbols-rounded">visibility</span></button> <button class="gpa-btn sm" data-dldoc="' + m.id + '|' + x.id + '" title="Télécharger"><span class="material-symbols-rounded">download</span></button>' + (w ? ' <button class="gpa-btn sm del" data-deldoc="' + m.id + '|' + x.id + '"><span class="material-symbols-rounded">delete</span></button>' : '') + '</td></tr>').join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun document pour ce marché</div>') + '</div>';
   }
 
   /* ── tiroir générique ── */
@@ -159,7 +207,7 @@
       '<div class="gpa-box"><h4>Paiements</h4><table><tbody>' + (num(m.apport) > 0 ? '<tr><td>' + fdate(m.apportDate || m.debut) + '</td><td>Apport</td><td class="rt gpa-g"><b>' + fmt(num(m.apport)) + '</b></td><td></td></tr>' : '') +
       pays.map(p => '<tr><td>' + fdate(p.date) + '</td><td>' + esc(p.libelle || 'Paiement') + '<span class="sub">' + esc(p.mode || '') + (p.ref ? ' · ' + esc(p.ref) : '') + '</span></td><td class="rt gpa-g"><b>' + fmt(num(p.montant)) + '</b></td><td class="rt">' + (w ? '<button class="gpa-btn sm" data-editp="' + id + '|' + p.id + '"><span class="material-symbols-rounded">edit</span></button> <button class="gpa-btn sm del" data-delp="' + id + '|' + p.id + '"><span class="material-symbols-rounded">delete</span></button>' : '') + '</td></tr>').join('') +
       '</tbody></table>' + (!pays.length && !num(m.apport) ? '<div class="gpa-empty">Aucun paiement</div>' : '') + '</div>' +
-      '<div class="gpa-box"><h4>Documents</h4><div class="gpa-empty">Espace documents (contrat, devis, factures, PV…) — prochaine étape.</div></div>',
+      docsBox(m, w),
       '<button class="gpa-btn" data-x>Fermer</button>' + (w && s.reste > 0 ? '<button class="gpa-btn pri" data-newp="' + id + '">+ Paiement</button>' : ''));
   }
   function payDrawer(mid, pid) {
@@ -194,7 +242,7 @@
   }
   async function del(kind, a, b) {
     if (!canWrite()) return notify('Action non autorisée', 'err'); const d = ensure(db());
-    if (kind === 'm') { const m = d.marches.find(x => x.id === a); if (!m || !confirm('Supprimer le marché « ' + m.client + ' » et ses ' + ((m.paiements || []).length) + ' paiement(s) ?')) return; d.marches = d.marches.filter(x => x.id !== a); }
+    if (kind === 'm') { const m = d.marches.find(x => x.id === a); if (!m || !confirm('Supprimer le marché « ' + m.client + ' » , ses ' + ((m.paiements || []).length) + ' paiement(s) et ses ' + ((m.documents || []).length) + ' document(s) ?')) return; if ((m.documents || []).length) { try { await (await storage()).remove(m.documents.map(x => x.path)); } catch (_) { notify('Certains fichiers n’ont pas pu être supprimés du stockage', 'err'); } } d.marches = d.marches.filter(x => x.id !== a); }
     if (kind === 'r') { if (!confirm('Supprimer ce revenu ?')) return; d.revenusAutres = d.revenusAutres.filter(x => x.id !== a); }
     if (kind === 'p') { if (!confirm('Supprimer ce paiement ?')) return; const m = d.marches.find(x => x.id === a); m.paiements = m.paiements.filter(x => x.id !== b); }
     await save(d); render(); if (kind === 'p') viewDrawer(a); notify('Supprimé ✓');
@@ -202,13 +250,14 @@
 
   /* ── événements ── */
   document.addEventListener('click', async e => {
-    const t = e.target.closest('[data-tab],[data-yr],[data-acts],[data-newm],[data-newrev],[data-x],[data-view],[data-editm],[data-delm],[data-savem],[data-newp],[data-editp],[data-delp],[data-savep],[data-editr],[data-delr],[data-saver],[data-addact],[data-delact]');
+    const t = e.target.closest('[data-tab],[data-yr],[data-acts],[data-newm],[data-newrev],[data-x],[data-view],[data-editm],[data-delm],[data-savem],[data-newp],[data-editp],[data-delp],[data-savep],[data-editr],[data-delr],[data-saver],[data-addact],[data-delact],[data-updoc],[data-opendoc],[data-dldoc],[data-deldoc]');
     if (!t || !(t.closest('#page-activites') || t.closest('#gpaDr'))) return; const D = t.dataset, pr = v => String(v).split('|');
     if ('x' in D) return close(); if (D.tab) { st.tab = D.tab; return render(); } if (D.yr) { st.year += +D.yr; return render(); }
     if ('acts' in D) return actsDrawer(); if ('newm' in D) return marcheDrawer(); if ('newrev' in D) return revDrawer();
     if (D.view) return viewDrawer(D.view); if (D.editm) return marcheDrawer(D.editm); if (D.delm) return del('m', D.delm); if ('savem' in D) return saveMarche(D.savem);
     if (D.newp) return payDrawer(D.newp); if (D.editp) return payDrawer(...pr(D.editp)); if (D.delp) return del('p', ...pr(D.delp)); if ('savep' in D) return savePay(...pr(D.savep));
     if (D.editr) return revDrawer(D.editr); if (D.delr) return del('r', D.delr); if ('saver' in D) return saveRev(D.saver);
+    if (D.updoc) return uploadDocs(D.updoc); if (D.opendoc) return openDoc(...pr(D.opendoc)); if (D.dldoc) return openDoc(...pr(D.dldoc), true); if (D.deldoc) return delDoc(...pr(D.deldoc));
     if ('addact' in D) { const n = val('gpaNewAct').trim(); if (!n) return; const d = ensure(db()); if (d.activites.some(a => a.nom.toLowerCase() === n.toLowerCase())) return notify('Cette activité existe déjà', 'err'); d.activites.push({ id: uid('ac'), nom: n }); await save(d); actsDrawer(); return render(); }
     if (D.delact) { const d = ensure(db()), used = d.marches.some(m => m.activiteId === D.delact) || d.revenusAutres.some(r => r.activiteId === D.delact); if (used && !confirm('Cette activité est utilisée : les revenus resteront, classés « Sans activité ». Supprimer ?')) return; d.activites = d.activites.filter(a => a.id !== D.delact); d.marches.forEach(m => { if (m.activiteId === D.delact) m.activiteId = ''; }); d.revenusAutres.forEach(r => { if (r.activiteId === D.delact) r.activiteId = ''; }); await save(d); actsDrawer(); render(); }
   });
