@@ -28,6 +28,7 @@
     paiements:{name:'Paiements', icon:'payments', subtitle:'Suivez les encaissements et règlements'},
     depenses:{name:'Dépenses', icon:'receipt_long', subtitle:'Suivez les charges et sorties financières'},
     situation:{name:'Situation propriétaires', icon:'request_quote', subtitle:'Encaissements, commission et reversements par propriétaire'},
+    activites:{name:'Activités personnelles', icon:'work', subtitle:'Marchés, autres revenus et suivi des paiements de l’agence'},
     fichiers:{name:'Fichiers', icon:'folder', subtitle:'Centralisez vos documents importants'},
     messages:{name:'Messages', icon:'chat', subtitle:'Consultez et envoyez vos communications'},
     'agenda-employes':{name:'Agenda employés', icon:'event', subtitle:'Suivez les missions et rendez-vous de l’équipe'},
@@ -67,6 +68,7 @@
       return call('renderDepenses');
     },
     situation: function(){ return call('renderSituationProprietaires'); },
+    activites: function(){ return call('renderActivites'); },
     fichiers: function(){ return call('renderFichiers'); },
     messages: function(){ return call('renderMessages'); },
     'agenda-employes': function(){ return call('renderEmployeeAgenda'); },

@@ -110,12 +110,22 @@
       '<div class="gps-actions">' + periodBar(rg) + '<button class="gps-btn" data-export>Exporter CSV</button></div></div>' +
       '<div class="gps-cards">' + card(st.arrears ? 'À encaisser (loyer + arriérés)' : 'À encaisser (période)', T('aEnc')) + card('Encaissé', T('paid'), 'g') + card('Reste à encaisser', T('reste'), 'o') +
       card('Arriérés antérieurs', T('arrears'), 'o', st.arrears ? 'inclus dans le reste' : 'avant la période — non inclus') +
-      card('Ma commission', T('commission'), 'b', 'sur le loyer encaissé') + card('Dépenses déduites', T('depTotal'), 'r2', 'facturables aux propriétaires') + card('À reverser aux propriétaires', T('aReverser'), 'g', 'déjà reversé : ' + fmt(T('reverse'))) + '</div>' +
+      card('Ma commission', T('commission'), 'b', 'sur le loyer encaissé') + actCard(rg, T('commission')) + card('Dépenses déduites', T('depTotal'), 'r2', 'facturables aux propriétaires') + card('À reverser aux propriétaires', T('aReverser'), 'g', 'déjà reversé : ' + fmt(T('reverse'))) + '</div>' +
       (noTaux ? '<div class="gps-banner">Certains propriétaires n’ont pas de taux de commission (0 % appliqué). Renseignez-le dans la colonne « Taux ».</div>' : '') +
       '<input class="gps-search" id="gpsQ" placeholder="Rechercher un propriétaire ou un bien…" value="' + esc(st.q) + '">' +
       '<div class="gps-table"><table><thead><tr><th>Propriétaire / Bien</th><th>Taux %</th><th class="r">À encaisser</th><th class="r">Encaissé</th><th class="r">Reste</th><th class="r">Commission</th><th class="r">Dépenses</th><th class="r">À reverser</th><th></th></tr></thead><tbody>' +
       (rows.length ? rows.map(ownerHtml).join('') : '<tr><td colspan="9" class="gps-empty">Aucune donnée pour cette période</td></tr>') + '</tbody></table></div></div>';
     bind(page);
+  }
+
+  /* Carte « Revenus d'activités » (module activites-perso.js) + revenu global agence. */
+  function actCard(rg, com) {
+    try {
+      if (!window.GPActivites || !(window.GPPermissions ? GPPermissions.has(null, 'activites:view') : true)) return '';
+      const r = GPActivites.revenue(rg.from, rg.to);
+      return '<div class="gps-card"><small>Revenus d’activités</small><strong class="g">' + fmt(r.total) + '</strong><em>marchés + autres revenus</em></div>' +
+        '<div class="gps-card"><small>Revenu global agence</small><strong class="b">' + fmt(com + r.total) + '</strong><em>commission + activités</em></div>';
+    } catch (_) { return ''; }
   }
 
   function ownerHtml(o) {
