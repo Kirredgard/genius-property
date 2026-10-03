@@ -106,7 +106,7 @@
     const card = (l, v, cls, sub) => '<div class="gps-card"><small>' + l + '</small><strong class="' + (cls || '') + '">' + fmt(v) + '</strong>' + (sub ? '<em>' + sub + '</em>' : '') + '</div>';
     const noTaux = all.some(o => o.biens.length && o.taux == null && o.biens.some(r => r.tauxBien == null));
     page.innerHTML = '<style>' + css() + '</style><div class="gps">' +
-      '<div class="gps-top"><div><h3>Situation propriétaires</h3><p>À encaisser, commission agence et montant à reverser — par propriétaire et par bien.</p></div>' +
+      '<div class="gps-top"><div></div>' +
       '<div class="gps-actions">' + periodBar(rg) + '<button class="gps-btn" data-export>Exporter CSV</button></div></div>' +
       '<div class="gps-cards">' + card(st.arrears ? 'À encaisser (loyer + arriérés)' : 'À encaisser (période)', T('aEnc')) + card('Encaissé', T('paid'), 'g') + card('Reste à encaisser', T('reste'), 'o') +
       card('Arriérés antérieurs', T('arrears'), 'o', st.arrears ? 'inclus dans le reste' : 'avant la période — non inclus') +

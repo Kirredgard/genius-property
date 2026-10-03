@@ -147,7 +147,7 @@
   const dots = (s, n) => s ? esc(s) : '.'.repeat(n || 22);
   function parties(X) {
     const v = X.v, ag = X.ag, tel = ag.tel ? ' Tél. : ' + esc(ag.tel) + '.' : '';
-    const rep = v.repNom ? ', représenté par <b>' + esc((v.repNom)) + '</b>, ' + esc(v.repFonction || '') + ' de <b>' + esc(ag.nom) + '</b>, sis ' + esc(ag.adresse) : ', <b>' + esc(ag.nom) + '</b>, sis ' + esc(ag.adresse);
+    const rep = v.repNom ? ', représenté par <b>' + esc((v.repNom)) + '</b> du <b>' + esc(ag.nom) + '</b>, sis ' + esc(ag.adresse) : ', <b>' + esc(ag.nom) + '</b>, sis ' + esc(ag.adresse);
     const bail = '<p><b>' + (X.pro ? 'LE BAILLEUR' : 'Le Bailleur') + '</b>, ' + (v.bailleur ? esc((v.civB ? v.civB + ' ' : '') + v.bailleur) : '<b>' + esc(ag.nom) + '</b>') + (v.bailleur ? rep : '') + '.' + tel + '<br>Ci-après dénommé <b>« le Bailleur »</b>, d’une part ;</p>';
     const cni = 'CNI ou Passeport n° : ' + dots(v.cni, 18) + (v.cniDate || v.cniLieu ? ', délivré le ' + dots(dshort(v.cniDate), 10) + ' à ' + dots(v.cniLieu, 12) : '');
     const t = X.t, ttel = t.tel || t.telephone || '';
