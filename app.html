@@ -19,6 +19,10 @@
 <link rel="stylesheet" href="styles/app-shell.css?v=20260523">
 <link rel="stylesheet" href="styles/mobile.css?v=ultra-mobile-20260522">
 <link rel="stylesheet" href="styles/ui-icons-close-enhanced.css?v=20260522-docgold">
+<style id="gp-super-only-css">
+/* Réservé au super admin : invisible par défaut, affiché seulement si html.gp-super-admin (posé par auth.js). !important = aucun autre script ne peut le réafficher. */
+html:not(.gp-super-admin) [data-super-only],html:not(.gp-super-admin) #sideMenu li[data-page="admin-stockage"]{display:none!important}
+</style>
 <script src="env.js?v=supabase-v290"></script>
 <script src="js/core/clean-runtime.js?v=v15-clean"></script>
 <script src="js/core/single-agency-mode.js?v=1"></script>
@@ -85,7 +89,7 @@
     <li class="menu-section" data-menu-section="administration" aria-hidden="true">ADMINISTRATION</li>
     <li data-page="employes"><span class="material-symbols-rounded">badge</span> Équipe</li>
     <li data-page="parametres"><span class="material-symbols-rounded">settings</span> Paramètres</li>
-    <li data-page="admin-stockage"><span class="material-symbols-rounded">build</span> Maintenance &amp; Sécurité</li>
+    <li data-page="admin-stockage" data-super-only="true"><span class="material-symbols-rounded">build</span> Maintenance &amp; Sécurité</li>
   </ul>
   <ul class="menu-logout">
     <li class="logout" onclick="doLogout()"><span class="material-symbols-rounded">logout</span> Déconnexion</li>
@@ -1030,7 +1034,7 @@
 
 <script src="js/core/supabase-adapter.js?v=supabase-v291" defer></script>
 <script src="js/core/db.js?v=db-v280-owner-commit" defer></script>
-<script src="js/core/auth.js?v=multi-agences-2" defer></script>
+<script src="js/core/auth.js?v=super-only-3" defer></script>
 <script src="js/core/permissions.js?v=multi-agences-2" defer></script>
 <script src="js/core/supabase-auth.js?v=supabase-v291" defer></script>
 <script src="js/core/agencies.js?v=multi-agences-1" defer></script>
