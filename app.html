@@ -6,6 +6,9 @@
 <title>Genius Property — Gestion interne de l’agence</title>
 <meta name="description" content="Genius Property — Application interne de gestion immobilière pour une agence">
 <meta name="theme-color" content="#D4AF37">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1155,5 +1158,11 @@ window.gpSupabaseDiagnostic = async function(){
 <script src="js/core/contrats-generateur.js?v=v81-contrats" defer></script>
 <script src="js/core/mandat-generateur.js?v=v83-fix" defer></script>
 <script src="js/core/gp-cascade-fix.js?v=1" defer></script>
+<script>
+/* PWA : enregistrement du service worker (installation sur PC) */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){ navigator.serviceWorker.register('/sw.js',{scope:'/'}).catch(function(e){console.warn('SW PWA:',e);}); });
+}
+</script>
 </body>
 </html>
