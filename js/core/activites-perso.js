@@ -122,7 +122,7 @@
   }
   function autres(d) {
     const w = canWrite(), list = d.revenusAutres.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
-    $('gpaBody').innerHTML = '<div class="gpa-box">' + (list.length ? '<table><thead><tr><th>Date</th><th>Activité</th><th>Client / note</th><th>Mode</th><th class="rt">Montant</th><th class="rt">Frais</th><th class="rt">Net</th><th></th></tr></thead><tbody>' + list.map(r => '<tr><td>' + fdate(r.date) + '</td><td>' + esc(actName(d, r.activiteId)) + '</td><td>' + esc(r.client || '') + '<span class="sub">' + esc(r.note || '') + ((r.documents || []).length ? ' 📎 ' + r.documents.length : '') + '</span></td><td>' + esc(r.mode || '—') + '</td><td class="rt gpa-g"><b>' + fmt(num(r.montant)) + '</b></td><td class="rt">' + (fraisTotal(r) ? '<span class="gpa-r">− ' + fmt(fraisTotal(r)) + '</span>' : '—') + '</td><td class="rt"><b>' + fmt(num(r.montant) - fraisTotal(r)) + '</b></td><td class="rt">' + (w ? '<button class="gpa-btn sm" data-editr="' + r.id + '"><span class="material-symbols-rounded">edit</span></button> <button class="gpa-btn sm del" data-delr="' + r.id + '"><span class="material-symbols-rounded">delete</span></button>' : '') + '</td></tr>').join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun revenu. Saisissez ici vos revenus ponctuels (conseil, honoraires…).</div>') + '</div>';
+    $('gpaBody').innerHTML = '<div class="gpa-box">' + (list.length ? '<table><thead><tr><th>Date</th><th>Activité</th><th>Client / note</th><th>Mode</th><th class="rt">Montant</th><th class="rt">Frais</th><th class="rt">Net</th><th></th></tr></thead><tbody>' + list.map(r => '<tr><td>' + fdate(r.date) + '</td><td>' + esc(actName(d, r.activiteId)) + '</td><td>' + esc(r.client || '') + '<span class="sub">' + esc(r.note || '') + ((r.documents || []).length ? ' 📎 ' + r.documents.length : '') + '</span></td><td>' + esc(r.mode || '—') + '</td><td class="rt gpa-g"><b>' + fmt(num(r.montant)) + '</b></td><td class="rt">' + (fraisTotal(r) ? '<span class="gpa-r">− ' + fmt(fraisTotal(r)) + '</span>' : '—') + '</td><td class="rt"><b>' + fmt(num(r.montant) - fraisTotal(r)) + '</b></td><td class="rt" style="white-space:nowrap"><button class="gpa-btn sm" data-viewr="' + r.id + '" title="Détail / frais"><span class="material-symbols-rounded">visibility</span></button>' + (w ? ' <button class="gpa-btn sm" data-editr="' + r.id + '"><span class="material-symbols-rounded">edit</span></button> <button class="gpa-btn sm del" data-delr="' + r.id + '"><span class="material-symbols-rounded">delete</span></button>' : '') + '</td></tr>').join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun revenu. Saisissez ici vos revenus ponctuels (conseil, honoraires…).</div>') + '</div>';
   }
 
   /* ── documents (Supabase Storage, bucket privé gp-activites) ── */
@@ -132,7 +132,7 @@
   const fsize = n => n > 1048576 ? (n / 1048576).toFixed(1) + ' Mo' : Math.max(1, Math.round(n / 1024)) + ' Ko';
   const safeName = n => String(n).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9._-]+/g, '_').slice(-80);
   const holder = (d, id) => d.marches.find(x => x.id === id) || d.revenusAutres.find(x => x.id === id);
-  const reopen = id => (ensure(db()).revenusAutres.some(x => x.id === id) ? revDrawer(id) : viewDrawer(id));
+  const reopen = id => (ensure(db()).revenusAutres.some(x => x.id === id) ? viewRevDrawer(id) : viewDrawer(id));
   async function storage() {
     if (window.GPSupabase && GPSupabase.ready) { try { await GPSupabase.ready(); } catch (_) {} }
     const c = sbc(); if (!c) throw new Error('Supabase non connecté : reconnectez-vous');
@@ -271,6 +271,14 @@
     const d = ensure(db()), h = holder(d, hid); if (!h || !confirm('Supprimer ce frais ?')) return;
     h.depenses = (h.depenses || []).filter(x => x.id !== fid); await save(d); render(); reopen(hid); notify('Frais supprimé ✓');
   }
+  function viewRevDrawer(id) {
+    const d = ensure(db()), r = d.revenusAutres.find(x => x.id === id); if (!r) return; const w = canWrite(), frais = fraisTotal(r), net = num(r.montant) - frais;
+    drawer(esc(r.client || 'Revenu') + '<span class="sub" style="font-weight:400">' + fdate(r.date) + ' · ' + esc(actName(d, r.activiteId)) + '</span>',
+      '<div class="gpa-cards" style="grid-template-columns:repeat(3,1fr)"><div class="gpa-card"><small>Montant encaissé</small><strong class="gpa-g">' + fmt(num(r.montant)) + '</strong></div><div class="gpa-card"><small>Frais / dépenses</small><strong class="' + (frais ? 'gpa-r' : '') + '">' + fmt(frais) + '</strong></div><div class="gpa-card"><small>Net après frais</small><strong class="' + (net < 0 ? 'gpa-r' : 'gpa-g') + '">' + fmt(net) + '</strong></div></div>' +
+      '<p class="sub" style="margin:0 0 12px">' + esc(r.mode || '—') + (r.note ? ' · ' + esc(r.note) : '') + '</p>' +
+      fraisBox(r, w) + docsBox(r, w),
+      '<button class="gpa-btn" data-x>Fermer</button>' + (w ? '<button class="gpa-btn pri" data-editr="' + id + '">Modifier</button>' : ''));
+  }
   function revDrawer(id) {
     const d = ensure(db()), r = d.revenusAutres.find(x => x.id === id) || { date: today(), mode: 'Espèces' };
     drawer(id ? 'Modifier le revenu' : 'Nouveau revenu', fd('Montant (FCFA) *', '<input id="gr-m" type="number" min="0" value="' + (r.montant || '') + '">') + '<div class="gpa-g2">' + fd('Date', '<input id="gr-d" type="date" value="' + esc(r.date) + '">') + fd('Activité', '<select id="gr-a">' + actOpts(d, r.activiteId) + '</select>') + '</div>' +
@@ -293,13 +301,13 @@
 
   /* ── événements ── */
   document.addEventListener('click', async e => {
-    const t = e.target.closest('[data-tab],[data-yr],[data-acts],[data-newm],[data-newrev],[data-x],[data-view],[data-editm],[data-delm],[data-savem],[data-newp],[data-editp],[data-delp],[data-savep],[data-editr],[data-delr],[data-saver],[data-addact],[data-delact],[data-updoc],[data-opendoc],[data-dldoc],[data-deldoc],[data-newf],[data-editf],[data-delf],[data-savef],[data-back]');
+    const t = e.target.closest('[data-tab],[data-yr],[data-acts],[data-newm],[data-newrev],[data-x],[data-view],[data-editm],[data-delm],[data-savem],[data-newp],[data-editp],[data-delp],[data-savep],[data-viewr],[data-editr],[data-delr],[data-saver],[data-addact],[data-delact],[data-updoc],[data-opendoc],[data-dldoc],[data-deldoc],[data-newf],[data-editf],[data-delf],[data-savef],[data-back]');
     if (!t || !(t.closest('#page-activites') || t.closest('#gpaDr'))) return; const D = t.dataset, pr = v => String(v).split('|');
     if ('x' in D) return close(); if (D.tab) { st.tab = D.tab; return render(); } if (D.yr) { st.year += +D.yr; return render(); }
     if ('acts' in D) return actsDrawer(); if ('newm' in D) return marcheDrawer(); if ('newrev' in D) return revDrawer();
     if (D.view) return viewDrawer(D.view); if (D.editm) return marcheDrawer(D.editm); if (D.delm) return del('m', D.delm); if ('savem' in D) return saveMarche(D.savem);
     if (D.newp) return payDrawer(D.newp); if (D.editp) return payDrawer(...pr(D.editp)); if (D.delp) return del('p', ...pr(D.delp)); if ('savep' in D) return savePay(...pr(D.savep));
-    if (D.editr) return revDrawer(D.editr); if (D.delr) return del('r', D.delr); if ('saver' in D) return saveRev(D.saver);
+    if (D.viewr) return viewRevDrawer(D.viewr); if (D.editr) return revDrawer(D.editr); if (D.delr) return del('r', D.delr); if ('saver' in D) return saveRev(D.saver);
     if (D.back) return reopen(D.back); if (D.newf) return fraisDrawer(D.newf); if (D.editf) return fraisDrawer(...pr(D.editf)); if (D.delf) return delFrais(...pr(D.delf)); if ('savef' in D) return saveFrais(...pr(D.savef));
     if (D.updoc) return uploadDocs(D.updoc); if (D.opendoc) return openDoc(...pr(D.opendoc)); if (D.dldoc) return openDoc(...pr(D.dldoc), true); if (D.deldoc) return delDoc(...pr(D.deldoc));
     if ('addact' in D) { const n = val('gpaNewAct').trim(); if (!n) return; const d = ensure(db()); if (d.activites.some(a => a.nom.toLowerCase() === n.toLowerCase())) return notify('Cette activité existe déjà', 'err'); d.activites.push({ id: uid('ac'), nom: n }); await save(d); actsDrawer(); return render(); }
