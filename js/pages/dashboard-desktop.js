@@ -63,15 +63,36 @@
   function closeCalendar(){ var pop=document.getElementById('gdCalendarPop'); if(pop) pop.classList.remove('show'); }
   function typeSelect(){ return '<select class="gd-type-select" onchange="window.gdOpenBienType&&window.gdOpenBienType(this.value)" aria-label="Choisir un type de bien"><option value="">Choix du type de bien</option>'+typeOrder.map(function(t){return '<option value="'+esc(t)+'">'+esc(t)+'</option>';}).join('')+'</select>'; }
 
+  /* Loyers réellement en retard : échéance dépassée ET solde > 0 (même calcul que la page Encaissements). */
+  function lateRows(){
+    var enc=window.GPEncV2, d=db(), out=[];
+    if(enc&&typeof enc.schedule==='function'){
+      try{
+        var prep=(enc._internals&&enc._internals.prepareRelations)||function(x){return x;};
+        var dd=prep(d), now=new Date(), upto=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+        (dd.contrats||[]).filter(function(c){return normalize(c.statut)==='actif';}).forEach(function(c){
+          var late=enc.schedule(dd,c,upto).filter(function(e){return e.late&&e.solde>0;});
+          if(!late.length) return;
+          out.push({locataire:c.locataire,locative:c.locative||c.bien,reste:late.reduce(function(a,e){return a+e.solde;},0),diff:-Math.max.apply(null,late.map(function(e){return e.daysLate;}))});
+        });
+        return out.sort(function(a,b){return a.diff-b.diff;});
+      }catch(e){}
+    }
+    /* Plan B : uniquement si l'échéance est dépassée */
+    var today=new Date(); today.setHours(0,0,0,0);
+    return (d.paiements||[]).filter(function(p){
+      var due=new Date(p.echeance||p.date||p.datePaiement); due.setHours(0,0,0,0);
+      return num(p.reste||p.impaye||p.solde)>0 && !isNaN(due) && due<today;
+    }).map(function(p){return {locataire:p.locataire,locative:p.locative||p.bien,reste:num(p.reste||p.impaye||p.solde)};});
+  }
+
   function period(){
     var data=db(), now=new Date(), y=now.getFullYear(), m=now.getMonth();
     var pays=livePays().filter(function(p){var d=new Date(p.date||p.datePaiement||p.echeance);return !isNaN(d)&&d.getFullYear()===y&&d.getMonth()===m;});
     var deps=(data.depenses||[]).filter(function(p){var d=new Date(p.date);return !isNaN(d)&&d.getFullYear()===y&&d.getMonth()===m;});
     var rev=pays.reduce(function(s,p){return s+paidOf(p);},0);
     var dep=deps.reduce(function(s,p){return s+num(p.montant);},0);
-    var late=typeof window.getPaiementEcheances==='function'
-      ? window.getPaiementEcheances().filter(function(r){return r.cat==='retard';}).length
-      : (data.paiements||[]).filter(function(p){return num(p.reste||p.impaye||p.solde)>0;}).length;
+    var late=lateRows().length;
     return {rev:rev,dep:dep,late:late};
   }
 
@@ -93,10 +114,7 @@
     return livePays().filter(function(p){return paidOf(p)>0;}).sort(function(a,b){return new Date(b.date||b.datePaiement||b.echeance)-new Date(a.date||a.datePaiement||a.echeance);}).slice(0,3);
   }
   function alertRows(){
-    if(typeof window.getPaiementEcheances==='function'){
-      return window.getPaiementEcheances().filter(function(r){return r.cat==='retard';}).slice(0,3);
-    }
-    return (db().paiements||[]).filter(function(p){return num(p.reste||p.impaye||p.solde)>0;}).slice(0,3);
+    return lateRows().slice(0,3);
   }
 
   function build(){
