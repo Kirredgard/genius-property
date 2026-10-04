@@ -3,9 +3,12 @@
  *   activites[]     { id, nom }                       liste LIBRE, créée par l'agence
  *   marches[]       { id, client, titre, activiteId, total, apport, apportDate, debut, fin, statut, notes,
  *                     paiements[{ id, date, montant, mode, ref, libelle }],
+ *                     depenses[{ id, date, montant, libelle, mode, ref }]   (frais, déduits du montant encaissé),
  *                     documents[{ id, nom, cat, path, taille, type, date }] }   (fichiers dans Supabase Storage, bucket gp-activites)
- *   revenusAutres[] { id, date, activiteId, client, montant, mode, note, documents[] (même forme que marchés) }
- * Règles : encaissé = apport + paiements ; reste = total − encaissé (toujours calculé) ;
+ *   revenusAutres[] { id, date, activiteId, client, montant, mode, note, depenses[] (frais), documents[] (même forme que marchés) }
+ * Règles : encaissé = apport + paiements ; reste = total − encaissé (toujours calculé, les frais ne le changent pas) ;
+ *          net = encaissé − frais ; les revenus d'activités (tableau de bord, Situation) sont comptés NETS des frais,
+ *          chaque frais étant rattaché au mois de sa date ;
  *          un revenu est rattaché au mois de sa DATE d'encaissement (comme les commissions).
  * Lien Situation : window.GPActivites.revenue(from,to) → { marches, autres, total } */
 (function () {
@@ -28,13 +31,14 @@
   const STATUTS = { cours: 'En cours', termine: 'Terminé', suspendu: 'Suspendu', litige: 'Litige' };
   const canWrite = () => { try { const P = window.GPPermissions; return !(P && P.has) || !!P.has(null, 'activites:write'); } catch (_) { return true; } };
   const ensure = d => { ['activites', 'marches', 'revenusAutres'].forEach(k => { if (!Array.isArray(d[k])) d[k] = []; }); return d; };
+  const fraisTotal = h => (h.depenses || []).reduce((s, x) => s + num(x.montant), 0);
   const actName = (d, id) => ((d.activites || []).find(a => a.id === id) || {}).nom || 'Sans activité';
 
   /* ── calculs ── */
   function mStats(m) {
     const paid = num(m.apport) + (m.paiements || []).reduce((s, p) => s + num(p.montant), 0), total = num(m.total);
     const reste = Math.max(0, total - paid), late = m.statut === 'cours' && m.fin && m.fin < today() && reste > 0;
-    return { paid, total, reste, pct: total ? Math.min(100, Math.round(paid / total * 100)) : 0, late, over: paid > total && total > 0 };
+    return { paid, total, reste, pct: total ? Math.min(100, Math.round(paid / total * 100)) : 0, late, over: paid > total && total > 0, frais: fraisTotal(m), net: paid - fraisTotal(m) };
   }
   /** Flux d'argent encaissé : [{k:'YYYY-MM', date, montant, act, label, src}] */
   function flows(d) {
@@ -43,8 +47,12 @@
       const lab = (m.client || '') + (m.titre ? ' — ' + m.titre : '');
       if (num(m.apport) > 0) out.push({ date: m.apportDate || m.debut || today(), montant: num(m.apport), act: m.activiteId, label: lab + ' (apport)', src: 'marche' });
       (m.paiements || []).forEach(p => out.push({ date: p.date, montant: num(p.montant), act: m.activiteId, label: lab, src: 'marche' }));
+      (m.depenses || []).forEach(x => out.push({ date: x.date, montant: -num(x.montant), act: m.activiteId, label: lab + ' (frais)', src: 'marche' }));
     });
-    (d.revenusAutres || []).forEach(r => out.push({ date: r.date, montant: num(r.montant), act: r.activiteId, label: r.client || r.note || 'Revenu', src: 'autre' }));
+    (d.revenusAutres || []).forEach(r => {
+      out.push({ date: r.date, montant: num(r.montant), act: r.activiteId, label: r.client || r.note || 'Revenu', src: 'autre' });
+      (r.depenses || []).forEach(x => out.push({ date: x.date, montant: -num(x.montant), act: r.activiteId, label: (r.client || r.note || 'Revenu') + ' (frais)', src: 'autre' }));
+    });
     return out.filter(f => /^\d{4}-\d{2}/.test(f.date || '')).map(f => Object.assign(f, { k: mk(f.date) }));
   }
   function revenue(from, to) {
@@ -89,17 +97,18 @@
     ({ dash: dash, marches: marches, autres: autres })[st.tab](d);
   }
   function dash(d) {
-    const fl = flows(d).filter(f => f.k.slice(0, 4) === String(st.year)), act = fl.reduce((s, f) => s + f.montant, 0), com = commissions(st.year);
+    const fl = flows(d).filter(f => f.k.slice(0, 4) === String(st.year)), act = fl.reduce((s, f) => s + f.montant, 0), frs = fl.reduce((s, f) => s + (f.montant < 0 ? -f.montant : 0), 0), com = commissions(st.year);
     const open = d.marches.map(mStats), reste = open.reduce((s, x, i) => s + (d.marches[i].statut === 'cours' ? x.reste : 0), 0);
     const byM = Array(12).fill(0); fl.forEach(f => byM[+f.k.slice(5) - 1] += f.montant); const mx = Math.max(1, ...byM);
     const byA = {}; fl.forEach(f => { const n = actName(d, f.act); byA[n] = (byA[n] || 0) + f.montant; });
     const rows = Object.entries(byA).sort((a, b) => b[1] - a[1]);
-    $('gpaBody').innerHTML = '<div class="gpa-cards"><div class="gpa-card"><small>Revenus d’activités</small><strong class="gpa-g">' + fmt(act) + '</strong></div>' +
+    $('gpaBody').innerHTML = '<div class="gpa-cards"><div class="gpa-card"><small>Revenus nets d’activités</small><strong class="gpa-g">' + fmt(act) + '</strong></div>' +
+      '<div class="gpa-card"><small>Frais déduits</small><strong class="' + (frs ? 'gpa-r' : '') + '">' + fmt(frs) + '</strong></div>' +
       '<div class="gpa-card"><small>Commissions locatives</small><strong>' + fmt(com) + '</strong></div><div class="gpa-card"><small>Revenu global agence</small><strong>' + fmt(act + com) + '</strong></div>' +
       '<div class="gpa-card"><small>Reste à encaisser (marchés en cours)</small><strong class="gpa-o">' + fmt(reste) + '</strong></div>' +
       '<div class="gpa-card"><small>Marchés en retard</small><strong class="' + (open.some(x => x.late) ? 'gpa-r' : '') + '">' + open.filter(x => x.late).length + '</strong></div></div>' +
-      '<div class="gpa-box"><h4>Évolution mensuelle ' + st.year + '</h4><div class="gpa-chart">' + byM.map((v, i) => '<div title="' + fmt(v) + '"><i style="height:' + Math.round(v / mx * 100) + 'px"></i>' + MONTHS[i] + '</div>').join('') + '</div></div>' +
-      '<div class="gpa-box"><h4>Répartition par activité</h4>' + (rows.length ? '<table><tbody>' + rows.map(r => '<tr><td>' + esc(r[0]) + '</td><td class="rt"><b>' + fmt(r[1]) + '</b></td><td style="width:35%"><div class="gpa-bar"><i style="width:' + Math.round(r[1] / act * 100) + '%"></i></div></td></tr>').join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun revenu saisi pour ' + st.year + '</div>') + '</div>';
+      '<div class="gpa-box"><h4>Évolution mensuelle ' + st.year + '</h4><div class="gpa-chart">' + byM.map((v, i) => '<div title="' + fmt(v) + '"><i style="height:' + Math.max(0, Math.round(v / mx * 100)) + 'px"></i>' + MONTHS[i] + '</div>').join('') + '</div></div>' +
+      '<div class="gpa-box"><h4>Répartition par activité</h4>' + (rows.length ? '<table><tbody>' + rows.map(r => '<tr><td>' + esc(r[0]) + '</td><td class="rt"><b>' + fmt(r[1]) + '</b></td><td style="width:35%"><div class="gpa-bar"><i style="width:' + (act > 0 ? Math.max(0, Math.min(100, Math.round(r[1] / act * 100))) : 0) + '%"></i></div></td></tr>').join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun revenu saisi pour ' + st.year + '</div>') + '</div>';
   }
   function marches(d) {
     const w = canWrite(), q = st.q.toLowerCase();
@@ -107,13 +116,13 @@
     $('gpaBody').innerHTML = '<div style="display:flex;gap:8px;margin-bottom:10px"><input id="gpaQ" placeholder="Rechercher un client, un marché…" value="' + esc(st.q) + '" style="flex:1;height:34px;border:1px solid #e5e7eb;border-radius:9px;padding:0 10px;font-size:12px"></div>' +
       '<div class="gpa-box">' + (list.length ? '<table><thead><tr><th>Marché</th><th>Activité</th><th class="rt">Total</th><th class="rt">Encaissé</th><th class="rt">Reste</th><th>Avancement</th><th>Fin</th><th>Statut</th><th></th></tr></thead><tbody>' + list.map(m => {
         const s = mStats(m);
-        return '<tr><td><b>' + esc(m.client || '—') + '</b><span class="sub">' + esc(m.titre || '') + ((m.documents || []).length ? ' · 📎 ' + m.documents.length : '') + '</span></td><td>' + esc(actName(d, m.activiteId)) + '</td><td class="rt">' + fmt(s.total) + '</td><td class="rt gpa-g">' + fmt(s.paid) + '</td><td class="rt ' + (s.reste ? 'gpa-o' : 'gpa-g') + '"><b>' + fmt(s.reste) + '</b></td><td><div class="gpa-bar"><i style="width:' + s.pct + '%"></i></div><span class="sub">' + s.pct + ' %</span></td><td>' + fdate(m.fin) + (s.late ? '<span class="sub gpa-r">en retard</span>' : '') + '</td><td><span class="gpa-pill ' + m.statut + '">' + STATUTS[m.statut] + '</span></td>' +
+        return '<tr><td><b>' + esc(m.client || '—') + '</b><span class="sub">' + esc(m.titre || '') + ((m.documents || []).length ? ' · 📎 ' + m.documents.length : '') + '</span></td><td>' + esc(actName(d, m.activiteId)) + '</td><td class="rt">' + fmt(s.total) + '</td><td class="rt gpa-g">' + fmt(s.paid) + (s.frais ? '<span class="sub">frais − ' + fmt(s.frais) + ' · net ' + fmt(s.net) + '</span>' : '') + '</td><td class="rt ' + (s.reste ? 'gpa-o' : 'gpa-g') + '"><b>' + fmt(s.reste) + '</b></td><td><div class="gpa-bar"><i style="width:' + s.pct + '%"></i></div><span class="sub">' + s.pct + ' %</span></td><td>' + fdate(m.fin) + (s.late ? '<span class="sub gpa-r">en retard</span>' : '') + '</td><td><span class="gpa-pill ' + m.statut + '">' + STATUTS[m.statut] + '</span></td>' +
           '<td class="rt" style="white-space:nowrap"><button class="gpa-btn sm" data-view="' + m.id + '" title="Détail / paiements"><span class="material-symbols-rounded">visibility</span></button>' + (w ? ' <button class="gpa-btn sm" data-editm="' + m.id + '"><span class="material-symbols-rounded">edit</span></button> <button class="gpa-btn sm del" data-delm="' + m.id + '"><span class="material-symbols-rounded">delete</span></button>' : '') + '</td></tr>';
       }).join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun marché. Cliquez sur « + Marché » pour en créer un.</div>') + '</div>';
   }
   function autres(d) {
     const w = canWrite(), list = d.revenusAutres.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
-    $('gpaBody').innerHTML = '<div class="gpa-box">' + (list.length ? '<table><thead><tr><th>Date</th><th>Activité</th><th>Client / note</th><th>Mode</th><th class="rt">Montant</th><th></th></tr></thead><tbody>' + list.map(r => '<tr><td>' + fdate(r.date) + '</td><td>' + esc(actName(d, r.activiteId)) + '</td><td>' + esc(r.client || '') + '<span class="sub">' + esc(r.note || '') + ((r.documents || []).length ? ' 📎 ' + r.documents.length : '') + '</span></td><td>' + esc(r.mode || '—') + '</td><td class="rt gpa-g"><b>' + fmt(num(r.montant)) + '</b></td><td class="rt">' + (w ? '<button class="gpa-btn sm" data-editr="' + r.id + '"><span class="material-symbols-rounded">edit</span></button> <button class="gpa-btn sm del" data-delr="' + r.id + '"><span class="material-symbols-rounded">delete</span></button>' : '') + '</td></tr>').join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun revenu. Saisissez ici vos revenus ponctuels (conseil, honoraires…).</div>') + '</div>';
+    $('gpaBody').innerHTML = '<div class="gpa-box">' + (list.length ? '<table><thead><tr><th>Date</th><th>Activité</th><th>Client / note</th><th>Mode</th><th class="rt">Montant</th><th class="rt">Frais</th><th class="rt">Net</th><th></th></tr></thead><tbody>' + list.map(r => '<tr><td>' + fdate(r.date) + '</td><td>' + esc(actName(d, r.activiteId)) + '</td><td>' + esc(r.client || '') + '<span class="sub">' + esc(r.note || '') + ((r.documents || []).length ? ' 📎 ' + r.documents.length : '') + '</span></td><td>' + esc(r.mode || '—') + '</td><td class="rt gpa-g"><b>' + fmt(num(r.montant)) + '</b></td><td class="rt">' + (fraisTotal(r) ? '<span class="gpa-r">− ' + fmt(fraisTotal(r)) + '</span>' : '—') + '</td><td class="rt"><b>' + fmt(num(r.montant) - fraisTotal(r)) + '</b></td><td class="rt">' + (w ? '<button class="gpa-btn sm" data-editr="' + r.id + '"><span class="material-symbols-rounded">edit</span></button> <button class="gpa-btn sm del" data-delr="' + r.id + '"><span class="material-symbols-rounded">delete</span></button>' : '') + '</td></tr>').join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun revenu. Saisissez ici vos revenus ponctuels (conseil, honoraires…).</div>') + '</div>';
   }
 
   /* ── documents (Supabase Storage, bucket privé gp-activites) ── */
@@ -205,10 +214,12 @@
     const pays = (m.paiements || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
     drawer(esc(m.client) + '<span class="sub" style="font-weight:400">' + esc(m.titre || '') + ' · ' + esc(actName(d, m.activiteId)) + '</span>',
       '<div class="gpa-cards" style="grid-template-columns:repeat(3,1fr)"><div class="gpa-card"><small>Total</small><strong>' + fmt(s.total) + '</strong></div><div class="gpa-card"><small>Encaissé</small><strong class="gpa-g">' + fmt(s.paid) + '</strong></div><div class="gpa-card"><small>Reste</small><strong class="' + (s.reste ? 'gpa-o' : 'gpa-g') + '">' + fmt(s.reste) + '</strong></div></div>' +
+      '<div class="gpa-cards" style="grid-template-columns:repeat(2,1fr);margin-top:0"><div class="gpa-card"><small>Frais / dépenses</small><strong class="' + (s.frais ? 'gpa-r' : '') + '">' + fmt(s.frais) + '</strong></div><div class="gpa-card"><small>Net encaissé (après frais)</small><strong class="' + (s.net < 0 ? 'gpa-r' : 'gpa-g') + '">' + fmt(s.net) + '</strong></div></div>' +
       '<div class="gpa-bar" style="margin-bottom:6px"><i style="width:' + s.pct + '%"></i></div><p class="sub" style="margin:0 0 12px">' + s.pct + ' % encaissé · début ' + fdate(m.debut) + ' · fin ' + fdate(m.fin) + (s.late ? ' · <b class="gpa-r">en retard</b>' : '') + '</p>' +
       '<div class="gpa-box"><h4>Paiements</h4><table><tbody>' + (num(m.apport) > 0 ? '<tr><td>' + fdate(m.apportDate || m.debut) + '</td><td>Apport</td><td class="rt gpa-g"><b>' + fmt(num(m.apport)) + '</b></td><td></td></tr>' : '') +
       pays.map(p => '<tr><td>' + fdate(p.date) + '</td><td>' + esc(p.libelle || 'Paiement') + '<span class="sub">' + esc(p.mode || '') + (p.ref ? ' · ' + esc(p.ref) : '') + '</span></td><td class="rt gpa-g"><b>' + fmt(num(p.montant)) + '</b></td><td class="rt">' + (w ? '<button class="gpa-btn sm" data-editp="' + id + '|' + p.id + '"><span class="material-symbols-rounded">edit</span></button> <button class="gpa-btn sm del" data-delp="' + id + '|' + p.id + '"><span class="material-symbols-rounded">delete</span></button>' : '') + '</td></tr>').join('') +
       '</tbody></table>' + (!pays.length && !num(m.apport) ? '<div class="gpa-empty">Aucun paiement</div>' : '') + '</div>' +
+      fraisBox(m, w) +
       docsBox(m, w),
       '<button class="gpa-btn" data-x>Fermer</button>' + (w && s.reste > 0 ? '<button class="gpa-btn pri" data-newp="' + id + '">+ Paiement</button>' : ''));
   }
@@ -230,10 +241,40 @@
     if (mStats(m).reste <= 0 && m.statut === 'cours') m.statut = 'termine';
     await save(d); render(); viewDrawer(mid); notify('Paiement enregistré ✓');
   }
+  /* ── frais / dépenses (marchés + autres revenus) : déduits du montant encaissé ── */
+  function fraisBox(h, w) {
+    const isM = h.total !== undefined, list = (h.depenses || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    const net = (isM ? mStats(h).paid : num(h.montant)) - fraisTotal(h);
+    return '<div class="gpa-box"><h4 style="display:flex;justify-content:space-between;align-items:center">Frais / dépenses (' + list.length + ')' + (w ? '<button class="gpa-btn sm" data-newf="' + h.id + '">+ Frais</button>' : '') + '</h4>' +
+      (list.length ? '<table><tbody>' + list.map(x => '<tr><td>' + fdate(x.date) + '</td><td>' + esc(x.libelle || 'Frais') + '<span class="sub">' + esc(x.mode || '') + (x.ref ? ' · ' + esc(x.ref) : '') + '</span></td><td class="rt gpa-r"><b>− ' + fmt(num(x.montant)) + '</b></td><td class="rt" style="white-space:nowrap">' + (w ? '<button class="gpa-btn sm" data-editf="' + h.id + '|' + x.id + '"><span class="material-symbols-rounded">edit</span></button> <button class="gpa-btn sm del" data-delf="' + h.id + '|' + x.id + '"><span class="material-symbols-rounded">delete</span></button>' : '') + '</td></tr>').join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun frais</div>') +
+      (isM ? '' : '<div style="display:flex;justify-content:space-between;padding:10px 12px;border-top:1px solid var(--l);font-size:12px"><span>Net après frais</span><b class="' + (net < 0 ? 'gpa-r' : 'gpa-g') + '">' + fmt(net) + '</b></div>') + '</div>';
+  }
+  function fraisDrawer(hid, fid) {
+    const d = ensure(db()), h = holder(d, hid); if (!h) return;
+    const x = (h.depenses || []).find(y => y.id === fid) || { date: today(), mode: 'Espèces' }, isM = h.total !== undefined;
+    const net = (isM ? mStats(h).paid : num(h.montant)) - fraisTotal(h);
+    drawer(fid ? 'Modifier le frais' : 'Nouveau frais', '<div class="gpa-card" style="margin-bottom:12px"><small>Net encaissé actuel (après frais déjà saisis)</small><strong class="' + (net < 0 ? 'gpa-r' : 'gpa-g') + '">' + fmt(net) + '</strong></div>' +
+      fd('Montant (FCFA) *', '<input id="gf-m" type="number" min="0" value="' + (x.montant || '') + '">') + '<div class="gpa-g2">' + fd('Date', '<input id="gf-d" type="date" value="' + esc(x.date) + '">') + fd('Mode', '<select id="gf-mode">' + MODES.map(m => '<option' + (m === x.mode ? ' selected' : '') + '>' + m + '</option>').join('') + '</select>') + '</div>' +
+      fd('Libellé (transport, matériaux, main-d’œuvre…)', '<input id="gf-lib" value="' + esc(x.libelle || '') + '">') + fd('Référence', '<input id="gf-ref" value="' + esc(x.ref || '') + '">'),
+      '<button class="gpa-btn" data-back="' + hid + '">Annuler</button><button class="gpa-btn pri" data-savef="' + hid + '|' + (fid || '') + '">Enregistrer</button>');
+  }
+  async function saveFrais(hid, fid) {
+    if (!canWrite()) return notify('Action non autorisée', 'err');
+    const d = ensure(db()), h = holder(d, hid); if (!h) return; const a = num(val('gf-m'));
+    if (!(a > 0)) return notify('Saisissez un montant supérieur à 0', 'err');
+    h.depenses = h.depenses || []; let x = h.depenses.find(y => y.id === fid); if (!x) { x = { id: uid('fr') }; h.depenses.push(x); }
+    Object.assign(x, { montant: a, date: val('gf-d') || today(), mode: val('gf-mode'), libelle: val('gf-lib').trim(), ref: val('gf-ref').trim() });
+    await save(d); render(); reopen(hid); notify('Frais enregistré ✓');
+  }
+  async function delFrais(hid, fid) {
+    if (!canWrite()) return notify('Action non autorisée', 'err');
+    const d = ensure(db()), h = holder(d, hid); if (!h || !confirm('Supprimer ce frais ?')) return;
+    h.depenses = (h.depenses || []).filter(x => x.id !== fid); await save(d); render(); reopen(hid); notify('Frais supprimé ✓');
+  }
   function revDrawer(id) {
     const d = ensure(db()), r = d.revenusAutres.find(x => x.id === id) || { date: today(), mode: 'Espèces' };
     drawer(id ? 'Modifier le revenu' : 'Nouveau revenu', fd('Montant (FCFA) *', '<input id="gr-m" type="number" min="0" value="' + (r.montant || '') + '">') + '<div class="gpa-g2">' + fd('Date', '<input id="gr-d" type="date" value="' + esc(r.date) + '">') + fd('Activité', '<select id="gr-a">' + actOpts(d, r.activiteId) + '</select>') + '</div>' +
-      fd('Client / source', '<input id="gr-c" value="' + esc(r.client || '') + '">') + fd('Mode', '<select id="gr-mode">' + MODES.map(x => '<option' + (x === r.mode ? ' selected' : '') + '>' + x + '</option>').join('') + '</select>') + fd('Note', '<textarea id="gr-n">' + esc(r.note || '') + '</textarea>') + (id ? docsBox(r, canWrite()) : '<p class="sub">Enregistrez le revenu pour pouvoir y joindre un justificatif.</p>'),
+      fd('Client / source', '<input id="gr-c" value="' + esc(r.client || '') + '">') + fd('Mode', '<select id="gr-mode">' + MODES.map(x => '<option' + (x === r.mode ? ' selected' : '') + '>' + x + '</option>').join('') + '</select>') + fd('Note', '<textarea id="gr-n">' + esc(r.note || '') + '</textarea>') + (id ? fraisBox(r, canWrite()) + docsBox(r, canWrite()) : '<p class="sub">Enregistrez le revenu pour pouvoir y ajouter des frais et un justificatif.</p>'),
       '<button class="gpa-btn" data-x>Annuler</button><button class="gpa-btn pri" data-saver="' + (id || '') + '">Enregistrer</button>');
   }
   async function saveRev(id) {
@@ -252,13 +293,14 @@
 
   /* ── événements ── */
   document.addEventListener('click', async e => {
-    const t = e.target.closest('[data-tab],[data-yr],[data-acts],[data-newm],[data-newrev],[data-x],[data-view],[data-editm],[data-delm],[data-savem],[data-newp],[data-editp],[data-delp],[data-savep],[data-editr],[data-delr],[data-saver],[data-addact],[data-delact],[data-updoc],[data-opendoc],[data-dldoc],[data-deldoc]');
+    const t = e.target.closest('[data-tab],[data-yr],[data-acts],[data-newm],[data-newrev],[data-x],[data-view],[data-editm],[data-delm],[data-savem],[data-newp],[data-editp],[data-delp],[data-savep],[data-editr],[data-delr],[data-saver],[data-addact],[data-delact],[data-updoc],[data-opendoc],[data-dldoc],[data-deldoc],[data-newf],[data-editf],[data-delf],[data-savef],[data-back]');
     if (!t || !(t.closest('#page-activites') || t.closest('#gpaDr'))) return; const D = t.dataset, pr = v => String(v).split('|');
     if ('x' in D) return close(); if (D.tab) { st.tab = D.tab; return render(); } if (D.yr) { st.year += +D.yr; return render(); }
     if ('acts' in D) return actsDrawer(); if ('newm' in D) return marcheDrawer(); if ('newrev' in D) return revDrawer();
     if (D.view) return viewDrawer(D.view); if (D.editm) return marcheDrawer(D.editm); if (D.delm) return del('m', D.delm); if ('savem' in D) return saveMarche(D.savem);
     if (D.newp) return payDrawer(D.newp); if (D.editp) return payDrawer(...pr(D.editp)); if (D.delp) return del('p', ...pr(D.delp)); if ('savep' in D) return savePay(...pr(D.savep));
     if (D.editr) return revDrawer(D.editr); if (D.delr) return del('r', D.delr); if ('saver' in D) return saveRev(D.saver);
+    if (D.back) return reopen(D.back); if (D.newf) return fraisDrawer(D.newf); if (D.editf) return fraisDrawer(...pr(D.editf)); if (D.delf) return delFrais(...pr(D.delf)); if ('savef' in D) return saveFrais(...pr(D.savef));
     if (D.updoc) return uploadDocs(D.updoc); if (D.opendoc) return openDoc(...pr(D.opendoc)); if (D.dldoc) return openDoc(...pr(D.dldoc), true); if (D.deldoc) return delDoc(...pr(D.deldoc));
     if ('addact' in D) { const n = val('gpaNewAct').trim(); if (!n) return; const d = ensure(db()); if (d.activites.some(a => a.nom.toLowerCase() === n.toLowerCase())) return notify('Cette activité existe déjà', 'err'); d.activites.push({ id: uid('ac'), nom: n }); await save(d); actsDrawer(); return render(); }
     if (D.delact) { const d = ensure(db()), used = d.marches.some(m => m.activiteId === D.delact) || d.revenusAutres.some(r => r.activiteId === D.delact); if (used && !confirm('Cette activité est utilisée : les revenus resteront, classés « Sans activité ». Supprimer ?')) return; d.activites = d.activites.filter(a => a.id !== D.delact); d.marches.forEach(m => { if (m.activiteId === D.delact) m.activiteId = ''; }); d.revenusAutres.forEach(r => { if (r.activiteId === D.delact) r.activiteId = ''; }); await save(d); actsDrawer(); render(); }
