@@ -9,7 +9,7 @@
   var CACHE_KEYS = [
     'geniusproperty_db_clean_v1','geniusproperty_db_authoritative_v1',
     'geniusproperty_last_backup_snapshot','geniusproperty_last_backup_date',
-    'gpdb_local_revision','gp_data_dirty_at'
+    'gpdb_local_revision','gp_data_dirty_at','gp_cache_owner','gp_safety_snapshot'
   ];
 
   function esc(v){
@@ -60,9 +60,16 @@
   async function switchTo(id){
     var u = user();
     if(u && id === u.agencyId) return;
-    var dirty = false;
-    try { dirty = !!localStorage.getItem('gp_data_dirty_at'); } catch(_) {}
-    if(dirty && !confirm('Des modifications ne sont pas encore synchronisées et seront perdues en changeant d’agence. Continuer ?')) return;
+    // V30 : on envoie d'abord les données de l'agence actuelle ; on ne change pas d'agence
+    // tant que le serveur ne les a pas confirmées.
+    try {
+      if(window.GPSupabase && window.GPSupabase.flush) {
+        await window.GPSupabase.flush();
+      }
+    } catch(e) {
+      if(!confirm('Les données de l’agence actuelle n’ont pas pu être synchronisées (' + (e && e.message || e) + ').\nChanger d’agence maintenant risque de les perdre. Continuer quand même ?')) return;
+      try { if(window.GPDB && window.GPDB.exportJSON) window.GPDB.exportJSON('genius-property-SAUVEGARDE-avant-changement-agence.json'); } catch(_) {}
+    }
 
     var c = await sb();
     var r = await c.rpc('gp_switch_agency', {p_agency: id});
@@ -70,7 +77,8 @@
 
     // Les données en cache appartiennent à l'ancienne agence : on les remplace.
     clearLocalCache();
-    try { await window.GPSupabase.pull({applyToLocal: true}); } catch(e) { console.warn('[GPAgencies] pull:', e && e.message || e); }
+    try { window.GPSupabase.reset && window.GPSupabase.reset(); } catch(_) {}
+    // Le rechargement relance la synchronisation (GPSupabaseAuth.syncData) pour la nouvelle agence.
     location.reload();
   }
 

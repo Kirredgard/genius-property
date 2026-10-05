@@ -90,35 +90,152 @@
       .reduce(function(n,k){ return n + (Array.isArray(d[k]) ? d[k].length : 0); }, 0);
   }
 
+  /* ---------- V30 — protection des données ---------- */
+  var CACHE_KEYS = [
+    'geniusproperty_db_clean_v1','geniusproperty_db_authoritative_v1',
+    'geniusproperty_last_backup_snapshot','geniusproperty_last_backup_date',
+    'gpdb_local_revision','gp_data_dirty_at','gp_cache_owner','gp_safety_snapshot'
+  ];
+  function clearLocalCache(){
+    try {
+      CACHE_KEYS.forEach(function(k){ localStorage.removeItem(k); });
+      for(var i=localStorage.length-1;i>=0;i--){
+        var k=localStorage.key(i);
+        if(k && k.indexOf('geniusproperty_backup_')===0) localStorage.removeItem(k);
+      }
+    } catch(_) {}
+  }
+  function readJSON(key){
+    try { var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch(_) { return null; }
+  }
+  function stamp(){ return new Date().toISOString().replace(/[:.]/g,'-'); }
+  function keepOnly(prefix, max){
+    try {
+      var keys=[];
+      for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k && k.indexOf(prefix)===0) keys.push(k); }
+      keys.sort().reverse().slice(max).forEach(function(k){ localStorage.removeItem(k); });
+    } catch(_) {}
+  }
+  // Copie de sécurité locale AVANT tout écrasement du cache par le cloud.
+  function safetySnapshot(db, why){
+    try { localStorage.setItem('gp_safety_snapshot', JSON.stringify({date:new Date().toISOString(), why:why||'', db:db})); } catch(_) {}
+  }
+  // Données d'un autre compte/agence : on les met de côté, on ne les mélange JAMAIS avec l'agence courante.
+  function quarantine(db, owner){
+    try {
+      localStorage.setItem('gp_quarantine_'+stamp(), JSON.stringify({owner:owner, date:new Date().toISOString(), db:db}));
+      keepOnly('gp_quarantine_', 3);
+    } catch(_) {}
+  }
+  function idsOf(list){ var m={}; (list||[]).forEach(function(r){ if(r && r.id!=null) m[String(r.id)]=1; }); return m; }
+  // Fusion non destructive : union par id, la version locale (modifiée) l'emporte.
+  function mergeData(cloud, local){
+    var out = JSON.parse(JSON.stringify(cloud || {}));
+    Object.keys(local || {}).forEach(function(k){
+      var lv = local[k], cv = out[k];
+      if(Array.isArray(lv)) {
+        var res = Array.isArray(cv) ? cv.slice() : [];
+        var pos = {}; res.forEach(function(r,i){ if(r && r.id!=null) pos[String(r.id)] = i; });
+        lv.forEach(function(r){
+          if(r && r.id!=null && pos[String(r.id)]!=null) res[pos[String(r.id)]] = r; else res.push(r);
+        });
+        out[k] = res;
+      } else if(lv && typeof lv === 'object') {
+        out[k] = Object.assign({}, cv && typeof cv==='object' ? cv : {}, lv);
+      } else if(lv != null) out[k] = lv;
+    });
+    return out;
+  }
+  // Tout ce qui est local existe-t-il dans le cloud ?
+  function cloudCoversLocal(cloud, local){
+    var ok = true;
+    ['employes','proprietaires','locataires','biens','locatives','contrats','paiements','depenses','fichiers','messages','conversations','agenda'].forEach(function(k){
+      var c = idsOf(cloud && cloud[k]);
+      (local && local[k] || []).forEach(function(r){ if(r && r.id!=null && !c[String(r.id)]) ok = false; });
+    });
+    return ok && countRecords(cloud) >= countRecords(local);
+  }
+
+  var syncing = null;
   // Aligne les données locales et le cloud (connexion ET restauration de session).
-  async function syncData(){
-    if(!(window.GPSupabase && typeof window.GPSupabase.pull==='function')) {
+  // L'envoi vers le cloud reste bloqué (GPSupabase.isReady() === false) tant que cette
+  // étape n'a pas abouti : une base locale vide ne peut donc plus écraser le cloud.
+  function syncData(){
+    if(syncing) return syncing;
+    syncing = doSyncData().finally(function(){ syncing = null; });
+    return syncing;
+  }
+  async function doSyncData(){
+    var A = window.GPSupabase;
+    if(!(A && typeof A.pull==='function')) {
       if(window.GPDB && typeof window.GPDB.load==='function') window.GPDB.load();
       return;
     }
+    if(A.setReady) A.setReady(false);
+    var u = window.currentUser || {};
+    var owner = String(u.agencyId || u.id || '');
     var local = window.GPDB && typeof window.GPDB.load==='function' ? window.GPDB.load() : (window.DB || {});
     var localDirty = false;
     try { localDirty = !!localStorage.getItem('gp_data_dirty_at'); } catch(_) {}
+
     try {
-      // Toujours récupérer la version serveur pour initialiser le verrou de concurrence.
-      var cloud = await window.GPSupabase.pull({applyToLocal:false});
-      var cloudCount = countRecords(cloud), localCount = countRecords(local);
-      if((localDirty || cloudCount===0) && localCount>0 && window.GPSupabase.push) {
-        // Modifications locales non synchronisées (ou cloud encore vide) : on les envoie.
-        try {
-          await window.GPSupabase.push(local);
-          try { localStorage.removeItem('gp_data_dirty_at'); } catch(_) {}
-        } catch(syncErr) {
-          console.warn('[GPSupabaseAuth] Modification locale non synchronisée:', syncErr.message || syncErr);
-          if(window.toast) window.toast('Une modification locale n’a pas pu être synchronisée. Vos données locales sont conservées.', 'err');
-        }
-      } else if(cloud && cloudCount>0 && window.GPDB && typeof window.GPDB.save==='function') {
-        // Sans modification locale en attente, le cloud est la source de vérité.
-        // force:true : sinon la révision locale (plus élevée) bloque l'écriture.
-        window.GPDB.save(cloud,{silent:true,skipCloud:true,force:true});
-        try { window.dispatchEvent(new CustomEvent('gp:supabase:pulled')); } catch(_) {}
+      // 1) Propriétaire du cache : jamais de mélange entre comptes/agences.
+      var cacheOwner = '';
+      try { cacheOwner = localStorage.getItem('gp_cache_owner') || ''; } catch(_) {}
+      if(owner && cacheOwner && cacheOwner !== owner && countRecords(local) > 0) {
+        quarantine(local, cacheOwner);
+        try { ['geniusproperty_db_clean_v1','geniusproperty_db_authoritative_v1','gpdb_local_revision','gp_data_dirty_at'].forEach(function(k){ localStorage.removeItem(k); }); } catch(_) {}
+        local = window.GPDB.load(); localDirty = false;
+        if(window.toast) window.toast('Les données locales d’un autre compte ont été mises de côté.', 'warn');
       }
-    } catch(e) { console.warn('[GPSupabaseAuth] Chargement données:', e.message || e); }
+      if(owner) { try { localStorage.setItem('gp_cache_owner', owner); } catch(_) {} }
+
+      // 2) Sauvegarde locale non synchronisée laissée par une déconnexion forcée.
+      var rec = readJSON('gp_recovery_snapshot');
+      if(rec && rec.db && countRecords(rec.db) > 0 && (!rec.owner || rec.owner === owner) && countRecords(local) === 0) {
+        if(confirm('Une sauvegarde locale NON synchronisée (' + countRecords(rec.db) + ' enregistrements) a été conservée lors de votre dernière déconnexion.\n\nLa restaurer maintenant ?')) {
+          window.GPDB.save(rec.db, {silent:true, force:true});
+          try { localStorage.removeItem('gp_recovery_snapshot'); } catch(_) {}
+          local = window.GPDB.load();
+          localDirty = true;
+        }
+      }
+
+      // 3) État du cloud
+      var cloud = await A.pull({applyToLocal:false});
+      var cloudCount = countRecords(cloud), localCount = countRecords(local);
+
+      if(cloudCount === 0 && localCount > 0) {
+        // Cloud vide, local rempli : on envoie le local.
+        await A.push(local, {bootstrap:true});
+        try { localStorage.removeItem('gp_data_dirty_at'); } catch(_) {}
+      } else if(cloudCount > 0 && localCount === 0) {
+        // Local vide : on charge le cloud.
+        window.GPDB.save(cloud, {silent:true, skipCloud:true, force:true});
+        try { window.dispatchEvent(new CustomEvent('gp:supabase:pulled')); } catch(_) {}
+      } else if(cloudCount > 0 && localCount > 0) {
+        if(localDirty) {
+          // Les deux côtés ont des données et le local a des modifications en attente : FUSION.
+          safetySnapshot(local, 'avant fusion');
+          var merged = mergeData(cloud, local);
+          window.GPDB.save(merged, {silent:true, force:true});
+          await A.push(merged, {bootstrap:true});
+          try { localStorage.removeItem('gp_data_dirty_at'); } catch(_) {}
+          try { window.dispatchEvent(new CustomEvent('gp:supabase:pulled')); } catch(_) {}
+        } else {
+          // Pas de modification locale en attente : le cloud est la source de vérité,
+          // mais on garde une copie de sécurité du local avant de le remplacer.
+          if(!cloudCoversLocal(cloud, local)) safetySnapshot(local, 'avant remplacement par le cloud');
+          window.GPDB.save(cloud, {silent:true, skipCloud:true, force:true});
+          try { window.dispatchEvent(new CustomEvent('gp:supabase:pulled')); } catch(_) {}
+        }
+      }
+      if(A.setReady) A.setReady(true);   // les envois sont maintenant autorisés
+    } catch(e) {
+      // Échec (réseau, droits…) : envois BLOQUÉS, données locales conservées, nouvelle tentative automatique.
+      console.warn('[GPSupabaseAuth] Chargement données:', e && e.message || e);
+      if(window.toast) window.toast('Synchronisation impossible pour le moment. Vos données locales sont conservées ; nouvelle tentative automatique.', 'err');
+    }
   }
 
   async function login(ev){
@@ -164,35 +281,66 @@
     }
   }
 
+  // Envoie TOUT vers le cloud puis relit le serveur pour confirmer que rien ne manque.
+  async function flushAndVerify(){
+    var A = window.GPSupabase;
+    if(!A || !A.available || !A.available() || !A.currentUid || !A.currentUid() || !window.GPDB) return false;
+    try {
+      if(!A.isReady()) await syncData();
+      if(!A.isReady()) return false;
+      var local = window.GPDB.load();
+      if(countRecords(local) > 0) await A.push(local);
+      var cloud = await A.pull({applyToLocal:false});
+      return cloudCoversLocal(cloud, local);
+    } catch(e) {
+      console.warn('[GPSupabaseAuth] vérification avant déconnexion:', e && e.message || e);
+      return false;
+    }
+  }
+
   async function signOut(){
-    // Avant d'effacer le cache local, on envoie les modifications en attente.
-    var dirtyNow = false;
-    try { dirtyNow = !!localStorage.getItem('gp_data_dirty_at'); } catch(_) {}
-    if(dirtyNow && window.GPSupabase && window.GPSupabase.available && window.GPSupabase.available() && window.GPDB) {
-      try {
-        await window.GPSupabase.push(window.GPDB.load());
-        try { localStorage.removeItem('gp_data_dirty_at'); } catch(_) {}
-      } catch(flushErr) {
-        if(!confirm('Des modifications ne sont pas encore synchronisées et seront PERDUES si vous vous déconnectez maintenant. Se déconnecter quand même ?')) return false;
+    var A = window.GPSupabase;
+    var local = window.GPDB && typeof window.GPDB.load==='function' ? window.GPDB.load() : (window.DB || {});
+    var hasData = countRecords(local) > 0;
+    var keepRecovery = false;
+
+    // 1) On ne supprime RIEN tant que le serveur n'a pas confirmé qu'il possède toutes les données.
+    if(hasData) {
+      var verified = await flushAndVerify();
+      if(!verified) {
+        var go = confirm('⚠ Vos données n’ont PAS pu être confirmées dans le cloud (connexion, droits ou conflit).\n\n' +
+          'OK = télécharger une sauvegarde JSON maintenant, puis vous déconnecter (une copie reste aussi dans ce navigateur).\n' +
+          'Annuler = rester connecté.');
+        if(!go) return false;
+        try {
+          window.GPDB.exportJSON('genius-property-SAUVEGARDE-avant-deconnexion-' + stamp() + '.json');
+        } catch(e) {
+          alert('La sauvegarde JSON a échoué : déconnexion annulée pour protéger vos données.');
+          return false;
+        }
+        keepRecovery = true;
       }
     }
-    try { if(window.GPSupabase && window.GPSupabase.available()) await window.GPSupabase.client().auth.signOut(); } catch(_) {}
+
+    // 2) Copie de secours conservée si la synchro n'est pas confirmée (restaurable à la prochaine connexion).
+    if(keepRecovery) {
+      try {
+        var u = window.currentUser || {};
+        localStorage.setItem('gp_recovery_snapshot', JSON.stringify({
+          owner: String(u.agencyId || u.id || localStorage.getItem('gp_cache_owner') || ''),
+          date: new Date().toISOString(), db: local
+        }));
+      } catch(_) {}
+    }
+
+    try { if(A && A.available()) await A.client().auth.signOut(); } catch(_) {}
     window._supabaseCurrentUser=null;
     window.currentUser=null;
-    // Un poste partagé ne doit pas conserver les données métier après déconnexion.
-    // On supprime les caches connus ; la configuration Supabase reste conservée.
-    try {
-      [
-        'gp_session_name','gp_session_firstname','gp_session_role',
-        'geniusproperty_db_clean_v1','geniusproperty_db_authoritative_v1',
-        'geniusproperty_last_backup_snapshot','geniusproperty_last_backup_date',
-        'gpdb_local_revision','gp_data_dirty_at'
-      ].forEach(function(k){ localStorage.removeItem(k); });
-      for(var i=localStorage.length-1;i>=0;i--){
-        var k=localStorage.key(i);
-        if(k && k.indexOf('geniusproperty_backup_')===0) localStorage.removeItem(k);
-      }
-    } catch(_) {}
+    if(A && A.reset) A.reset();
+
+    // 3) Poste partagé : on efface le cache métier seulement maintenant (données déjà sécurisées).
+    try { ['gp_session_name','gp_session_firstname','gp_session_role'].forEach(function(k){ localStorage.removeItem(k); }); } catch(_) {}
+    clearLocalCache();
     try { window.DB = null; } catch(_) {}
     emitAuth(null);
   }
@@ -249,6 +397,8 @@
     signIn:login,
     signOut:signOut,
     restoreSession:restoreSession,
+    syncData:syncData,
+    clearCache:clearLocalCache,
     hydrateCurrentUser:hydrateCurrentUser,
     resetPassword:resetPassword,
     createEmployeeAccount:createEmployeeAccount,
