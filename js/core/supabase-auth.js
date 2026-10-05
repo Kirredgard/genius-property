@@ -202,7 +202,13 @@
       }
 
       // 3) État du cloud
+      // IMPORTANT : le pull est asynchrone. Une location (ou toute autre donnée)
+      // peut être créée localement pendant l'attente réseau. Il faut donc relire
+      // l'état local APRÈS le await, sinon on risque de travailler avec un snapshot
+      // obsolète et de remplacer la nouvelle donnée par l'ancien état du cloud.
       var cloud = await A.pull({applyToLocal:false});
+      local = window.GPDB && typeof window.GPDB.load==='function' ? window.GPDB.load() : (window.DB || {});
+      try { localDirty = !!localStorage.getItem('gp_data_dirty_at'); } catch(_) {}
       var cloudCount = countRecords(cloud), localCount = countRecords(local);
 
       if(cloudCount === 0 && localCount > 0) {
