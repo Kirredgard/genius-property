@@ -134,7 +134,7 @@
       '<td>' + (o.id ? '<input class="gps-taux" type="number" min="0" max="100" step="0.5" data-ot="' + esc(o.id) + '" value="' + (o.taux == null ? '' : o.taux) + '" placeholder="0">' : '—') + '</td>' +
       '<td class="r">' + fmt(o.aEnc) + '</td><td class="r g">' + fmt(o.paid) + '</td><td class="r o">' + fmt(o.reste) + (!st.arrears && o.arrears > 0 ? '<span class="gps-sub">+ ' + fmt(o.arrears) + ' arriérés</span>' : '') + '</td><td class="r b">' + fmt(o.commission) + '</td><td class="r r2">' + fmt(o.depTotal) + '</td>' +
       '<td class="r ' + (o.net < 0 ? 'neg' : 'g') + '"><b>' + fmt(o.net) + '</b>' + (o.reverse ? '<span class="gps-sub">reversé ' + fmt(o.reverse) + ' · reste ' + fmt(o.aReverser) + '</span>' : '') + '</td>' +
-      '<td class="r">' + (o.id && single && o.aReverser > 0 ? '<button class="gps-btn pri" data-rev="' + esc(o.id) + '" data-amt="' + o.aReverser + '">' + (o.reverse > 0 ? 'Reverser le reste' : 'Reverser') + '</button>' : '') + (o.id && o.net > 0 && o.aReverser <= 0 ? '<span class="gps-ok">✓ Reversé</span> <button class="gps-btn pri" data-bilan="' + esc(o.id) + '" title="Facture / bilan à remettre au propriétaire">🧾 Facture</button>' : '') + (o.id ? ' <button class="gps-btn" data-rel="' + esc(o.id) + '" title="Relevé à imprimer">🖨</button>' : '') + '</td></tr>';
+      '<td class="r">' + (o.id && single && o.aReverser > 0 ? '<button class="gps-btn pri" data-rev="' + esc(o.id) + '" data-amt="' + o.aReverser + '">' + (o.reverse > 0 ? 'Reverser le reste' : 'Reverser') + '</button>' : '') + (o.id && o.net > 0 && o.aReverser <= 0 ? '<span class="gps-ok">✓ Reversé</span> <button class="gps-btn pri" data-bilan="' + esc(o.id) + '" title="Facture / bilan à remettre au propriétaire">🧾 Facture</button>' : '') + (o.id && o.reverse > 0 ? ' <button class="gps-btn" data-hist="' + esc(o.id) + '" title="Modifier ou supprimer un reversement">✏️ Reversements</button>' : '') + (o.id ? ' <button class="gps-btn" data-rel="' + esc(o.id) + '" title="Relevé à imprimer">🖨</button>' : '') + '</td></tr>';
     if (open) {
       h += o.biens.map(r => '<tr class="gps-bien"><td>' + esc(r.nom) + '</td><td>' + (r.b && r.b.id ? '<input class="gps-taux" type="number" min="0" max="100" step="0.5" data-bt="' + esc(r.id) + '" value="' + (r.tauxBien == null ? '' : r.tauxBien) + '" placeholder="' + r.taux + (r.tauxHerite ? ' (hérité)' : '') + '">' : '—') + '</td>' +
         '<td class="r">' + fmt(r.aEnc) + '</td><td class="r g">' + fmt(r.paid) + '</td><td class="r o">' + fmt(r.reste) + (!st.arrears && r.arrears > 0 ? '<span class="gps-sub">+ ' + fmt(r.arrears) + ' arriérés</span>' : '') + '</td><td class="r b">' + fmt(r.commission) + '</td><td class="r r2">' + fmt(r.dep) + '</td><td class="r ' + (r.net < 0 ? 'neg' : '') + '">' + fmt(r.net) + '</td><td></td></tr>' +
@@ -159,6 +159,7 @@
       if (t.hasAttribute('data-export')) return exportCsv();
       if (t.dataset.rel) return printRelevé(t.dataset.rel);
       if (t.dataset.bilan) return printBilan(t.dataset.bilan);
+      if (t.dataset.hist) return showHistory(t.dataset.hist);
       if (t.dataset.rev) {
         const rg = range(), d = db(), o = (d.proprietaires || []).find(x => String(x.id) === t.dataset.rev);
         const dispo = Math.round(+t.dataset.amt);
@@ -203,17 +204,18 @@
   }
 
   /* ── Fenêtre de reversement : montant libre (≤ disponible) ou total ── */
-  function askPayout(nom, periode, dispo) {
+  function askPayout(nom, periode, dispo, init) {
+    init = init || null;
     return new Promise(resolve => {
       const ov = document.createElement('div'); ov.className = 'gps-ov';
       ov.innerHTML = '<style>.gps-ov{position:fixed;inset:0;background:rgba(17,24,39,.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px}.gps-md{background:#fff;border-radius:14px;padding:20px;width:100%;max-width:420px;font:13px Arial,sans-serif;box-shadow:0 20px 50px rgba(0,0,0,.25)}.gps-md h3{margin:0 0 4px;font-size:17px}.gps-md p{margin:0 0 12px;color:#6b7280}.gps-md label{display:block;font-weight:700;font-size:11px;color:#374151;margin:10px 0 4px}.gps-md input,.gps-md select{width:100%;box-sizing:border-box;height:38px;border:1px solid #e5e7eb;border-radius:8px;padding:0 10px;font-size:14px}.gps-dispo{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px;color:#166534;font-weight:700}.gps-q{display:flex;gap:8px;margin-top:8px}.gps-q button{flex:1}.gps-err{color:#dc2626;font-size:12px;min-height:16px;margin-top:6px}.gps-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}.gps-md .gps-btn{padding:8px 14px}.gps-md .gps-btn.pri{background:#111827;color:#fff;border-color:#111827}</style>' +
-        '<div class="gps-md"><h3>Reversement</h3><p>' + esc(nom) + ' · ' + esc(periode) + '</p>' +
-        '<div class="gps-dispo">Disponible à reverser : ' + fmt(dispo) + '</div>' +
+        '<div class="gps-md"><h3>' + (init ? 'Modifier le reversement' : 'Reversement') + '</h3><p>' + esc(nom) + ' · ' + esc(periode) + '</p>' +
+        '<div class="gps-dispo">' + (init ? 'Maximum possible pour ce reversement : ' : 'Disponible à reverser : ') + fmt(dispo) + '</div>' +
         '<div class="gps-q"><button type="button" class="gps-btn pri" id="gpmTot">Reverser le total</button><button type="button" class="gps-btn" id="gpmPart">Montant partiel</button></div>' +
-        '<label>Montant à reverser (FCFA)</label><input id="gpmAmt" type="number" min="1" max="' + dispo + '" step="1" value="' + dispo + '">' +
+        '<label>Montant à reverser (FCFA)</label><input id="gpmAmt" type="number" min="1" max="' + dispo + '" step="1" value="' + (init ? init.montant : dispo) + '">' +
         '<label>Mode de paiement</label><select id="gpmMode"><option>Espèces</option><option>Virement</option><option>Wave</option><option>Orange Money</option><option>Chèque</option></select>' +
-        '<label>Date</label><input id="gpmDate" type="date" value="' + new Date().toISOString().slice(0, 10) + '">' +
-        '<label>Note (facultatif)</label><input id="gpmNote" type="text" placeholder="Ex : acompte, solde…">' +
+        '<label>Date</label><input id="gpmDate" type="date" value="' + (init && init.date ? init.date : new Date().toISOString().slice(0, 10)) + '">' +
+        '<label>Note (facultatif)</label><input id="gpmNote" type="text" placeholder="Ex : acompte, solde…" value="' + esc(init ? init.note || '' : '') + '">' +
         '<div class="gps-err" id="gpmErr"></div><div class="gps-foot"><button type="button" class="gps-btn" id="gpmNo">Annuler</button><button type="button" class="gps-btn pri" id="gpmOk">Confirmer</button></div></div>';
       document.body.appendChild(ov);
       const g = id => ov.querySelector('#' + id), amt = g('gpmAmt'), done = v => { ov.remove(); resolve(v); };
@@ -227,8 +229,41 @@
         if (m > dispo) { g('gpmErr').textContent = 'Le montant dépasse le disponible (' + fmt(dispo) + ').'; return; }
         done({ montant: m, mode: g('gpmMode').value, date: g('gpmDate').value || new Date().toISOString().slice(0, 10), note: g('gpmNote').value.trim() });
       };
+      if (init && init.mode) g('gpmMode').value = init.mode;
       amt.focus(); amt.select();
     });
+  }
+
+  /* ── Historique des reversements : modifier / supprimer ── */
+  function showHistory(id) {
+    const rg = range(), d = db(), o = compute(d, rg.from, rg.to, false).find(x => x.id === id);
+    const list = (d.reversements || []).filter(v => String(v.proprietaireId) === id && v.periode >= rg.from && v.periode <= rg.to);
+    const old = document.querySelector('.gps-ov.hist'); if (old) old.remove();
+    const ov = document.createElement('div'); ov.className = 'gps-ov hist';
+    ov.innerHTML = '<style>.gps-ov{position:fixed;inset:0;background:rgba(17,24,39,.5);z-index:99998;display:flex;align-items:center;justify-content:center;padding:16px}.gps-md{background:#fff;border-radius:14px;padding:20px;width:100%;max-width:520px;max-height:85vh;overflow:auto;font:13px Arial,sans-serif}.gps-md h3{margin:0 0 4px;font-size:17px}.gps-md p{margin:0 0 12px;color:#6b7280}.gps-md table{width:100%;border-collapse:collapse}.gps-md td,.gps-md th{padding:7px 6px;border-top:1px solid #f1f5f9;text-align:left;font-size:12px}.gps-md .r{text-align:right;white-space:nowrap}.gps-btn{border:1px solid #e5e7eb;background:#fff;border-radius:8px;padding:5px 9px;font-size:12px;font-weight:700;cursor:pointer}</style>' +
+      '<div class="gps-md"><h3>Reversements — ' + esc(o ? o.nom : '') + '</h3><p>' + esc(rg.label) + '</p><table><tr><th>Date</th><th>Mode</th><th>Note</th><th class="r">Montant</th><th></th></tr>' +
+      (list.length ? list.map(v => '<tr><td>' + dFr(v.date) + '</td><td>' + esc(v.mode || '') + '</td><td>' + esc(v.note || '') + '</td><td class="r">' + fmt(num(v.montant)) + '</td><td class="r"><button class="gps-btn" data-e="' + esc(v.id) + '">Modifier</button> <button class="gps-btn" data-d="' + esc(v.id) + '" style="color:#dc2626">Supprimer</button></td></tr>').join('') : '<tr><td colspan="5">Aucun reversement</td></tr>') +
+      '</table><div style="text-align:right;margin-top:12px"><button class="gps-btn" data-x="1">Fermer</button></div></div>';
+    document.body.appendChild(ov);
+    ov.onclick = async e => {
+      if (e.target === ov || e.target.dataset.x) return ov.remove();
+      const eid = e.target.dataset.e, did = e.target.dataset.d; if (!eid && !did) return;
+      const dd = db(), v = (dd.reversements || []).find(x => String(x.id) === (eid || did)); if (!v) return;
+      if (did) {
+        const ok = window.GPForms && GPForms.confirm ? await GPForms.confirm('Supprimer ce reversement de ' + fmt(num(v.montant)) + ' ?', { title: 'Suppression', okText: 'Supprimer' }) : confirm('Supprimer ce reversement de ' + fmt(num(v.montant)) + ' ?');
+        if (!ok) return;
+        dd.reversements = dd.reversements.filter(x => x !== v); await save(dd); notify('Reversement supprimé ✓');
+      } else {
+        const cur = compute(dd, rg.from, rg.to, false).find(x => x.id === id);
+        const max = Math.round((cur ? cur.aReverser : 0) + num(v.montant));
+        ov.style.display = 'none';
+        const res = await askPayout(ownerName((dd.proprietaires || []).find(x => String(x.id) === id) || {}), monthLabel(v.periode), max, { montant: Math.round(num(v.montant)), mode: v.mode, date: v.date, note: v.note });
+        ov.style.display = '';
+        if (!res) return;
+        v.montant = res.montant; v.mode = res.mode; v.date = res.date; v.note = res.note; await save(dd); notify('Reversement modifié ✓');
+      }
+      render(); showHistory(id);
+    };
   }
 
   const LS = k => { try { return localStorage.getItem(k) || ''; } catch (_) { return ''; } };
