@@ -311,8 +311,9 @@
       .gpe-btn:hover{border-color:#cbd5e1}.gpe-btn.pri{background:var(--g);border-color:var(--g);color:#111}.gpe-btn.sm{height:30px;padding:0 10px;font-size:11px}.gpe-btn[disabled]{opacity:.45;cursor:default}
       .gpe-btn .material-symbols-rounded{font-size:16px}
       .gpe-month{display:flex;align-items:center;border:1px solid #e5e7eb;border-radius:9px;background:#fff;height:36px;overflow:hidden}
-      .gpe-month button{border:0;background:none;width:30px;height:100%;cursor:pointer;color:#374151}.gpe-month button:hover{background:#f8fafc}
-      .gpe-month span{min-width:128px;text-align:center;font-size:12px;font-weight:900}
+      .gpe-month button{border:0;background:none;width:30px;min-width:30px;flex:0 0 30px;height:100%;padding:0;cursor:pointer;color:#374151;display:inline-flex;align-items:center;justify-content:center}.gpe-month button:hover{background:#f8fafc}
+      .gpe-month button .material-symbols-rounded{min-width:0;width:auto;font-size:18px;line-height:1}
+      .gpe-month>span{min-width:128px;text-align:center;font-size:12px;font-weight:900}
       .gpe-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}
       .gpe-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
       .gpe-card small{display:block;color:var(--mut);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
