@@ -82,8 +82,11 @@
       ow.due = sum(ow.biens, 'due'); ow.arrears = sum(ow.biens, 'arrears'); ow.paid = sum(ow.biens, 'paid'); ow.reste = sum(ow.biens, 'reste'); ow.aEnc = sum(ow.biens, 'aEnc');
       ow.commission = sum(ow.biens, 'commission'); ow.depTotal = sum(ow.biens, 'dep') + ow.dep;
       ow.net = ow.paid - ow.commission - ow.depTotal;
-      ow.reverse = (d.reversements || []).filter(v => String(v.proprietaireId) === ow.id && v.periode >= from && v.periode <= to).reduce((s, v) => s + num(v.montant), 0);
-      ow.aReverser = Math.max(0, ow.net - ow.reverse);
+      const pv = (d.reversements || []).filter(v => String(v.proprietaireId) === ow.id && v.periode >= from && v.periode <= to);
+      ow.reverse = pv.filter(v => v.type !== 'avance').reduce((s, v) => s + num(v.montant), 0);
+      ow.avance = pv.filter(v => v.type === 'avance').reduce((s, v) => s + num(v.montant), 0);
+      /* Solde = net dû − reversé − avances de fonds. Il peut être NÉGATIF : c'est alors une avance à récupérer. */
+      ow.aReverser = ow.net - ow.reverse - ow.avance;
     });
     return all;
   }
@@ -110,7 +113,7 @@
       '<div class="gps-actions">' + periodBar(rg) + '<button class="gps-btn" data-export>Exporter CSV</button></div></div>' +
       '<div class="gps-cards">' + card(st.arrears ? 'À encaisser (loyer + arriérés)' : 'À encaisser (période)', T('aEnc')) + card('Encaissé', T('paid'), 'g') + card('Reste à encaisser', T('reste'), 'o') +
       card('Arriérés antérieurs', T('arrears'), 'o', st.arrears ? 'inclus dans le reste' : 'avant la période — non inclus') +
-      card('Ma commission', T('commission'), 'b', 'sur le loyer encaissé') + actCard(rg, T('commission')) + card('Dépenses déduites', T('depTotal'), 'r2', 'facturables aux propriétaires') + card('À reverser aux propriétaires', T('aReverser'), 'g', 'déjà reversé : ' + fmt(T('reverse'))) + '</div>' +
+      card('Ma commission', T('commission'), 'b', 'sur le loyer encaissé') + actCard(rg, T('commission')) + card('Dépenses déduites', T('depTotal'), 'r2', 'facturables aux propriétaires') + card('À reverser aux propriétaires', all.reduce((s, o) => s + Math.max(0, o.aReverser), 0), 'g', 'déjà reversé : ' + fmt(T('reverse')) + (T('avance') ? ' · avances à récupérer : ' + fmt(all.reduce((s, o) => s + Math.max(0, -o.aReverser), 0)) : '')) + '</div>' +
       (noTaux ? '<div class="gps-banner">Certains propriétaires n’ont pas de taux de commission (0 % appliqué). Renseignez-le dans la colonne « Taux ».</div>' : '') +
       '<input class="gps-search" id="gpsQ" placeholder="Rechercher un propriétaire ou un bien…" value="' + esc(st.q) + '">' +
       '<div class="gps-table"><table><thead><tr><th>Propriétaire / Bien</th><th>Taux %</th><th class="r">À encaisser</th><th class="r">Encaissé</th><th class="r">Reste</th><th class="r">Commission</th><th class="r">Dépenses</th><th class="r">À reverser</th><th></th></tr></thead><tbody>' +
@@ -133,8 +136,8 @@
     let h = '<tr class="gps-owner"><td><button class="gps-tog" data-tog="' + esc(o.id || 'none') + '">' + (open ? '▾' : '▸') + '</button><b>' + esc(o.nom) + '</b><span class="gps-sub">' + o.biens.length + ' bien(s)</span></td>' +
       '<td>' + (o.id ? '<input class="gps-taux" type="number" min="0" max="100" step="0.5" data-ot="' + esc(o.id) + '" value="' + (o.taux == null ? '' : o.taux) + '" placeholder="0">' : '—') + '</td>' +
       '<td class="r">' + fmt(o.aEnc) + '</td><td class="r g">' + fmt(o.paid) + '</td><td class="r o">' + fmt(o.reste) + (!st.arrears && o.arrears > 0 ? '<span class="gps-sub">+ ' + fmt(o.arrears) + ' arriérés</span>' : '') + '</td><td class="r b">' + fmt(o.commission) + '</td><td class="r r2">' + fmt(o.depTotal) + '</td>' +
-      '<td class="r ' + (o.net < 0 ? 'neg' : 'g') + '"><b>' + fmt(o.net) + '</b>' + (o.reverse ? '<span class="gps-sub">reversé ' + fmt(o.reverse) + ' · reste ' + fmt(o.aReverser) + '</span>' : '') + '</td>' +
-      '<td class="r">' + (o.id && single && o.aReverser > 0 ? '<button class="gps-btn pri" data-rev="' + esc(o.id) + '" data-amt="' + o.aReverser + '">' + (o.reverse > 0 ? 'Reverser le reste' : 'Reverser') + '</button>' : '') + (o.id && o.net > 0 && o.aReverser <= 0 ? '<span class="gps-ok">✓ Reversé</span>' : '') + (o.id && o.reverse > 0 ? ' <button class="gps-btn" data-hist="' + esc(o.id) + '" title="Modifier ou supprimer un reversement" aria-label="Modifier ou supprimer un reversement">✏️</button>' : '') + (o.id ? ' <button class="gps-btn" data-bilan="' + esc(o.id) + '" title="Facture / bilan à remettre au propriétaire">🖨</button>' : '') + '</td></tr>';
+      '<td class="r ' + (o.net < 0 ? 'neg' : 'g') + '"><b>' + fmt(o.net) + '</b>' + ((o.reverse || o.avance) ? '<span class="gps-sub">' + (o.reverse ? 'reversé ' + fmt(o.reverse) : '') + (o.reverse && o.avance ? ' · ' : '') + (o.avance ? 'avance ' + fmt(o.avance) : '') + (o.aReverser < 0 ? ' · <b class="neg">avance à récupérer ' + fmt(-o.aReverser) + '</b>' : ' · reste ' + fmt(o.aReverser)) + '</span>' : '') + '</td>' +
+      '<td class="r">' + (o.id && single ? '<button class="gps-btn pri" data-rev="' + esc(o.id) + '" data-amt="' + Math.max(0, Math.round(o.aReverser)) + '" title="Reverser au propriétaire ou lui avancer des fonds">' + (o.aReverser <= 0 ? 'Reverser / Avance' : (o.reverse > 0 ? 'Reverser le reste' : 'Reverser')) + '</button>' : '') + (o.id && o.net > 0 && o.aReverser === 0 ? ' <span class="gps-ok">✓ Reversé</span>' : '') + (o.id && (o.reverse > 0 || o.avance > 0) ? ' <button class="gps-btn" data-hist="' + esc(o.id) + '" title="Modifier ou supprimer un reversement" aria-label="Modifier ou supprimer un reversement">✏️</button>' : '') + (o.id ? ' <button class="gps-btn" data-bilan="' + esc(o.id) + '" title="Facture / bilan à remettre au propriétaire">🖨</button>' : '') + '</td></tr>';
     if (open) {
       h += o.biens.map(r => '<tr class="gps-bien"><td>' + esc(r.nom) + '</td><td>' + (r.b && r.b.id ? '<input class="gps-taux" type="number" min="0" max="100" step="0.5" data-bt="' + esc(r.id) + '" value="' + (r.tauxBien == null ? '' : r.tauxBien) + '" placeholder="' + r.taux + (r.tauxHerite ? ' (hérité)' : '') + '">' : '—') + '</td>' +
         '<td class="r">' + fmt(r.aEnc) + '</td><td class="r g">' + fmt(r.paid) + '</td><td class="r o">' + fmt(r.reste) + (!st.arrears && r.arrears > 0 ? '<span class="gps-sub">+ ' + fmt(r.arrears) + ' arriérés</span>' : '') + '</td><td class="r b">' + fmt(r.commission) + '</td><td class="r r2">' + fmt(r.dep) + '</td><td class="r ' + (r.net < 0 ? 'neg' : '') + '">' + fmt(r.net) + '</td><td></td></tr>' +
@@ -164,10 +167,12 @@
         const dispo = Math.round(+t.dataset.amt);
         const res = await askPayout(ownerName(o || {}), monthLabel(rg.from), dispo); if (!res) return;
         d.reversements = d.reversements || [];
-        d.reversements.unshift({ id: 'RV-' + Date.now().toString(36), proprietaireId: t.dataset.rev, periode: rg.from, montant: res.montant, date: res.date, mode: res.mode, note: res.note || '' });
+        const base = { proprietaireId: t.dataset.rev, periode: rg.from, date: res.date, mode: res.mode, note: res.note || '' }, uid = Date.now().toString(36);
+        if (res.avance > 0) d.reversements.unshift(Object.assign({ id: 'AV-' + uid, type: 'avance', montant: res.avance }, base));
+        if (res.montant > 0) d.reversements.unshift(Object.assign({ id: 'RV-' + uid, montant: res.montant }, base));
         await save(d);
-        const reste = dispo - res.montant;
-        notify(reste > 0 ? 'Reversement partiel enregistré ✓ — reste ' + fmt(reste) : 'Reversement total enregistré ✓ — vous pouvez éditer la facture');
+        const reste = dispo - res.montant - res.avance;
+        notify(res.avance > 0 ? 'Avance de fonds ' + fmt(res.avance) + ' enregistrée ✓' + (reste < 0 ? ' — à récupérer : ' + fmt(-reste) : '') : reste > 0 ? 'Reversement partiel enregistré ✓ — reste ' + fmt(reste) : 'Reversement total enregistré ✓ — vous pouvez éditer la facture');
         render();
       }
     };
@@ -193,34 +198,50 @@
     const csv = '\ufeff' + lines(compute(db(), range().from, range().to, st.arrears)).map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(';')).join('\n');
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'situation-proprietaires-' + (range().from === range().to ? range().from : range().from + '_' + range().to) + '.csv'; a.click();
   }
-  /* ── Fenêtre de reversement : montant libre (≤ disponible) ou total ── */
+  /* ── Fenêtre de reversement : reversement (≤ disponible) + avance de fonds (libre) ── */
   function askPayout(nom, periode, dispo, init) {
     init = init || null;
+    const isAv = !!(init && init.type === 'avance'), noFunds = !(dispo > 0);
     return new Promise(resolve => {
       const ov = document.createElement('div'); ov.className = 'gps-ov';
-      ov.innerHTML = '<style>.gps-ov{position:fixed;inset:0;background:rgba(17,24,39,.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px}.gps-md{background:#fff;border-radius:14px;padding:20px;width:100%;max-width:420px;font:13px Arial,sans-serif;box-shadow:0 20px 50px rgba(0,0,0,.25)}.gps-md h3{margin:0 0 4px;font-size:17px}.gps-md p{margin:0 0 12px;color:#6b7280}.gps-md label{display:block;font-weight:700;font-size:11px;color:#374151;margin:10px 0 4px}.gps-md input,.gps-md select{width:100%;box-sizing:border-box;height:38px;border:1px solid #e5e7eb;border-radius:8px;padding:0 10px;font-size:14px}.gps-dispo{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px;color:#166534;font-weight:700}.gps-q{display:flex;gap:8px;margin-top:8px}.gps-q button{flex:1}.gps-err{color:#dc2626;font-size:12px;min-height:16px;margin-top:6px}.gps-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}.gps-md .gps-btn{padding:8px 14px}.gps-md .gps-btn.pri{background:#111827;color:#fff;border-color:#111827}</style>' +
-        '<div class="gps-md"><h3>' + (init ? 'Modifier le reversement' : 'Reversement') + '</h3><p>' + esc(nom) + ' · ' + esc(periode) + '</p>' +
-        '<div class="gps-dispo">' + (init ? 'Maximum possible pour ce reversement : ' : 'Disponible à reverser : ') + fmt(dispo) + '</div>' +
-        '<div class="gps-q"><button type="button" class="gps-btn pri" id="gpmTot">Reverser le total</button><button type="button" class="gps-btn" id="gpmPart">Montant partiel</button></div>' +
-        '<label>Montant à reverser (FCFA)</label><input id="gpmAmt" type="number" min="1" max="' + dispo + '" step="1" value="' + (init ? init.montant : dispo) + '">' +
+      const showRev = !isAv, showAv = isAv || !init;
+      ov.innerHTML = '<style>.gps-ov{position:fixed;inset:0;background:rgba(17,24,39,.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px}.gps-md{background:#fff;border-radius:14px;padding:20px;width:100%;max-width:420px;font:13px Arial,sans-serif;box-shadow:0 20px 50px rgba(0,0,0,.25)}.gps-md h3{margin:0 0 4px;font-size:17px}.gps-md p{margin:0 0 12px;color:#6b7280}.gps-md label{display:block;font-weight:700;font-size:11px;color:#374151;margin:10px 0 4px}.gps-md input,.gps-md select{width:100%;box-sizing:border-box;height:38px;border:1px solid #e5e7eb;border-radius:8px;padding:0 10px;font-size:14px}.gps-dispo{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px;color:#166534;font-weight:700}.gps-q{display:flex;gap:8px;margin-top:8px}.gps-q button{flex:1}.gps-err{color:#dc2626;font-size:12px;min-height:16px;margin-top:6px}.gps-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}.gps-md .gps-btn{padding:8px 14px}.gps-md .gps-btn.pri{background:#111827;color:#fff;border-color:#111827}.gps-md{max-height:92vh;overflow:auto}.gps-dispo.warn{background:#fff7ed;border-color:#fed7aa;color:#c2410c}.gps-av{border:1px dashed #fdba74;background:#fff7ed;border-radius:10px;padding:10px 12px;margin-top:12px}.gps-av h4{margin:0 0 2px;font-size:12px;color:#9a3412}.gps-av small{display:block;color:#9a3412;margin-bottom:4px;font-size:11px}.gps-sum{margin-top:12px;border:1px solid #e5e7eb;border-radius:10px;padding:8px 12px;background:#f8fafc}.gps-sum div{display:flex;justify-content:space-between;padding:3px 0;font-size:12px}.gps-sum .tot{border-top:1px solid #e5e7eb;margin-top:4px;padding-top:6px;font-weight:800}.gps-sum .neg{color:#dc2626;font-weight:800}.gps-sum .ok{color:#16a34a;font-weight:800}</style>' +
+        '<div class="gps-md"><h3>' + (init ? (isAv ? 'Modifier l\u2019avance de fonds' : 'Modifier le reversement') : 'Reversement') + '</h3><p>' + esc(nom) + ' · ' + esc(periode) + '</p>' +
+        (isAv ? '' : '<div class="gps-dispo' + (noFunds ? ' warn' : '') + '">' + (init ? 'Maximum possible pour ce reversement : ' + fmt(dispo) : (noFunds ? 'Aucun fonds disponible à reverser — vous pouvez toutefois lui faire une avance.' : 'Disponible à reverser : ' + fmt(dispo))) + '</div>') +
+        (showRev ? '<div class="gps-q"><button type="button" class="gps-btn pri" id="gpmTot"' + (noFunds ? ' disabled style="opacity:.45;cursor:not-allowed"' : '') + '>Reverser le total</button><button type="button" class="gps-btn" id="gpmPart">Montant partiel</button></div>' +
+          '<label>Montant à reverser (FCFA)</label><input id="gpmAmt" type="number" min="0" max="' + Math.max(0, dispo) + '" step="1" value="' + (init ? init.montant : (noFunds ? '' : dispo)) + '" placeholder="0">' : '') +
+        (showAv ? '<div class="gps-av"><h4>Avance de fonds</h4><small>Somme prêtée au propriétaire sur les fonds de l\u2019agence. Elle est déduite de son solde « à reverser ».</small>' +
+          '<input id="gpmAv" type="number" min="0" step="1" value="' + (isAv ? init.montant : '') + '" placeholder="0"></div>' : '') +
+        (init ? '' : '<div class="gps-sum"><div><span>Reversement</span><b id="gpsR">0 FCFA</b></div><div><span>Avance de fonds</span><b id="gpsA">0 FCFA</b></div><div class="tot"><span>Total remis au propriétaire</span><b id="gpsT">0 FCFA</b></div><div><span id="gpsSL">Solde après opération</span><b id="gpsS">0 FCFA</b></div></div>') +
         '<label>Mode de paiement</label><select id="gpmMode"><option>Espèces</option><option>Virement</option><option>Wave</option><option>Orange Money</option><option>Chèque</option></select>' +
         '<label>Date</label><input id="gpmDate" type="date" value="' + (init && init.date ? init.date : new Date().toISOString().slice(0, 10)) + '">' +
-        '<label>Note (facultatif)</label><input id="gpmNote" type="text" placeholder="Ex : acompte, solde…" value="' + esc(init ? init.note || '' : '') + '">' +
+        '<label>Note (facultatif)</label><input id="gpmNote" type="text" placeholder="Ex : acompte, solde, avance…" value="' + esc(init ? init.note || '' : '') + '">' +
         '<div class="gps-err" id="gpmErr"></div><div class="gps-foot"><button type="button" class="gps-btn" id="gpmNo">Annuler</button><button type="button" class="gps-btn pri" id="gpmOk">Confirmer</button></div></div>';
       document.body.appendChild(ov);
-      const g = id => ov.querySelector('#' + id), amt = g('gpmAmt'), done = v => { ov.remove(); resolve(v); };
-      g('gpmTot').onclick = () => { amt.value = dispo; g('gpmErr').textContent = ''; };
-      g('gpmPart').onclick = () => { amt.value = ''; amt.focus(); };
+      const g = id => ov.querySelector('#' + id), amt = g('gpmAmt'), av = g('gpmAv'), done = v => { ov.remove(); resolve(v); };
+      const vals = () => ({ m: amt ? Math.max(0, Math.round(num(amt.value))) : 0, a: av ? Math.max(0, Math.round(num(av.value))) : 0 });
+      const sum = () => {
+        if (!g('gpsR')) return; const v = vals(), left = dispo - v.m - v.a;
+        g('gpsR').textContent = fmt(v.m); g('gpsA').textContent = fmt(v.a); g('gpsT').textContent = fmt(v.m + v.a);
+        g('gpsSL').textContent = left < 0 ? 'Avance à récupérer sur les prochains reversements' : 'Solde après opération';
+        g('gpsS').textContent = fmt(Math.abs(left)); g('gpsS').className = left < 0 ? 'neg' : 'ok';
+      };
+      if (g('gpmTot')) g('gpmTot').onclick = () => { if (noFunds) return; amt.value = dispo; g('gpmErr').textContent = ''; sum(); };
+      if (g('gpmPart')) g('gpmPart').onclick = () => { amt.value = ''; amt.focus(); sum(); };
+      [amt, av].forEach(el => el && el.addEventListener('input', sum));
       g('gpmNo').onclick = () => done(null);
       ov.addEventListener('mousedown', e => { if (e.target === ov) done(null); });
       g('gpmOk').onclick = () => {
-        const m = Math.round(num(amt.value));
-        if (!(m > 0)) { g('gpmErr').textContent = 'Saisissez un montant supérieur à 0.'; return; }
-        if (m > dispo) { g('gpmErr').textContent = 'Le montant dépasse le disponible (' + fmt(dispo) + ').'; return; }
-        done({ montant: m, mode: g('gpmMode').value, date: g('gpmDate').value || new Date().toISOString().slice(0, 10), note: g('gpmNote').value.trim() });
+        const v = vals(), err = t => { g('gpmErr').textContent = t; };
+        if (isAv) { if (!(v.a > 0)) return err('Saisissez un montant d\u2019avance supérieur à 0.'); }
+        else {
+          if (v.m > Math.max(0, dispo)) return err('Le reversement dépasse le disponible (' + fmt(Math.max(0, dispo)) + '). Utilisez le champ « Avance de fonds » pour le surplus.');
+          if (init ? !(v.m > 0) : !(v.m > 0 || v.a > 0)) return err('Saisissez un reversement ou une avance de fonds supérieur à 0.');
+        }
+        done({ montant: v.m, avance: v.a, mode: g('gpmMode').value, date: g('gpmDate').value || new Date().toISOString().slice(0, 10), note: g('gpmNote').value.trim() });
       };
       if (init && init.mode) g('gpmMode').value = init.mode;
-      amt.focus(); amt.select();
+      sum(); const f = amt && !noFunds ? amt : (av || amt); if (f) { f.focus(); f.select && f.select(); }
     });
   }
 
@@ -232,7 +253,7 @@
     const ov = document.createElement('div'); ov.className = 'gps-ov hist';
     ov.innerHTML = '<style>.gps-ov{position:fixed;inset:0;background:rgba(17,24,39,.5);z-index:99998;display:flex;align-items:center;justify-content:center;padding:16px}.gps-md{background:#fff;border-radius:14px;padding:20px;width:100%;max-width:520px;max-height:85vh;overflow:auto;font:13px Arial,sans-serif}.gps-md h3{margin:0 0 4px;font-size:17px}.gps-md p{margin:0 0 12px;color:#6b7280}.gps-md table{width:100%;border-collapse:collapse}.gps-md td,.gps-md th{padding:7px 6px;border-top:1px solid #f1f5f9;text-align:left;font-size:12px}.gps-md .r{text-align:right;white-space:nowrap}.gps-btn{border:1px solid #e5e7eb;background:#fff;border-radius:8px;padding:5px 9px;font-size:12px;font-weight:700;cursor:pointer}</style>' +
       '<div class="gps-md"><h3>Reversements — ' + esc(o ? o.nom : '') + '</h3><p>' + esc(rg.label) + '</p><table><tr><th>Date</th><th>Mode</th><th>Note</th><th class="r">Montant</th><th></th></tr>' +
-      (list.length ? list.map(v => '<tr><td>' + dFr(v.date) + '</td><td>' + esc(v.mode || '') + '</td><td>' + esc(v.note || '') + '</td><td class="r">' + fmt(num(v.montant)) + '</td><td class="r"><button class="gps-btn" data-e="' + esc(v.id) + '">Modifier</button> <button class="gps-btn" data-d="' + esc(v.id) + '" style="color:#dc2626">Supprimer</button></td></tr>').join('') : '<tr><td colspan="5">Aucun reversement</td></tr>') +
+      (list.length ? list.map(v => '<tr><td>' + dFr(v.date) + '</td><td>' + esc(v.mode || '') + '</td><td>' + (v.type === 'avance' ? '<b style="color:#c2410c">Avance de fonds</b>' + (v.note ? ' — ' : '') : '') + esc(v.note || '') + '</td><td class="r">' + fmt(num(v.montant)) + '</td><td class="r"><button class="gps-btn" data-e="' + esc(v.id) + '">Modifier</button> <button class="gps-btn" data-d="' + esc(v.id) + '" style="color:#dc2626">Supprimer</button></td></tr>').join('') : '<tr><td colspan="5">Aucun reversement</td></tr>') +
       '</table><div style="text-align:right;margin-top:12px"><button class="gps-btn" data-x="1">Fermer</button></div></div>';
     document.body.appendChild(ov);
     ov.onclick = async e => {
@@ -247,12 +268,12 @@
         dd.reversements = dd.reversements.filter(x => x !== v); await save(dd); notify('Reversement supprimé ✓');
       } else {
         const cur = compute(dd, rg.from, rg.to, false).find(x => x.id === id);
-        const max = Math.round((cur ? cur.aReverser : 0) + num(v.montant));
+        const max = Math.max(0, Math.round((cur ? cur.aReverser : 0) + num(v.montant)));
         ov.style.display = 'none';
-        const res = await askPayout(ownerName((dd.proprietaires || []).find(x => String(x.id) === id) || {}), monthLabel(v.periode), max, { montant: Math.round(num(v.montant)), mode: v.mode, date: v.date, note: v.note });
+        const res = await askPayout(ownerName((dd.proprietaires || []).find(x => String(x.id) === id) || {}), monthLabel(v.periode), max, { montant: Math.round(num(v.montant)), mode: v.mode, date: v.date, note: v.note, type: v.type });
         ov.style.display = '';
         if (!res) return;
-        v.montant = res.montant; v.mode = res.mode; v.date = res.date; v.note = res.note; await save(dd); notify('Reversement modifié ✓');
+        v.montant = v.type === 'avance' ? res.avance : res.montant; v.mode = res.mode; v.date = res.date; v.note = res.note; await save(dd); notify('Reversement modifié ✓');
       }
       render(); showHistory(id);
     };
@@ -282,7 +303,7 @@
   }
 
   function bilanHtml(o, rg, revs, ag) {
-    const totalVerse = revs.reduce((s, v) => s + num(v.montant), 0), solde = o.net - totalVerse, solded = solde <= 0;
+    const avTot = revs.filter(v => v.type === 'avance').reduce((s, v) => s + num(v.montant), 0), totalVerse = revs.reduce((s, v) => s + num(v.montant), 0), solde = o.net - totalVerse, solded = solde <= 0;
     const numero = 'BIL-' + rg.from.replace('-', '') + (rg.single ? '' : '-' + rg.to.replace('-', '')) + '-' + String(o.id).slice(-4).toUpperCase();
     const tenants = [], deps = [];
     o.biens.forEach(r => { r.lignes.forEach(l => tenants.push({ bien: r.nom, loc: l.loc, due: l.due, paid: l.paid, solde: l.solde })); r.depLignes.forEach(x => deps.push({ bien: r.nom, lib: x.lib, date: x.date, m: x.m })); });
@@ -318,11 +339,11 @@
         '<tr><td colspan="3" style="' + TOT + '">Total</td><td style="' + TOT + ';text-align:right;white-space:nowrap">' + fmt(o.depTotal) + '</td></tr></tbody></table>') +
       /* 3. bilan */
       wrap(sec('Bilan') + '<table style="width:100%;border-collapse:collapse">' +
-        line('Loyers encaissés, nets de frais de gestion', fmt(loyersNets)) + line('− Dépenses et réparations', fmt(o.depTotal)) + line('Net dû au propriétaire', fmt(o.net), true) + line('− Total déjà reversé', fmt(totalVerse)) +
-        '<tr><td style="padding:14px 0 4px;font-size:13px;font-weight:800;border-top:2px solid ' + INK + '">Solde restant dû' + (solded ? ' <span style="margin-left:10px;font-size:9px;letter-spacing:1px;color:#15803d;border:1.5px solid #15803d;border-radius:4px;padding:2px 7px;vertical-align:middle">SOLDÉ</span>' : '') + '</td><td style="padding:14px 0 4px;font-size:15px;font-weight:800;text-align:right;white-space:nowrap;border-top:2px solid ' + INK + ';color:' + (solded ? '#15803d' : '#b45309') + '">' + fmt(Math.max(0, solde)) + '</td></tr></table>') +
+        line('Loyers encaissés, nets de frais de gestion', fmt(loyersNets)) + line('− Dépenses et réparations', fmt(o.depTotal)) + line('Net dû au propriétaire', fmt(o.net), true) + line('− Total déjà versé' + (avTot ? ' (dont avance de fonds ' + fmt(avTot) + ')' : ''), fmt(totalVerse)) +
+        '<tr><td style="padding:14px 0 4px;font-size:13px;font-weight:800;border-top:2px solid ' + INK + '">' + (solde < 0 ? 'Avance à récupérer par l\u2019agence' : 'Solde restant dû') + (solded && solde >= 0 ? ' <span style="margin-left:10px;font-size:9px;letter-spacing:1px;color:#15803d;border:1.5px solid #15803d;border-radius:4px;padding:2px 7px;vertical-align:middle">SOLDÉ</span>' : '') + '</td><td style="padding:14px 0 4px;font-size:15px;font-weight:800;text-align:right;white-space:nowrap;border-top:2px solid ' + INK + ';color:' + (solde < 0 ? '#dc2626' : solded ? '#15803d' : '#b45309') + '">' + fmt(Math.abs(solde)) + '</td></tr></table>') +
       /* 4. reversements */
       wrap(sec('Reversements effectués') + '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + TH + '">Date</th><th style="' + TH + '">Mode</th><th style="' + TH + '">Note</th><th style="' + THR + '">Montant</th></tr></thead><tbody>' +
-        (revs.length ? revs.map(v => '<tr><td style="' + TD + ';white-space:nowrap">' + dFr(v.date) + '</td><td style="' + TD + '">' + esc(v.mode || '') + '</td><td style="' + TD + ';color:' + MUT + '">' + esc(v.note || '') + '</td><td style="' + TDR + ';font-weight:700">' + fmt(num(v.montant)) + '</td></tr>').join('') : empty(4, 'Aucun reversement')) +
+        (revs.length ? revs.map(v => '<tr><td style="' + TD + ';white-space:nowrap">' + dFr(v.date) + '</td><td style="' + TD + '">' + esc(v.mode || '') + '</td><td style="' + TD + ';color:' + MUT + '">' + (v.type === 'avance' ? '<b style="color:#c2410c">Avance de fonds</b>' + (v.note ? ' — ' : '') : '') + esc(v.note || '') + '</td><td style="' + TDR + ';font-weight:700">' + fmt(num(v.montant)) + '</td></tr>').join('') : empty(4, 'Aucun reversement')) +
         '<tr><td colspan="3" style="' + TOT + '">Total versé</td><td style="' + TOT + ';text-align:right;white-space:nowrap">' + fmt(totalVerse) + '</td></tr></tbody></table>') +
       /* signatures */
       '<div style="page-break-inside:avoid;display:flex;justify-content:space-between;gap:80px;margin-top:60px;font-size:10px"><div style="flex:1"><div style="font-weight:700">Pour l’agence</div><div style="color:' + MUT + ';font-size:9px;margin-top:2px">Cachet et signature</div><div style="height:60px;border-bottom:1px solid #9ca3af"></div></div><div style="flex:1"><div style="font-weight:700">Le propriétaire</div><div style="color:' + MUT + ';font-size:9px;margin-top:2px">« Reçu » · date et signature</div><div style="height:60px;border-bottom:1px solid #9ca3af"></div></div></div>' +
