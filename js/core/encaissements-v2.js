@@ -289,9 +289,16 @@
     if (saved === false) return { error: 'Modification non enregistrée. Rechargez puis réessayez.' };
     // Vérification finale : le groupe remplacé ne doit plus exister.
     // Si une couche de persistance refuse l'écriture, on ne confirme pas la modification.
-    const persisted = prepareRelations(db());
-    if (opts.replace && rowsOfGroup(persisted, opts.replace).length) {
-      return { error: "La modification n'a pas remplacé l'ancien encaissement. Rechargez puis réessayez." };
+    // Les nouvelles lignes gardent le même identifiant de groupe que l'ancien
+    // encaissement : on ne peut donc pas tester « le groupe n'existe plus ».
+    // On vérifie que le groupe contient exactement le montant saisi (pas l'ancien
+    // montant + le nouveau).
+    if (opts.replace) {
+      const persisted = prepareRelations(db());
+      const stored = rowsOfGroup(persisted, groupe).reduce((s, p) => s + num(p.paye), 0);
+      if (Math.round(stored) !== Math.round(amount)) {
+        return { error: "La modification n'a pas remplacé l'ancien encaissement. Rechargez puis réessayez." };
+      }
     }
     try { localStorage.setItem('gpe_last_mode', mode); } catch (_) {}
     return { recuNo, rows: al.rows, settledPeriods, cKey: cid(c) };
