@@ -4968,6 +4968,19 @@ function buildNotifications(){
     }
   });
 
+  // 5. Contrats arrivés à échéance, à clôturer ou reconduire
+  const aCloturer = (DB.contrats||[]).filter(c => String(c.statut||'').toLowerCase().indexOf('clôtur') > -1);
+  if(aCloturer.length > 0){
+    items.push({
+      id: 'contrats_a_cloturer_'+aCloturer.length,
+      type:'gold', icon:'event_busy', unread:true,
+      title: `${aCloturer.length} contrat${aCloturer.length>1?'s':''} à clôturer`,
+      desc: aCloturer.slice(0,2).map(c=>(c.locataire||'Locataire')+' · '+(c.locative||'')).join(', ') + (aCloturer.length>2?` +${aCloturer.length-2}`:''),
+      time: 'Échéance dépassée — clôturer ou reconduire',
+      action: () => navigate('contrats')
+    });
+  }
+
   return items;
 }
 
