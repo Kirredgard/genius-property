@@ -265,13 +265,19 @@
   function agencyInfo() {
     let ag = {};
     try { if (typeof window._getAgenceInfo === 'function') ag = window._getAgenceInfo() || {}; } catch (_) {}
+    const val = id => { const e = document.getElementById(id); return e && e.value ? String(e.value).trim() : ''; };
     const g = k => ag[k] || '';
-    let nom = g('agence');
-    if (!nom || nom === 'Genius Property') { try { const c = window.GPAgencies && GPAgencies.current(); if (c && c.name && !LS('geniusproperty_agence')) nom = c.name; } catch (_) {} }
+    let nom = LS('geniusproperty_agence') || '';
+    if (!nom) { try { const c = window.GPAgencies && GPAgencies.current(); if (c && c.name) nom = c.name; } catch (_) {} }
+    if (!nom) nom = g('agence') || val('cfg-agence') || 'Genius Property';
+    /* logo : Paramètres (stocké) → aperçu du logo dans Paramètres → logo de l'application (menu) */
+    let logo = LS('geniusproperty_logo') || g('logo');
+    if (!logo) { const pv = document.getElementById('cfg-logo-preview'); if (pv && pv.getAttribute('src') && pv.style.display !== 'none') logo = pv.src; }
+    if (!logo) { const sb = document.getElementById('sidebar-logo'); if (sb && sb.src) logo = sb.src; }
     return {
-      nom: nom || LS('geniusproperty_agence') || 'Genius Property',
-      adresse: g('adresse') || LS('geniusproperty_adresse'), tel: g('tel') || LS('geniusproperty_tel'), email: g('email') || LS('geniusproperty_email'),
-      rccm: g('rccm') || LS('geniusproperty_rccm'), ninea: g('ninea') || LS('geniusproperty_ninea'), logo: g('logo') || LS('geniusproperty_logo')
+      nom, logo,
+      adresse: LS('geniusproperty_adresse') || val('cfg-adresse'), tel: LS('geniusproperty_tel') || val('cfg-tel'), email: LS('geniusproperty_email') || val('cfg-email'),
+      rccm: LS('geniusproperty_rccm') || val('cfg-rccm'), ninea: LS('geniusproperty_ninea') || val('cfg-ninea')
     };
   }
 
@@ -281,52 +287,46 @@
     const tenants = [], deps = [];
     o.biens.forEach(r => { r.lignes.forEach(l => tenants.push({ bien: r.nom, loc: l.loc, due: l.due, paid: l.paid, solde: l.solde })); r.depLignes.forEach(x => deps.push({ bien: r.nom, lib: x.lib, date: x.date, m: x.m })); });
     o.depAutres.forEach(x => deps.push({ bien: '—', lib: x.lib, date: '', m: x.m }));
-    const GOLD = '#D4AF37', TD = 'padding:11px 10px;border-bottom:1px solid #eef0f3;font-size:10.5px;color:#222;vertical-align:top', TDR = TD + ';text-align:right;white-space:nowrap',
-      TH = 'padding:9px 10px;font-size:8px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:#6b7280;background:#f6f7f9;text-align:left', THR = TH + ';text-align:right',
-      TT = 'padding:12px 10px;font-size:11px;font-weight:800;background:#faf8ef', sec = (n, t) => '<div style="display:flex;align-items:center;gap:10px;margin:30px 0 12px"><span style="width:22px;height:22px;border-radius:50%;background:#111;color:#fff;font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;line-height:22px;text-align:center">' + n + '</span><span style="font-size:12px;font-weight:800;letter-spacing:.3px">' + t + '</span></div>',
-      info = (l, v) => '<div style="background:#fafaf7;border-left:3px solid ' + GOLD + ';border-radius:4px;padding:10px 14px"><div style="font-size:7.5px;letter-spacing:.9px;color:#8a8a8a;text-transform:uppercase;font-weight:700">' + l + '</div><div style="font-size:11.5px;font-weight:700;margin-top:4px;color:#111">' + v + '</div></div>',
-      kpi = (l, v, c) => '<div style="padding:14px;background:#fafaf7;border-radius:8px"><div style="font-size:7.5px;letter-spacing:.9px;color:#8a8a8a;text-transform:uppercase;font-weight:700">' + l + '</div><div style="font-size:14px;font-weight:800;margin-top:6px;color:' + (c || '#111') + ';white-space:nowrap">' + v + '</div></div>',
-      empty = (n, t) => '<tr><td colspan="' + n + '" style="' + TD + ';color:#9ca3af;text-align:center">' + t + '</td></tr>';
-    const contact = [ag.adresse, ag.tel, ag.email].filter(Boolean).map(esc).join(' · ');
-    const legal = [ag.rccm && 'RCCM ' + esc(ag.rccm), ag.ninea && 'NINEA ' + esc(ag.ninea)].filter(Boolean).join('<br>');
-    return '<div style="width:794px;box-sizing:border-box;padding:40px 44px;font-family:\'Inter\',\'Helvetica Neue\',Arial,sans-serif;color:#111;background:#fff">' +
-      /* en-tête agence */
-      '<div style="display:flex;align-items:center;gap:22px;padding-bottom:18px;border-bottom:3px solid ' + GOLD + '">' +
-        (ag.logo ? '<div style="flex:none;width:120px;height:100px;display:flex;align-items:center;justify-content:center"><img src="' + esc(ag.logo) + '" style="max-width:120px;max-height:100px;width:auto;height:auto;object-fit:contain"></div>' : '') +
-        '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:800;line-height:1.4;text-transform:uppercase;letter-spacing:.2px">' + esc(ag.nom) + '</div><div style="font-size:8.5px;font-weight:700;letter-spacing:1.6px;color:#9a7b14;margin-top:5px">GESTION LOCATIVE</div>' + (contact ? '<div style="font-size:8.5px;color:#666;margin-top:5px;line-height:1.6">' + contact + '</div>' : '') + '</div>' +
-        (legal ? '<div style="flex:none;text-align:right;font-size:8px;line-height:1.7;color:#666;white-space:nowrap">' + legal + '</div>' : '') + '</div>' +
-      /* titre */
-      '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin:28px 0 22px"><div><div style="font-size:22px;font-weight:800;letter-spacing:.2px">Bilan propriétaire</div><div style="font-size:10px;color:#777;margin-top:6px">État de gestion de votre logement · ' + esc(rg.label) + '</div></div>' +
-        '<div style="text-align:right"><div style="font-size:7.5px;letter-spacing:.9px;color:#8a8a8a;text-transform:uppercase;font-weight:700">N° de bilan</div><div style="font-size:13px;font-weight:800;color:#9a7b14;margin-top:4px">' + esc(numero) + '</div></div></div>' +
-      '<div style="display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:10px">' + info('Propriétaire', esc(o.nom)) + info('Période', esc(rg.label)) + info('Émis le', dFr(new Date().toISOString().slice(0, 10))) + '</div>' +
-      /* chiffres clés */
-      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px">' + kpi('Loyers encaissés', fmt(o.paid), '#16a34a') + kpi('Commission agence', fmt(o.commission), '#7c3aed') + kpi('Dépenses / réparations', fmt(o.depTotal), '#dc2626') + kpi('Net dû', fmt(o.net)) + '</div>' +
-      /* 1 loyers */
-      sec(1, 'Loyers du mois') + '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + TH + '">Bien</th><th style="' + TH + '">Locataire</th><th style="' + THR + '">Loyer dû</th><th style="' + THR + '">Encaissé</th><th style="' + THR + '">Reste</th></tr></thead><tbody>' +
-      (tenants.length ? tenants.map(t => '<tr><td style="' + TD + '">' + esc(t.bien) + '</td><td style="' + TD + '">' + esc(t.loc) + '</td><td style="' + TDR + '">' + fmt(t.due) + '</td><td style="' + TDR + ';font-weight:700;color:#16a34a">' + fmt(t.paid) + '</td><td style="' + TDR + ';color:' + (t.solde > 0 ? '#ea580c' : '#9ca3af') + '">' + fmt(t.solde) + '</td></tr>').join('') : empty(5, 'Aucun loyer sur la période')) +
-      '<tr><td colspan="2" style="' + TT + '">TOTAL</td><td style="' + TT + ';text-align:right;white-space:nowrap">' + fmt(o.due) + '</td><td style="' + TT + ';text-align:right;white-space:nowrap">' + fmt(o.paid) + '</td><td style="' + TT + ';text-align:right;white-space:nowrap">' + fmt(tenants.reduce((a, t) => a + t.solde, 0)) + '</td></tr></tbody></table>' +
-      /* 2 commission */
-      sec(2, 'Commission d’agence') + '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + TH + '">Bien</th><th style="' + THR + '">Taux</th><th style="' + THR + '">Loyers encaissés</th><th style="' + THR + '">Commission</th></tr></thead><tbody>' +
-      o.biens.filter(r => r.paid || r.commission).map(r => '<tr><td style="' + TD + '">' + esc(r.nom) + '</td><td style="' + TDR + '">' + r.taux + ' %</td><td style="' + TDR + '">' + fmt(r.paid) + '</td><td style="' + TDR + ';font-weight:700">' + fmt(r.commission) + '</td></tr>').join('') +
-      '<tr><td colspan="2" style="' + TT + '">TOTAL</td><td style="' + TT + ';text-align:right;white-space:nowrap">' + fmt(o.paid) + '</td><td style="' + TT + ';text-align:right;white-space:nowrap">' + fmt(o.commission) + '</td></tr></tbody></table>' +
-      /* 3 dépenses */
-      sec(3, 'Dépenses et réparations') + '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + TH + '">Désignation</th><th style="' + TH + '">Bien</th><th style="' + TH + '">Date</th><th style="' + THR + '">Montant</th></tr></thead><tbody>' +
-      (deps.length ? deps.map(x => '<tr><td style="' + TD + '">' + esc(x.lib) + '</td><td style="' + TD + '">' + esc(x.bien) + '</td><td style="' + TD + ';white-space:nowrap">' + dFr(x.date) + '</td><td style="' + TDR + ';font-weight:700">' + fmt(x.m) + '</td></tr>').join('') : empty(4, 'Aucune dépense sur la période')) +
-      '<tr><td colspan="3" style="' + TT + '">TOTAL</td><td style="' + TT + ';text-align:right;white-space:nowrap">' + fmt(o.depTotal) + '</td></tr></tbody></table>' +
-      /* 4 bilan */
-      '<div style="page-break-inside:avoid">' + sec(4, 'Bilan du propriétaire') +
-      '<div style="background:#fafaf7;border-radius:10px;padding:8px 18px"><table style="width:100%;border-collapse:collapse">' +
-        [['Loyers encaissés', fmt(o.paid), '#111'], ['− Commission d’agence', fmt(o.commission), '#7c3aed'], ['− Dépenses / réparations', fmt(o.depTotal), '#dc2626']].map(r => '<tr><td style="padding:9px 0;font-size:11px;color:#444;border-bottom:1px solid #ecebe3">' + r[0] + '</td><td style="padding:9px 0;font-size:11px;font-weight:700;text-align:right;border-bottom:1px solid #ecebe3;color:' + r[2] + ';white-space:nowrap">' + r[1] + '</td></tr>').join('') +
-        '<tr><td style="padding:12px 0 6px;font-size:12px;font-weight:800">Net dû au propriétaire</td><td style="padding:12px 0 6px;font-size:15px;font-weight:800;text-align:right;white-space:nowrap">' + fmt(o.net) + '</td></tr></table></div></div>' +
-      /* 5 reversements */
-      '<div style="page-break-inside:avoid">' + sec(5, 'Reversements effectués') + '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + TH + '">Date</th><th style="' + TH + '">Mode</th><th style="' + TH + '">Note</th><th style="' + THR + '">Montant</th></tr></thead><tbody>' +
-      (revs.length ? revs.map(v => '<tr><td style="' + TD + ';white-space:nowrap">' + dFr(v.date) + '</td><td style="' + TD + '">' + esc(v.mode || '') + '</td><td style="' + TD + ';color:#666">' + esc(v.note || '') + '</td><td style="' + TDR + ';font-weight:700">' + fmt(num(v.montant)) + '</td></tr>').join('') : empty(4, 'Aucun reversement')) +
-      '<tr><td colspan="3" style="' + TT + '">TOTAL VERSÉ</td><td style="' + TT + ';text-align:right;white-space:nowrap">' + fmt(totalVerse) + '</td></tr></tbody></table>' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding:14px 18px;border-radius:10px;background:' + (solded ? '#ecfdf5' : '#fff7ed') + '"><div><div style="font-size:8px;letter-spacing:.9px;font-weight:700;color:' + (solded ? '#166534' : '#9a3412') + '">SOLDE RESTANT DÛ</div><div style="font-size:18px;font-weight:800;margin-top:4px;color:' + (solded ? '#166534' : '#9a3412') + '">' + fmt(Math.max(0, solde)) + '</div></div>' +
-      (solded ? '<div style="border:2px solid #16a34a;color:#16a34a;font-weight:800;font-size:11px;letter-spacing:.8px;padding:7px 14px;border-radius:8px">SOLDÉ · REVERSEMENT TOTAL EFFECTUÉ</div>' : '') + '</div></div>' +
+    const loyersNets = o.paid - o.commission; /* la commission n'est pas détaillée : loyers présentés nets de frais de gestion */
+    const INK = '#111827', MUT = '#6b7280', LINE = '#e5e7eb', GOLD = '#D4AF37',
+      TH = 'padding:0 8px 8px;font-size:8.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:' + MUT + ';border-bottom:1.5px solid ' + INK + ';text-align:left',
+      THR = TH + ';text-align:right', TD = 'padding:11px 8px;font-size:11px;color:' + INK + ';border-bottom:1px solid ' + LINE + ';vertical-align:top',
+      TDR = TD + ';text-align:right;white-space:nowrap', TOT = 'padding:12px 8px 0;font-size:11.5px;font-weight:800;color:' + INK,
+      sec = t => '<div style="font-size:9px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:' + INK + ';margin:0 0 10px">' + t + '</div>',
+      wrap = h => '<div style="margin-top:34px;page-break-inside:avoid">' + h + '</div>',
+      lab = (l, v) => '<div><div style="font-size:8.5px;letter-spacing:.9px;text-transform:uppercase;color:' + MUT + ';font-weight:700">' + l + '</div><div style="font-size:12.5px;font-weight:700;margin-top:5px;color:' + INK + '">' + v + '</div></div>',
+      empty = (n, t) => '<tr><td colspan="' + n + '" style="' + TD + ';color:#9ca3af">' + t + '</td></tr>';
+    const contact = [ag.adresse, ag.tel, ag.email].filter(Boolean).map(esc).join('  ·  ');
+    const legal = [ag.rccm && 'RCCM ' + esc(ag.rccm), ag.ninea && 'NINEA ' + esc(ag.ninea)].filter(Boolean).join('  ·  ');
+    const line = (l, v, bold, color) => '<tr><td style="padding:9px 0;font-size:' + (bold ? 12.5 : 11.5) + 'px;font-weight:' + (bold ? 800 : 400) + ';color:' + INK + ';border-bottom:1px solid ' + LINE + '">' + l + '</td><td style="padding:9px 0;font-size:' + (bold ? 13.5 : 11.5) + 'px;font-weight:' + (bold ? 800 : 600) + ';text-align:right;white-space:nowrap;color:' + (color || INK) + ';border-bottom:1px solid ' + LINE + '">' + v + '</td></tr>';
+    return '<div style="width:794px;box-sizing:border-box;padding:46px 54px;font-family:\'Inter\',\'Helvetica Neue\',Arial,sans-serif;color:' + INK + ';background:#fff">' +
+      /* en-tête : identité de l'agence | titre du document */
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:24px">' +
+        '<div style="display:flex;align-items:center;gap:16px;min-width:0">' + (ag.logo ? '<img src="' + esc(ag.logo) + '" style="flex:none;max-width:96px;max-height:84px;width:auto;height:auto;object-fit:contain">' : '') +
+          '<div style="min-width:0"><div style="font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;line-height:1.3">' + esc(ag.nom) + '</div>' + (contact ? '<div style="font-size:9px;color:' + MUT + ';margin-top:5px;line-height:1.6">' + contact + '</div>' : '') + (legal ? '<div style="font-size:9px;color:' + MUT + ';line-height:1.6">' + legal + '</div>' : '') + '</div></div>' +
+        '<div style="text-align:right;flex:none"><div style="font-size:21px;font-weight:800;letter-spacing:.2px">Bilan propriétaire</div><div style="font-size:10px;color:' + MUT + ';margin-top:6px">N° ' + esc(numero) + '</div><div style="font-size:10px;color:' + MUT + '">Émis le ' + dFr(new Date().toISOString().slice(0, 10)) + '</div></div></div>' +
+      '<div style="height:2px;background:' + GOLD + ';margin:22px 0 26px"></div>' +
+      /* propriétaire / période */
+      '<div style="display:flex;gap:60px">' + lab('Propriétaire', esc(o.nom)) + lab('Période', esc(rg.label)) + lab('Biens en gestion', String(o.biens.length)) + '</div>' +
+      /* 1. loyers */
+      wrap(sec('Loyers') + '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + TH + '">Bien</th><th style="' + TH + '">Locataire</th><th style="' + THR + '">Loyer dû</th><th style="' + THR + '">Encaissé</th><th style="' + THR + '">Reste</th></tr></thead><tbody>' +
+        (tenants.length ? tenants.map(t => '<tr><td style="' + TD + '">' + esc(t.bien) + '</td><td style="' + TD + '">' + esc(t.loc) + '</td><td style="' + TDR + '">' + fmt(t.due) + '</td><td style="' + TDR + ';font-weight:700">' + fmt(t.paid) + '</td><td style="' + TDR + ';color:' + (t.solde > 0 ? '#b45309' : '#9ca3af') + '">' + fmt(t.solde) + '</td></tr>').join('') : empty(5, 'Aucun loyer sur la période')) +
+        '<tr><td colspan="2" style="' + TOT + '">Total</td><td style="' + TOT + ';text-align:right;white-space:nowrap">' + fmt(o.due) + '</td><td style="' + TOT + ';text-align:right;white-space:nowrap">' + fmt(o.paid) + '</td><td style="' + TOT + ';text-align:right;white-space:nowrap">' + fmt(tenants.reduce((a, t) => a + t.solde, 0)) + '</td></tr></tbody></table>') +
+      /* 2. dépenses */
+      wrap(sec('Dépenses et réparations') + '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + TH + '">Désignation</th><th style="' + TH + '">Bien</th><th style="' + TH + '">Date</th><th style="' + THR + '">Montant</th></tr></thead><tbody>' +
+        (deps.length ? deps.map(x => '<tr><td style="' + TD + '">' + esc(x.lib) + '</td><td style="' + TD + '">' + esc(x.bien) + '</td><td style="' + TD + ';white-space:nowrap">' + dFr(x.date) + '</td><td style="' + TDR + ';font-weight:700">' + fmt(x.m) + '</td></tr>').join('') : empty(4, 'Aucune dépense sur la période')) +
+        '<tr><td colspan="3" style="' + TOT + '">Total</td><td style="' + TOT + ';text-align:right;white-space:nowrap">' + fmt(o.depTotal) + '</td></tr></tbody></table>') +
+      /* 3. bilan */
+      wrap(sec('Bilan') + '<table style="width:100%;border-collapse:collapse">' +
+        line('Loyers encaissés, nets de frais de gestion', fmt(loyersNets)) + line('− Dépenses et réparations', fmt(o.depTotal)) + line('Net dû au propriétaire', fmt(o.net), true) + line('− Total déjà reversé', fmt(totalVerse)) +
+        '<tr><td style="padding:14px 0 4px;font-size:13px;font-weight:800;border-top:2px solid ' + INK + '">Solde restant dû' + (solded ? ' <span style="margin-left:10px;font-size:9px;letter-spacing:1px;color:#15803d;border:1.5px solid #15803d;border-radius:4px;padding:2px 7px;vertical-align:middle">SOLDÉ</span>' : '') + '</td><td style="padding:14px 0 4px;font-size:15px;font-weight:800;text-align:right;white-space:nowrap;border-top:2px solid ' + INK + ';color:' + (solded ? '#15803d' : '#b45309') + '">' + fmt(Math.max(0, solde)) + '</td></tr></table>') +
+      /* 4. reversements */
+      wrap(sec('Reversements effectués') + '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + TH + '">Date</th><th style="' + TH + '">Mode</th><th style="' + TH + '">Note</th><th style="' + THR + '">Montant</th></tr></thead><tbody>' +
+        (revs.length ? revs.map(v => '<tr><td style="' + TD + ';white-space:nowrap">' + dFr(v.date) + '</td><td style="' + TD + '">' + esc(v.mode || '') + '</td><td style="' + TD + ';color:' + MUT + '">' + esc(v.note || '') + '</td><td style="' + TDR + ';font-weight:700">' + fmt(num(v.montant)) + '</td></tr>').join('') : empty(4, 'Aucun reversement')) +
+        '<tr><td colspan="3" style="' + TOT + '">Total versé</td><td style="' + TOT + ';text-align:right;white-space:nowrap">' + fmt(totalVerse) + '</td></tr></tbody></table>') +
       /* signatures */
-      '<div style="page-break-inside:avoid;display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-top:56px;text-align:center;font-size:10px"><div><div style="height:56px;border-bottom:1px solid #999"></div><div style="margin-top:8px;font-weight:800">Pour l’agence</div><div style="color:#888;font-size:9px;margin-top:2px">Cachet et signature</div></div><div><div style="height:56px;border-bottom:1px solid #999"></div><div style="margin-top:8px;font-weight:800">Le propriétaire</div><div style="color:#888;font-size:9px;margin-top:2px">« Reçu » · date et signature</div></div></div>' +
-      '<div style="margin-top:34px;border-top:1px solid #eee;padding-top:10px;text-align:center;font-size:8px;color:#8a8a8a;line-height:1.6">' + esc(ag.nom) + (ag.adresse ? '<br>' + esc(ag.adresse) : '') + (ag.email ? ' · ' + esc(ag.email) : '') + '</div></div>';
+      '<div style="page-break-inside:avoid;display:flex;justify-content:space-between;gap:80px;margin-top:60px;font-size:10px"><div style="flex:1"><div style="font-weight:700">Pour l’agence</div><div style="color:' + MUT + ';font-size:9px;margin-top:2px">Cachet et signature</div><div style="height:60px;border-bottom:1px solid #9ca3af"></div></div><div style="flex:1"><div style="font-weight:700">Le propriétaire</div><div style="color:' + MUT + ';font-size:9px;margin-top:2px">« Reçu » · date et signature</div><div style="height:60px;border-bottom:1px solid #9ca3af"></div></div></div>' +
+      '<div style="margin-top:34px;text-align:center;font-size:8.5px;color:#9ca3af">' + esc(ag.nom) + '</div></div>';
   }
 
   async function printBilan(id) {
