@@ -88,7 +88,7 @@
       #page-locataires .gpl-status:before{content:'';width:7px;height:7px;border-radius:50%;background:#22c55e}
       #page-locataires .gpl-status.off:before{background:#94a3b8}
       #page-locataires .gpl-actions{display:flex;gap:5px;white-space:nowrap}
-      #page-locataires .gpl-action{width:32px;height:32px;border:1px solid #e5e7eb;background:#fff;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+      #page-locataires .gpl-action{width:32px;height:32px;border:1px solid #e5e7eb;background:#fff;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}.gpl-action .material-symbols-rounded{font-size:16px}.gpl-action:hover{background:#f8fafc;border-color:#cbd5e1}.gpl-action.danger:hover{background:#fef2f2;border-color:#fecaca;color:#ef4444}
       #page-locataires .gpl-action.danger{color:#b91c1c}
       .gpl-overlay{position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:12000;display:flex;align-items:center;justify-content:center;padding:20px}
       .gpl-modal{width:min(900px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:16px;box-shadow:0 24px 70px rgba(15,23,42,.25)}
