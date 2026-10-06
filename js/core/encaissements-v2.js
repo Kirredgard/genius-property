@@ -501,7 +501,6 @@
     const d = db(), all = rowsForMonth(d);
     const attendu = all.reduce((s, r) => s + r.cur.due, 0), percu = all.reduce((s, r) => s + Math.min(r.cur.paid, r.cur.due), 0);
     const credit = all.reduce((s, r) => s + Math.max(0, r.cur.paid - r.cur.due), 0);
-    const anom = findAnomalies(d); anomList = anom;
     const reste = all.reduce((s, r) => s + r.cur.solde, 0), arrears = all.reduce((s, r) => s + r.arrears, 0);
     const taux = attendu ? Math.min(100, Math.round(percu / attendu * 100)) : 0;
     const nUn = unlinked(d).length;
@@ -518,7 +517,6 @@
       '<div class="gpe-card"><small>Reste du mois</small><strong class="gpe-orange">' + fmt(reste) + '</strong><em>à percevoir</em></div>' +
       '<div class="gpe-card"><small>Arriérés</small><strong class="' + (arrears ? 'gpe-red' : '') + '">' + fmt(arrears) + '</strong><em>mois précédents</em></div>' +
       '<div class="gpe-card"><small>Recouvrement</small><strong>' + taux + ' %</strong><em>du mois</em></div></div>' +
-      (anom.length ? '<div class="gpe-banner"><b>' + anom.length + ' anomalie' + (anom.length > 1 ? 's' : '') + '</b> détectée' + (anom.length > 1 ? 's' : '') + ' (paiement supérieur au loyer dû ou doublon). <button class="gpe-btn sm" data-anom>Vérifier et corriger</button></div>' : '') +
       (nUn ? '<div class="gpe-banner"><b>' + nUn + ' ancien' + (nUn > 1 ? 's' : '') + ' paiement' + (nUn > 1 ? 's' : '') + '</b> non rattaché' + (nUn > 1 ? 's' : '') + ' à un contrat actif (contrat terminé ou nom différent) : ' + (nUn > 1 ? 'ils restent' : 'il reste') + ' consultable' + (nUn > 1 ? 's' : '') + ' dans l\'export mais ' + (nUn > 1 ? 'ne comptent' : 'ne compte') + ' pas dans l\'échéancier.</div>' : '') +
       '<div class="gpe-toolbar"><input class="gpe-search" id="gpeSearch" placeholder="Rechercher un locataire, un bien…" value="' + esc(st.q) + '"><div class="gpe-chips">' +
       chip('tous', 'Tous', all.length) + chip('retard', 'En retard', cnt('retard')) + chip('partiel', 'Partiels', cnt('partiel')) + chip('avenir', 'À venir', cnt('avenir')) + chip('paye', 'Payés', cnt('paye')) + '</div></div>' +
