@@ -92,6 +92,20 @@
   #page-paiements .gpf-toolbar-actions,
   #page-depenses .gpf-toolbar-actions{margin-left:0!important}
 }
+
+/* V26 — cartes KPI compactes : Encaissements, Situation propriétaires, Mes activités, Journal
+   (même gabarit que la page Biens : 60 px mini, valeur 18 px, libellé 11 px, sous-texte 10 px) */
+#page-paiements .gpe-cards,#page-situation .gps-cards,#page-activites .gpa-cards{gap:8px!important;margin:0 0 10px!important}
+#page-paiements .gpe-card,#page-situation .gps-card,#page-activites .gpa-card{min-height:60px!important;padding:8px 10px!important;border-radius:13px!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;justify-content:center!important}
+#page-paiements .gpe-card small,#page-situation .gps-card small,#page-activites .gpa-card small{font-size:11px!important;font-weight:700!important;line-height:1.15!important;text-transform:none!important;letter-spacing:0!important;margin:0 0 3px!important}
+#page-paiements .gpe-card strong,#page-situation .gps-card strong,#page-activites .gpa-card strong{font-size:18px!important;line-height:1.05!important;margin:0!important}
+#page-paiements .gpe-card em,#page-situation .gps-card em,#page-activites .gpa-card em{display:block!important;font-size:10px!important;line-height:1.1!important;margin-top:2px!important;color:#9ca3af!important;font-style:normal!important}
+#page-paiements .gpe-card .gpe-bar{margin-top:4px!important;height:4px!important}
+#page-journal .gp-v20-kpis{gap:8px!important;margin:0 0 10px!important}
+#page-journal .gp-v20-kpis>div{min-height:60px!important;padding:8px 10px!important;gap:8px!important;border-radius:13px!important}
+#page-journal .gp-v20-kpis strong{font-size:18px!important;line-height:1.05!important}
+#page-journal .gp-v20-kpis span{font-size:11px!important;line-height:1.05!important;margin-top:3px!important}
+#page-journal .gp-v20-kpis em{font-size:10px!important;line-height:1.1!important;margin-top:2px!important}
 `;
   document.head.appendChild(s);
 })();

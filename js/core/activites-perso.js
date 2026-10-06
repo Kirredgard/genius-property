@@ -105,7 +105,7 @@
     $('gpaBody').innerHTML = '<div class="gpa-cards"><div class="gpa-card"><small>Revenus nets d’activités</small><strong class="gpa-g">' + fmt(act) + '</strong></div>' +
       '<div class="gpa-card"><small>Frais déduits</small><strong class="' + (frs ? 'gpa-r' : '') + '">' + fmt(frs) + '</strong></div>' +
       '<div class="gpa-card"><small>Commissions locatives</small><strong>' + fmt(com) + '</strong></div><div class="gpa-card"><small>Revenu global agence</small><strong>' + fmt(act + com) + '</strong></div>' +
-      '<div class="gpa-card"><small>Reste à encaisser (marchés en cours)</small><strong class="gpa-o">' + fmt(reste) + '</strong></div>' +
+      '<div class="gpa-card"><small>Reste à encaisser</small><strong class="gpa-o">' + fmt(reste) + '</strong><em>marchés en cours</em></div>' +
       '<div class="gpa-card"><small>Marchés en retard</small><strong class="' + (open.some(x => x.late) ? 'gpa-r' : '') + '">' + open.filter(x => x.late).length + '</strong></div></div>' +
       '<div class="gpa-box"><h4>Évolution mensuelle ' + st.year + '</h4><div class="gpa-chart">' + byM.map((v, i) => '<div title="' + fmt(v) + '"><i style="height:' + Math.max(0, Math.round(v / mx * 100)) + 'px"></i>' + MONTHS[i] + '</div>').join('') + '</div></div>' +
       '<div class="gpa-box"><h4>Répartition par activité</h4>' + (rows.length ? '<table><tbody>' + rows.map(r => '<tr><td>' + esc(r[0]) + '</td><td class="rt"><b>' + fmt(r[1]) + '</b></td><td style="width:35%"><div class="gpa-bar"><i style="width:' + (act > 0 ? Math.max(0, Math.min(100, Math.round(r[1] / act * 100))) : 0) + '%"></i></div></td></tr>').join('') + '</tbody></table>' : '<div class="gpa-empty">Aucun revenu saisi pour ' + st.year + '</div>') + '</div>';

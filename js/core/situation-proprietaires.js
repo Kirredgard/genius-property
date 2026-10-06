@@ -111,9 +111,9 @@
     page.innerHTML = '<style>' + css() + '</style><div class="gps">' +
       '<div class="gps-top"><div></div>' +
       '<div class="gps-actions">' + periodBar(rg) + '<button class="gps-btn" data-export>Exporter CSV</button></div></div>' +
-      '<div class="gps-cards">' + card(st.arrears ? 'À encaisser (loyer + arriérés)' : 'À encaisser (période)', T('aEnc')) + card('Encaissé', T('paid'), 'g') + card('Reste à encaisser', T('reste'), 'o') +
+      '<div class="gps-cards">' + card(st.arrears ? 'À encaisser (+ arriérés)' : 'À encaisser', T('aEnc')) + card('Encaissé', T('paid'), 'g') + card('Reste à encaisser', T('reste'), 'o') +
       card('Arriérés antérieurs', T('arrears'), 'o', st.arrears ? 'inclus dans le reste' : 'avant la période — non inclus') +
-      card('Ma commission', T('commission'), 'b', 'sur le loyer encaissé') + actCard(rg, T('commission')) + card('Dépenses déduites', T('depTotal'), 'r2', 'facturables aux propriétaires') + card('À reverser aux propriétaires', all.reduce((s, o) => s + Math.max(0, o.aReverser), 0), 'g', 'déjà reversé : ' + fmt(T('reverse')) + (T('avance') ? ' · avances à récupérer : ' + fmt(all.reduce((s, o) => s + Math.max(0, -o.aReverser), 0)) : '')) + '</div>' +
+      card('Ma commission', T('commission'), 'b', 'sur le loyer encaissé') + actCard(rg, T('commission')) + card('Dépenses déduites', T('depTotal'), 'r2', 'facturables aux propriétaires') + card('À reverser', all.reduce((s, o) => s + Math.max(0, o.aReverser), 0), 'g', 'aux propriétaires · déjà reversé : ' + fmt(T('reverse')) + (T('avance') ? ' · avances à récupérer : ' + fmt(all.reduce((s, o) => s + Math.max(0, -o.aReverser), 0)) : '')) + '</div>' +
       (noTaux ? '<div class="gps-banner">Certains propriétaires n’ont pas de taux de commission (0 % appliqué). Renseignez-le dans la colonne « Taux ».</div>' : '') +
       '<input class="gps-search" id="gpsQ" placeholder="Rechercher un propriétaire ou un bien…" value="' + esc(st.q) + '">' +
       '<div class="gps-table"><table><thead><tr><th>Propriétaire / Bien</th><th>Taux %</th><th class="r">À encaisser</th><th class="r">Encaissé</th><th class="r">Reste</th><th class="r">Commission</th><th class="r">Dépenses</th><th class="r">À reverser</th><th></th></tr></thead><tbody>' +
