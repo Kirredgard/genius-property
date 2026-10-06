@@ -113,6 +113,8 @@
   /* ───────── 2. Page « Locataires » : plus accessible ───────── */
   function redirectTenants(fn) {
     return function (page) {
+      /* Exception : le bouton « Locataires » de la page Locations pose ce drapeau pour ouvrir la vraie page. */
+      if (page === 'locataires' && window.__gpAllowTenantsPage) return fn.apply(this, arguments);
       if (page === 'locataires' || page === 'nv-locataire') arguments[0] = 'locatives';
       return fn.apply(this, arguments);
     };
