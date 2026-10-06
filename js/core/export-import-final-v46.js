@@ -23,28 +23,79 @@
   function csvCell(v){v=v==null?'':String(v);return /[";\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
   function download(blob,name){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},800);}
 
+  /* ───────── Mise en forme des exports : colonnes utiles, montants numériques, en-têtes lisibles ───────── */
+  var TECH=/(^|\.)(id|\w*Id|createdAt|updatedAt|quittanceAt|groupe)$/;
+  var MONEY=/^(montant|paye|reste|loyer|caution|prix|total|solde|commission|avance|charges?|depenses?|montantTotal)$/i;
+  var MOIS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  function pretty(h){var l=String(h).split('.').pop().replace(/([a-zà-ÿ])([A-Z])/g,'$1 $2').replace(/_/g,' ');return l.charAt(0).toUpperCase()+l.slice(1);}
+  function frDate(v){var m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?m[3]+'/'+m[2]+'/'+m[1]:(v||'');}
+  function frMois(v){var m=String(v||'').match(/^(\d{4})-(\d{2})$/);return m?MOIS[+m[2]-1]+' '+m[1]:(v||'');}
+  function num(v){var x=+v;return isNaN(x)?0:x;}
+  function payTable(d){
+    var seen={},list=[],dup=0;
+    d.forEach(function(p){var k=[p.recuNo,p.groupe,p.date,p.paye,p.montant].join('|');if(p.recuNo&&seen[k]){dup++;return;}seen[k]=1;list.push(p);});
+    list.sort(function(a,b){return String(a.date||'').localeCompare(String(b.date||''))||String(a.recuNo||'').localeCompare(String(b.recuNo||''));});
+    var body=list.map(function(p){
+      var u=String(p.locative||'').replace(/^Location\s*-\s*/,'');if(p.bien&&u.indexOf(p.bien+' - ')===0)u=u.slice(p.bien.length+3);
+      return [frDate(p.date),p.recuNo||'',p.bien||'',String(p.locataire||'').replace(/\s+/g,' ').trim(),u,frMois(p.periode),p.mode||'',num(p.montant),num(p.paye),num(p.reste)];
+    });
+    var tot=body.reduce(function(a,r){return a+r[8];},0);
+    return {head:['Date','N° reçu','Bien','Locataire','Unité','Période','Mode','Loyer dû','Payé','Reste'],body:body,num:{7:1,8:1,9:1},totals:{8:tot},
+      note:dup?dup+' ligne'+(dup>1?'s':'')+' en double (même reçu) '+(dup>1?'ignorées':'ignorée')+' dans cet export.':''};
+  }
+  function table(r){
+    if(r.key==='paiements')return payTable(r.data);
+    var rr=rows(r.data),c=cols(r.data).filter(function(x){return !TECH.test(x)&&rr.some(function(o){return o[x]!==''&&o[x]!=null;});});
+    var nm={};c.forEach(function(x,i){if(MONEY.test(x.split('.').pop())&&rr.every(function(o){var v=o[x];return v===''||v==null||!isNaN(+v);}))nm[i]=1;});
+    return {head:c.map(pretty),num:nm,totals:{},note:'',body:rr.map(function(o){return c.map(function(x,i){var v=o[x];if(v==null)return '';return nm[i]&&v!==''?+v:v;});})};
+  }
+  function fmtN(v){return typeof v==='number'?v.toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g,' '):v;}
+  function agencyHead(){
+    var g=function(k){try{return localStorage.getItem(k)||'';}catch(e){return '';}};
+    var nom=g('geniusproperty_agence');
+    if(!nom){try{var c=window.GPAgencies&&window.GPAgencies.current();if(c&&c.name)nom=c.name;}catch(e){}}
+    var sb=document.getElementById('sidebar-logo');
+    return {nom:nom||'Genius Property',logo:g('geniusproperty_logo')||(sb&&sb.src)||''};
+  }
+
   window.exportExcel=function(key){
     var r=dataFor(key);if(!r.data.length){toast('Aucune donnée à exporter','err');return;}
-    var c=cols(r.data),rr=rows(r.data),name='genius-property_'+r.key+'_'+new Date().toISOString().slice(0,10);
-    if(window.ensureXLSX){window.ensureXLSX().then(function(XLSX){var aoa=[c].concat(rr.map(function(x){return c.map(function(k){return x[k]==null?'':x[k];});}));var ws=XLSX.utils.aoa_to_sheet(aoa),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,(labels[r.key]||r.key).slice(0,31));XLSX.writeFile(wb,name+'.xlsx');toast('Export Excel '+(labels[r.key]||r.key)+' ✓');}).catch(function(){fallbackCsv(r,name);});}
+    var t=table(r),name='genius-property_'+r.key+'_'+new Date().toISOString().slice(0,10);
+    if(window.ensureXLSX){window.ensureXLSX().then(function(XLSX){
+      var aoa=[t.head].concat(t.body);
+      if(Object.keys(t.totals).length){var tr=t.head.map(function(_,i){return i===0?'TOTAL':(t.totals[i]!=null?t.totals[i]:'');});aoa.push(tr);}
+      var ws=XLSX.utils.aoa_to_sheet(aoa),wb=XLSX.utils.book_new();
+      /* montants : vrais nombres avec séparateur de milliers */
+      for(var R=1;R<aoa.length;R++)Object.keys(t.num).forEach(function(ci){var ref=XLSX.utils.encode_cell({r:R,c:+ci}),cell=ws[ref];if(cell&&cell.t==='n')cell.z='#,##0';});
+      for(var ci in t.totals){var rf=XLSX.utils.encode_cell({r:aoa.length-1,c:+ci});if(ws[rf])ws[rf].z='#,##0';}
+      ws['!cols']=t.head.map(function(h,i){var w=String(h).length;aoa.forEach(function(row){var v=row[i];w=Math.max(w,String(v==null?'':v).length);});return {wch:Math.min(42,Math.max(9,w+2))};});
+      ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:t.body.length,c:t.head.length-1}})};
+      ws['!freeze']={xSplit:0,ySplit:1}; ws['!views']=[{state:'frozen',ySplit:1}];
+      XLSX.utils.book_append_sheet(wb,ws,(labels[r.key]||r.key).slice(0,31));XLSX.writeFile(wb,name+'.xlsx');
+      toast('Export Excel '+(labels[r.key]||r.key)+' ✓'+(t.note?' — '+t.note:''));
+    }).catch(function(){fallbackCsv(r,name);});}
     else fallbackCsv(r,name);
   };
-  function fallbackCsv(r,name){var c=cols(r.data),rr=rows(r.data),txt='\ufeff'+c.map(csvCell).join(';')+'\n'+rr.map(function(x){return c.map(function(k){return csvCell(x[k]);}).join(';');}).join('\n');download(new Blob([txt],{type:'text/csv;charset=utf-8'}),name+'.csv');toast('Export CSV '+(labels[r.key]||r.key)+' ✓');}
+  function fallbackCsv(r,name){var t=table(r),txt='\ufeff'+t.head.map(csvCell).join(';')+'\n'+t.body.map(function(row){return row.map(csvCell).join(';');}).join('\n');download(new Blob([txt],{type:'text/csv;charset=utf-8'}),name+'.csv');toast('Export CSV '+(labels[r.key]||r.key)+' ✓');}
 
   window.exportListePDF=function(key){
     var r=dataFor(key);if(!r.data.length){toast('Aucune donnée à exporter','err');return;}
-    var title=labels[r.key]||key,c=cols(r.data),rr=rows(r.data);
-    /* holder hors écran + contenu SANS position/offset : html2pdf clone le contenu, un left:-20000px cloné donne un PDF blanc */
+    var title=labels[r.key]||key,t=table(r),ag=agencyHead(),n=t.head.length,fs=n>10?8:(n>8?9:10);
+    var th='padding:0 6px 8px;font-size:'+(fs-1)+'px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#6b7280;border-bottom:1.5px solid #111827;text-align:';
+    var td='padding:8px 6px;font-size:'+fs+'px;border-bottom:1px solid #e5e7eb;vertical-align:top;';
+    var html='<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:2px solid #D4AF37;margin-bottom:18px"><div style="display:flex;align-items:center;gap:14px">'+(ag.logo?'<img src="'+esc(ag.logo)+'" style="max-width:80px;max-height:64px;width:auto;height:auto;object-fit:contain">':'')+'<div style="font-size:15px;font-weight:800;text-transform:uppercase">'+esc(ag.nom)+'</div></div><div style="text-align:right"><div style="font-size:19px;font-weight:800">'+esc(title)+'</div><div style="font-size:10px;color:#6b7280;margin-top:4px">Export du '+new Date().toLocaleDateString('fr-FR')+' · '+t.body.length+' ligne'+(t.body.length>1?'s':'')+'</div></div></div>'+
+      '<table style="width:100%;border-collapse:collapse"><thead><tr>'+t.head.map(function(h,i){return '<th style="'+th+(t.num[i]?'right':'left')+'">'+esc(h)+'</th>';}).join('')+'</tr></thead><tbody>'+
+      t.body.map(function(row){return '<tr style="page-break-inside:avoid">'+row.map(function(v,i){return '<td style="'+td+(t.num[i]?'text-align:right;white-space:nowrap;font-weight:600':(i===0?'white-space:nowrap':''))+'">'+esc(fmtN(v))+'</td>';}).join('')+'</tr>';}).join('')+
+      (Object.keys(t.totals).length?'<tr>'+t.head.map(function(_,i){return '<td style="padding:11px 6px 0;font-size:'+(fs+1)+'px;font-weight:800;'+(t.num[i]?'text-align:right;white-space:nowrap':'')+'">'+(i===0?'TOTAL':(t.totals[i]!=null?esc(fmtN(t.totals[i])):''))+'</td>';}).join('')+'</tr>':'')+
+      '</tbody></table>'+(t.note?'<div style="margin-top:14px;font-size:9px;color:#9ca3af">'+esc(t.note)+'</div>':'');
     var wrap=document.createElement('div');wrap.style.cssText='position:fixed;left:-20000px;top:0;width:1060px;pointer-events:none;';
-    var box=document.createElement('div');box.style.cssText='width:1060px;background:#fff;color:#111;padding:28px;box-sizing:border-box;font-family:Arial,sans-serif;';
-    box.innerHTML='<h1 style="margin:0 0 4px;font-size:22px">Genius Property</h1><div style="font-size:18px;font-weight:700;margin-bottom:4px">'+esc(title)+'</div><div style="font-size:11px;color:#666;margin-bottom:16px">Export du '+new Date().toLocaleDateString('fr-FR')+' \u2014 '+r.data.length+' ligne(s)</div><table style="width:100%;border-collapse:collapse;font-size:9px"><thead><tr>'+c.map(function(k){return '<th style="padding:6px;background:#111;color:#fff;text-align:left;border:1px solid #ddd">'+esc(k)+'</th>';}).join('')+'</tr></thead><tbody>'+rr.map(function(x,i){return '<tr>'+c.map(function(k){return '<td style="padding:6px;border:1px solid #ddd;background:'+(i%2?'#fafafa':'#fff')+'">'+esc(x[k]==null?'':x[k])+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>';
-    wrap.appendChild(box);document.body.appendChild(wrap);
+    var box=document.createElement('div');box.style.cssText='width:1060px;background:#fff;color:#111827;padding:32px 36px;box-sizing:border-box;font-family:Inter,Helvetica,Arial,sans-serif;';
+    box.innerHTML=html;wrap.appendChild(box);document.body.appendChild(wrap);
     var fail=function(e){console.error('[export PDF]',e);wrap.remove();toast('Export PDF impossible','err');};
     var go=function(){
       if(typeof window.html2pdf!=='function'){wrap.remove();toast('Export PDF indisponible','err');return;}
-      /* laisse le navigateur calculer la mise en page avant la capture */
       requestAnimationFrame(function(){setTimeout(function(){
-        window.html2pdf().from(box).set({margin:8,filename:'genius-property_'+r.key+'_'+new Date().toISOString().slice(0,10)+'.pdf',image:{type:'jpeg',quality:.96},html2canvas:{scale:1.4,useCORS:true,backgroundColor:'#fff'},jsPDF:{unit:'mm',format:'a4',orientation:'landscape'},pagebreak:{mode:['css','legacy'],avoid:'tr'}}).save().then(function(){wrap.remove();toast('Export PDF '+title+' \u2713');}).catch(fail);
+        window.html2pdf().from(box).set({margin:8,filename:'genius-property_'+r.key+'_'+new Date().toISOString().slice(0,10)+'.pdf',image:{type:'jpeg',quality:.96},html2canvas:{scale:1.6,useCORS:true,backgroundColor:'#fff'},jsPDF:{unit:'mm',format:'a4',orientation:'landscape'},pagebreak:{mode:['css','legacy'],avoid:'tr'}}).save().then(function(){wrap.remove();toast('Export PDF '+title+' ✓');}).catch(fail);
       },50);});
     };
     if(window.ensureHtml2Pdf){window.ensureHtml2Pdf().then(go).catch(fail);}else go();
