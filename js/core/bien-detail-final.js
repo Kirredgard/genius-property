@@ -142,9 +142,10 @@
     var occupied=(snap.occupied||[]).length;
     var unitRows=(snap.units||[]).map(function(r){ return {nom:r.unit&&r.unit.nom||'Unité', statut:r.statut, loyer:r.loyer, relation:r}; });
     var locHtml=locs.length?locs.map(function(l){
-      var cs=contractsForLoc(l), c=cs[0], tenant=clean(c&&(c.locataire||c.tenant))||personName(l)||'—';
+      var cs=contractsForLoc(l), c=cs[0]||l._contract||null, tenant=clean(c&&(c.locataire||c.tenant))||personName(l)||'—';
+      var changeId=clean(l.id|| (c&&(c.locationId||c.locativeId)) || '');
       var tel=l.telephone||l.tel||l.phone||'', rent=l.loyer||l.montant||l.montantLoyer||'';
-      return '<div class="v34-person"><div class="v34-person-head"><b>'+esc(tenant)+'</b>'+badge(l.statut||'Loué')+'</div><div class="v34-person-grid">'+
+      return '<div class="v34-person"><div class="v34-person-head"><div style="display:flex;align-items:center;gap:6px;min-width:0"><b>'+esc(tenant)+'</b>'+badge(l.statut||'Loué')+'</div>'+(changeId&&c?'<button class="v34-btn edit" type="button" onclick="event.stopPropagation();gpChangeOccupant(\''+esc(changeId)+'\')"><span class="material-symbols-rounded">swap_horiz</span>Changer d’occupant</button>':'')+'</div><div class="v34-person-grid">'+
         '<div class="v34-field"><small>Location</small><b>'+esc(l.nom||l.location||'—')+'</b></div>'+
         '<div class="v34-field"><small>Téléphone</small><b>'+esc(tel||'—')+'</b></div>'+
         '<div class="v34-field"><small>Loyer</small><b>'+money(rent)+'</b></div>'+
