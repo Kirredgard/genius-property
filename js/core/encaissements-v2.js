@@ -248,7 +248,14 @@
     if (!(amount > 0)) return { error: 'Saisissez un montant supérieur à 0' };
     const old = opts.replace ? rowsOfGroup(d, opts.replace) : [];
     if (opts.replace && !old.length) return { error: 'Encaissement introuvable (déjà supprimé ?)' };
-    const al = allocate(opts.replace ? without(d, opts.replace) : d, c, amount);
+    // En modification, on travaille sur une copie qui exclut les lignes exactes
+    // de l'encaissement édité. Cela évite qu'une ancienne ligne soit recomptée
+    // comme un nouveau paiement (notamment pour les anciens paiements sans
+    // champ `groupe`). Le montant saisi remplace donc réellement l'ancien.
+    const base = opts.replace
+      ? Object.assign({}, d, { paiements: (d.paiements || []).filter(p => !old.includes(p)) })
+      : d;
+    const al = allocate(base, c, amount);
     if (!al.rows.length) return { error: 'Aucune échéance à solder pour ce contrat' };
     if (al.leftover > 0) return { error: 'Le montant dépasse ce qui peut être imputé (' + fmt(amount - al.leftover) + ' max)' };
     /* ── validation OK : on peut modifier ── */
@@ -256,7 +263,12 @@
     if (!Array.isArray(d.paiements)) d.paiements = [];
     const oldPeriods = old.map(p => p.periode).filter(validKey);
     const keep = old[0] || {};
-    if (opts.replace) d.paiements = d.paiements.filter(p => groupOf(p) !== opts.replace);
+    if (opts.replace) {
+      // Suppression par référence d'objet : plus robuste que le seul identifiant
+      // de groupe pour les données historiques/anciennes.
+      const oldSet = new Set(old);
+      d.paiements = d.paiements.filter(p => !oldSet.has(p));
+    }
     const recuNo = keep.recuNo || nextRecu(d), groupe = keep.groupe || ('ENC-' + Date.now().toString(36)), now = new Date().toISOString();
     al.rows.slice().reverse().forEach(a => {
       d.paiements.unshift({
@@ -273,7 +285,14 @@
     const settledPeriods = al.rows.map(a => settled[a.k]).filter(Boolean);
     refreshProchain(d, c);
     pushAudit(d, opts.replace ? 'modification' : 'creation', { recuNo, contrat: c.num || c.id, locataire: c.locataire, montant: Math.round(amount), avant: old.reduce((s, p) => s + num(p.paye), 0) });
-    await saveDb(d);
+    const saved = await saveDb(d);
+    if (saved === false) return { error: 'Modification non enregistrée. Rechargez puis réessayez.' };
+    // Vérification finale : le groupe remplacé ne doit plus exister.
+    // Si une couche de persistance refuse l'écriture, on ne confirme pas la modification.
+    const persisted = prepareRelations(db());
+    if (opts.replace && rowsOfGroup(persisted, opts.replace).length) {
+      return { error: "La modification n'a pas remplacé l'ancien encaissement. Rechargez puis réessayez." };
+    }
     try { localStorage.setItem('gpe_last_mode', mode); } catch (_) {}
     return { recuNo, rows: al.rows, settledPeriods, cKey: cid(c) };
   }
