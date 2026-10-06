@@ -391,6 +391,65 @@
     </style>`);
   }
 
+  /* ───────── contrôle de cohérence (trop-perçus, doublons) ───────── */
+  let anomList = [];
+  function findAnomalies(d) {
+    d = prepareRelations(d);
+    const out = [], groups = {};
+    (d.paiements || []).forEach(p => { const g = groupOf(p); (groups[g] = groups[g] || []).push(p); });
+    activeContracts(d).forEach(c => {
+      const due = monthlyDue(d, c); if (!(due > 0)) return;
+      const cg = {};
+      Object.keys(groups).forEach(g => { const rows = groups[g].filter(p => belongs(p, c)); if (rows.length) cg[g] = rows; });
+      const info = g => { const rows = cg[g], f = rows[rows.length - 1]; return { gid: g, rows, first: f, total: rows.reduce((s, p) => s + num(p.paye), 0) }; };
+      // 1) trop-perçu : une période payée au-delà du loyer dû
+      const paid = paidMap(d, c);
+      Object.keys(paid).sort().forEach(k => {
+        const excess = paid[k] - due; if (excess <= 0.5) return;
+        let best = null;
+        Object.keys(cg).forEach(g => {
+          const inK = cg[g].filter(p => p.periode === k).reduce((s, p) => s + num(p.paye), 0);
+          if (inK > 0 && (!best || inK > best.inK)) best = { g, inK };
+        });
+        if (!best) return;
+        const gi = info(best.g), cut = Math.min(excess, best.inK), newAmount = Math.max(0, Math.round(gi.total - cut));
+        out.push({ type: 'over', cKey: cid(c), locataire: c.locataire, periode: k, paid: paid[k], due, excess, gid: gi.gid, recuNo: gi.first.recuNo || '', date: gi.first.date, mode: gi.first.mode || 'Espèces', ref: gi.first.ref || '', total: gi.total, newAmount });
+      });
+      // 2) doublons : même date + même montant total, plusieurs encaissements
+      const seen = {};
+      Object.keys(cg).forEach(g => { const gi = info(g), key = (gi.first.date || '') + '|' + Math.round(gi.total); (seen[key] = seen[key] || []).push(gi); });
+      Object.keys(seen).forEach(key => {
+        if (seen[key].length < 2) return;
+        const gi = seen[key][0]; // on propose de supprimer le premier de la liste (le plus récent)
+        out.push({ type: 'dup', cKey: cid(c), locataire: c.locataire, gid: gi.gid, recuNo: gi.first.recuNo || '', date: gi.first.date, total: gi.total, count: seen[key].length });
+      });
+    });
+    return out;
+  }
+  function openAnomalies() {
+    const d = db(); anomList = findAnomalies(d);
+    const body = anomList.length ? '<div class="gpe-banner">Rien n\'est modifié automatiquement : chaque correction demande votre confirmation et est enregistrée dans le journal.</div>' +
+      anomList.map((a, i) => {
+        const when = a.date ? shortDate(parseD(a.date) || new Date()) : '—';
+        if (a.type === 'over') return '<div class="gpe-docs"><h4>' + esc(a.locataire) + ' — ' + monthLabel(a.periode) + '</h4><div class="gpe-doc-row"><span>Payé <b>' + fmt(a.paid) + '</b> pour un dû de <b>' + fmt(a.due) + '</b><br>Excédent : <b class="gpe-red">' + fmt(a.excess) + '</b> · reçu ' + esc(a.recuNo || '—') + ' du ' + when + '</span><button class="gpe-btn sm pri" data-fix="' + i + '">' + (a.newAmount > 0 ? 'Ramener à ' + fmt(a.newAmount) : 'Supprimer') + '</button></div></div>';
+        return '<div class="gpe-docs"><h4>' + esc(a.locataire) + ' — doublon possible</h4><div class="gpe-doc-row"><span>' + a.count + ' encaissements de <b>' + fmt(a.total) + '</b> le ' + when + '<br>Reçu ' + esc(a.recuNo || '—') + '</span><button class="gpe-btn sm" data-fix="' + i + '">Supprimer celui-ci</button></div></div>';
+      }).join('') : '<div class="gpe-info"><div class="row"><span>Aucune anomalie détectée ✓</span></div></div>';
+    openDrawer('Contrôle des encaissements', 'Trop-perçus et doublons', body, '<button class="gpe-btn" data-close>Fermer</button>');
+  }
+  async function fixAnomaly(i) {
+    const a = anomList[i]; if (!a) return;
+    if (!canWrite()) return notify('Action non autorisée pour votre rôle', 'err');
+    if (a.type === 'dup' || a.newAmount <= 0) {
+      if (!(await deleteEncaissement(a.gid))) return;
+    } else {
+      if (!window.confirm('Corriger l\'encaissement ' + (a.recuNo || '') + ' de ' + a.locataire + ' ?\n\n' + fmt(a.total) + '  →  ' + fmt(a.newAmount))) return;
+      const r = await saveEncaissement(a.cKey, a.newAmount, a.date, a.mode, a.ref, { replace: a.gid });
+      if (r.error) return notify(r.error, 'err');
+      notify('Encaissement corrigé ✓');
+    }
+    refreshAll(); openAnomalies();
+  }
+
   /* ───────── page principale ───────── */
   const st = { month: nowKey(), filter: 'tous', q: '' };
   const STATUS = { paye: 'Payé', partiel: 'Partiel', retard: 'En retard', avenir: 'À venir' };
@@ -440,7 +499,9 @@
     const page = $('page-paiements'); if (!page) return;
     injectStyle(); migrate();
     const d = db(), all = rowsForMonth(d);
-    const attendu = all.reduce((s, r) => s + r.cur.due, 0), percu = all.reduce((s, r) => s + r.cur.paid, 0);
+    const attendu = all.reduce((s, r) => s + r.cur.due, 0), percu = all.reduce((s, r) => s + Math.min(r.cur.paid, r.cur.due), 0);
+    const credit = all.reduce((s, r) => s + Math.max(0, r.cur.paid - r.cur.due), 0);
+    const anom = findAnomalies(d); anomList = anom;
     const reste = all.reduce((s, r) => s + r.cur.solde, 0), arrears = all.reduce((s, r) => s + r.arrears, 0);
     const taux = attendu ? Math.min(100, Math.round(percu / attendu * 100)) : 0;
     const nUn = unlinked(d).length;
@@ -453,10 +514,11 @@
       '<button class="gpe-btn pri" data-pay=""><span class="material-symbols-rounded">add</span>Nouvel encaissement</button></div></div>' +
       '<div class="gpe-cards">' +
       '<div class="gpe-card"><small>Attendu</small><strong>' + fmt(attendu) + '</strong><em>' + all.length + ' loyer' + (all.length > 1 ? 's' : '') + '</em></div>' +
-      '<div class="gpe-card"><small>Encaissé</small><strong class="gpe-green">' + fmt(percu) + '</strong><div class="gpe-bar"><i style="width:' + taux + '%"></i></div></div>' +
+      '<div class="gpe-card"><small>Encaissé</small><strong class="gpe-green">' + fmt(percu) + '</strong><div class="gpe-bar"><i style="width:' + taux + '%"></i></div>' + (credit > 0 ? '<em class="gpe-orange">+ ' + fmt(credit) + ' de trop-perçu (crédit)</em>' : '') + '</div>' +
       '<div class="gpe-card"><small>Reste du mois</small><strong class="gpe-orange">' + fmt(reste) + '</strong><em>à percevoir</em></div>' +
       '<div class="gpe-card"><small>Arriérés</small><strong class="' + (arrears ? 'gpe-red' : '') + '">' + fmt(arrears) + '</strong><em>mois précédents</em></div>' +
       '<div class="gpe-card"><small>Recouvrement</small><strong>' + taux + ' %</strong><em>du mois</em></div></div>' +
+      (anom.length ? '<div class="gpe-banner"><b>' + anom.length + ' anomalie' + (anom.length > 1 ? 's' : '') + '</b> détectée' + (anom.length > 1 ? 's' : '') + ' (paiement supérieur au loyer dû ou doublon). <button class="gpe-btn sm" data-anom>Vérifier et corriger</button></div>' : '') +
       (nUn ? '<div class="gpe-banner"><b>' + nUn + ' ancien' + (nUn > 1 ? 's' : '') + ' paiement' + (nUn > 1 ? 's' : '') + '</b> non rattaché' + (nUn > 1 ? 's' : '') + ' à un contrat actif (contrat terminé ou nom différent) : ' + (nUn > 1 ? 'ils restent' : 'il reste') + ' consultable' + (nUn > 1 ? 's' : '') + ' dans l\'export mais ' + (nUn > 1 ? 'ne comptent' : 'ne compte') + ' pas dans l\'échéancier.</div>' : '') +
       '<div class="gpe-toolbar"><input class="gpe-search" id="gpeSearch" placeholder="Rechercher un locataire, un bien…" value="' + esc(st.q) + '"><div class="gpe-chips">' +
       chip('tous', 'Tous', all.length) + chip('retard', 'En retard', cnt('retard')) + chip('partiel', 'Partiels', cnt('partiel')) + chip('avenir', 'À venir', cnt('avenir')) + chip('paye', 'Payés', cnt('paye')) + '</div></div>' +
@@ -760,7 +822,7 @@
     try { typeof window.updateSidebarBadges === 'function' && window.updateSidebarBadges(); } catch (_) {}
   }
   document.addEventListener('click', e => {
-    const t = e.target.closest('[data-pay],[data-fiche],[data-filter],[data-mo],[data-export],[data-close],[data-save],[data-q],[data-tab],[data-statement],[data-report],[data-receipt],[data-quittance],[data-edit],[data-del]');
+    const t = e.target.closest('[data-pay],[data-fiche],[data-filter],[data-mo],[data-export],[data-close],[data-save],[data-q],[data-tab],[data-statement],[data-report],[data-receipt],[data-quittance],[data-edit],[data-del],[data-anom],[data-fix]');
     if (!t) return;
     const inPage = t.closest('#page-paiements') || t.closest('#gpeDrawer');
     if (!inPage) return;
@@ -770,6 +832,8 @@
     if (t.hasAttribute('data-tab')) { fiche.tab = t.dataset.tab; return paintFiche(); }
     if (t.hasAttribute('data-statement')) return openStatementDialog(t.dataset.statement);
     if (t.hasAttribute('data-report')) { const key=t.dataset.report, type=($('gpeRepType')||{}).value||'mois', anchor=($('gpeRepAnchor')||{}).value||nowKey(); closeDrawer(); return generateStatementPDF(key,type,anchor); }
+    if (t.hasAttribute('data-anom')) return openAnomalies();
+    if (t.hasAttribute('data-fix')) return fixAnomaly(+t.dataset.fix);
     if (t.hasAttribute('data-edit')) return openEdit(t.dataset.edit);
     if (t.hasAttribute('data-del')) return deleteEncaissement(t.dataset.del);
     if (t.hasAttribute('data-receipt')) return generateReceiptPDF(t.dataset.receipt);
@@ -806,7 +870,7 @@
   if (window.GPNavigation && typeof window.GPNavigation.registerRenderer === 'function') window.GPNavigation.registerRenderer('paiements', render);
 
   window.genererRecuPaiementPDF = generateReceiptPDFByIndex;
-  window.GPEncV2 = { render, migrate, schedule, allocate, saveEncaissement, deleteEncaissement, openEdit, openPay, openFiche, generateReceiptPDF, generateReceiptPDFByIndex, generateQuittancePDF, generateStatementPDF, _internals: { cid, monthlyDue, startKey, paidMap, nextRecu, nextQuittance, prepareRelations } };
+  window.GPEncV2 = { findAnomalies, openAnomalies, render, migrate, schedule, allocate, saveEncaissement, deleteEncaissement, openEdit, openPay, openFiche, generateReceiptPDF, generateReceiptPDFByIndex, generateQuittancePDF, generateStatementPDF, _internals: { cid, monthlyDue, startKey, paidMap, nextRecu, nextQuittance, prepareRelations } };
 
   // Si la page Encaissements est déjà affichée au chargement, on remplace l'ancien rendu.
   const pg = $('page-paiements');
