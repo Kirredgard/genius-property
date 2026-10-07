@@ -109,7 +109,7 @@ html:not(.gp-super-admin) [data-super-only],html:not(.gp-super-admin) #sideMenu 
     var section=null;
     Array.prototype.forEach.call(menu.children,function(el){
       if(el.classList && el.classList.contains('menu-section')){
-        if(section) section.hidden=!section._hasVisible;
+        if(section && section.hidden!==!section._hasVisible) section.hidden=!section._hasVisible;
         section=el; section._hasVisible=false; return;
       }
       if(section && el.matches && el.matches('li[data-page]')){
@@ -117,7 +117,7 @@ html:not(.gp-super-admin) [data-super-only],html:not(.gp-super-admin) #sideMenu 
         if(cs.display!=='none' && !el.hidden) section._hasVisible=true;
       }
     });
-    if(section) section.hidden=!section._hasVisible;
+    if(section && section.hidden!==!section._hasVisible) section.hidden=!section._hasVisible;
   }
   window.refreshSidebarSections=refreshSidebarSections;
   document.addEventListener('DOMContentLoaded',function(){
@@ -1047,7 +1047,7 @@ html:not(.gp-super-admin) [data-super-only],html:not(.gp-super-admin) #sideMenu 
 <script src="js/core/user-menu.js?v=user-menu-2" defer></script>
 <script src="js/safe-bootstrap.js?v=supabase-v2" defer></script>
 <script src="js/core/renderers.js" defer></script>
-<script src="js/core/ui-functions.js?v=v76-topbar" defer></script>
+<script src="js/core/ui-functions.js?v=v76-topbar-perf1" defer></script>
 <script src="js/core/topbar-patch.js" defer></script>
 <script src="js/core/fallback-renderers.js?v=20260526" defer></script>
 <script src="js/pages/employes-modern.js?v=restore-v48" defer></script>
@@ -1080,7 +1080,7 @@ html:not(.gp-super-admin) [data-super-only],html:not(.gp-super-admin) #sideMenu 
 
 <script src="js/inline/inline-script-11.js?v=v82-owner-mandat"></script>
 <!-- pages/biens.js legacy CRUD retired: current-workflows.js is the single Bien form/CRUD -->
-<script src="js/core/missing-actions.js?v=v82-owner-mandat" defer></script>
+<script src="js/core/missing-actions.js?v=v82-owner-mandat-perf1" defer></script>
 <script src="js/core/parametres-restore.js" defer></script>
 <script src="js/core/sidebar-badge-restore.js" defer></script>
 
@@ -1090,7 +1090,7 @@ html:not(.gp-super-admin) [data-super-only],html:not(.gp-super-admin) #sideMenu 
 <!-- désactivé nettoyage final: <script src="js/core/avenir-kpi-fix.js?v=20260523-v23-clean" defer></script> -->
 
 <link rel="stylesheet" href="styles/gp-payments-date-compact-v3.css?v=20260523-v3">
-<script src="js/core/gp-date-format-global-v3.js?v=20260523-v3" defer></script>
+<script src="js/core/gp-date-format-global-v3.js?v=20260523-v3-perf1" defer></script>
 
 <script id="gpSplashFailsafe">
   // Si ni l'app ni la session ne sont prêtes après 8 s, on renvoie vers la page de connexion.
@@ -1132,13 +1132,13 @@ window.gpSupabaseDiagnostic = async function(){
 
 <script src="js/core/gp-pagination.js?v=common-12"></script>
 <script src="js/core/gp-search-focus-fix.js?v=1"></script>
-<script src="js/core/media.js?v=v63-canonical-media"></script>
+<script src="js/core/media.js?v=v63-canonical-media-perf1"></script>
 <!-- current-data-sync.js retired: duplicate global refresh/consistency layer removed -->
 <script src="js/core/locations-page-restorer.js?v=v70-location-ui-restore" defer></script>
 <script src="js/core/locataires-shortcut.js?v=v2" defer></script>
 <script src="js/core/current-workflows.js?v=v76-photo-delete"></script>
 <script src="js/core/location-data-audit.js?v=v69-location-source-unique"></script>
-<script src="js/core/current-finance-workflows.js?v=v83-fix"></script>
+<script src="js/core/current-finance-workflows.js?v=v83-fix-perf1"></script>
 <script src="js/core/v27-unified-actions.js?v=v83-fix"></script>
 <script src="js/core/finance-close-fix-v17.js?v=v17"></script>
 <script src="js/core/final-navigation-guard.js?v=v15"></script>
@@ -1149,7 +1149,7 @@ window.gpSupabaseDiagnostic = async function(){
 <script src="js/core/ui-consistency-v26.js?v=v89-cartes-compactes"></script>
 
 <script src="js/core/v32-unified-gp10-edit-forms.js?v=v32"></script>
-<script src="js/core/v37-clean-bien-click-expense-bar.js?v=v37-clean"></script>
+<script src="js/core/v37-clean-bien-click-expense-bar.js?v=v37-clean-perf1"></script>
 <script src="js/core/v39-compact-final.js?v=v43-spacing-select"></script>
 <script src="js/core/export-import-final-v46.js?v=v47-menu-pdf"></script>
 <script src="js/core/encaissements-v2.js?v=v67-sans-banniere"></script>
