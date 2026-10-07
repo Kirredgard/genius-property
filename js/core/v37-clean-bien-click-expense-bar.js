@@ -41,7 +41,7 @@
   },true);
   function styleBienCards(){
     var page=document.getElementById('page-biens');if(!page||!page.classList.contains('active'))return;
-    page.querySelectorAll('.gp-bien-card,.bien-card').forEach(function(card){
+    page.querySelectorAll('.gp-bien-card:not(.gp-v37-bien-clickable),.bien-card:not(.gp-v37-bien-clickable)').forEach(function(card){
       card.classList.add('gp-v37-bien-clickable');
       card.removeAttribute('title');
       card.querySelectorAll('.gp-v35-click-hint,.gp-v36-hover-hint').forEach(function(h){h.remove();});
@@ -73,15 +73,19 @@
   function addExpenseBar(){
     var page=document.getElementById('page-depenses');if(!page||!page.classList.contains('active'))return;
     removeOldExpenseIndicators(page);
-    var old=page.querySelector('.gp-v37-expense-bar');if(old)old.remove();
-    var now=new Date(),key=monthKey(now),all=arr('depenses');
+    var old=page.querySelector('.gp-v37-expense-bar');
+    var now=new Date(),key=monthKey(now);
+    var sig=key+'|'+(localStorage.getItem('gpdb_local_revision')||'0');
+    if(old&&old.getAttribute('data-gp-sig')===sig)return; // rien n'a changé : pas de relecture de la base ni de reconstruction
+    if(old)old.remove();
+    var all=arr('depenses');
     var month=all.filter(function(x){var d=parseDate(x.date||x.dateDepense||x.createdAt);return d&&monthKey(d)===key;});
     var total=month.reduce(function(s,x){return s+num(x.montant);},0);
     var agency=month.filter(function(x){var cat=norm(x.cat||x.categorie||x.category||''),type=norm(x.type||x.typeDepense||x.type_depense||''),bien=norm(x.bien||x.bienId||x.parentBien||x.parentBienId||x.affectation||'');return bien==='agence'||bien.indexOf('agence')>=0||cat.indexOf('agence')>=0||cat.indexOf('facture agence')>=0||type==='agence'||type.indexOf('agence')>=0;}).reduce(function(s,x){return s+num(x.montant||x.amount||0);},0);
     var works=month.filter(function(x){var cat=norm(x.cat||x.categorie||x.category||''),type=norm(x.type||x.typeDepense||x.type_depense||''),bien=norm(x.bien||x.bienId||x.parentBien||x.parentBienId||x.affectation||'');var isAgency=bien==='agence'||bien.indexOf('agence')>=0||cat.indexOf('agence')>=0||cat.indexOf('facture agence')>=0||type==='agence'||type.indexOf('agence')>=0; if(isAgency)return false; return cat.indexOf('travaux')>=0||cat.indexOf('reparation')>=0||type.indexOf('travaux')>=0||type.indexOf('reparation')>=0;}).reduce(function(s,x){return s+num(x.montant||x.amount||0);},0);
     var wp=total?Math.min(100,works/total*100):0,ap=total?Math.min(100,agency/total*100):0;
     var label=now.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
-    var wrap=document.createElement('div');wrap.className='gp-v37-expense-bar';
+    var wrap=document.createElement('div');wrap.className='gp-v37-expense-bar';wrap.setAttribute('data-gp-sig',sig);
     wrap.innerHTML='<div class="gp-v37-expense-head"><span>Dépenses · '+esc(label)+'</span><b>'+total.toLocaleString('fr-FR')+' FCFA</b></div><div class="gp-v37-expense-track" aria-label="Répartition mensuelle des dépenses entre travaux et agence"><div class="gp-v37-expense-seg works" style="width:'+wp+'%"><strong>Travaux / réparations</strong><b>'+Math.round(wp)+' %</b><small>'+works.toLocaleString('fr-FR')+' FCFA</small></div><div class="gp-v37-expense-seg agency" style="width:'+ap+'%"><strong>Agence</strong><b>'+Math.round(ap)+' %</b><small>'+agency.toLocaleString('fr-FR')+' FCFA</small></div></div>';
     var toolbar=page.querySelector('.gpf-toolbar-finance');
     if(toolbar)toolbar.insertAdjacentElement('afterend',wrap);else page.prepend(wrap);
@@ -89,5 +93,5 @@
   function refresh(){styleBienCards();addExpenseBar();}
   document.addEventListener('DOMContentLoaded',function(){setTimeout(refresh,250);});
   document.addEventListener('gp:navigation',function(e){if(!e||!e.detail)return;if(e.detail.page==='biens')setTimeout(styleBienCards,30);if(e.detail.page==='depenses')setTimeout(addExpenseBar,30);});
-  setInterval(refresh,800);
+  setInterval(function(){ if(!document.hidden) refresh(); },2500);
 })();
