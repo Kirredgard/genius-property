@@ -475,8 +475,9 @@
     if(!el) return;
     var t=(el.textContent||'').replace(/\s+/g,' ').trim();
     if(t==='SN +221' || t==='+221' || t.indexOf('+221')>=0 || t.indexOf('🇸🇳')>=0){
-      el.innerHTML=flagHtml();
-      el.setAttribute('data-code','+221');
+      // Perf : ne réécrit que si nécessaire (sinon l'observateur ci-dessous se redéclenche en boucle)
+      if(t!=='🇸🇳 +221 expand_more' && t!=='🇸🇳+221expand_more'){ el.innerHTML=flagHtml(); }
+      if(el.getAttribute('data-code')!=='+221') el.setAttribute('data-code','+221');
     }
   }
   function fixPhoneFlags(root){
@@ -491,7 +492,7 @@
         countries.slice(1).forEach(function(c){ c.remove(); });
       }
       var inp=w.querySelector('input');
-      if(inp){ inp.value=(inp.value||'').replace(/^\s*(SN\s*)?\+221\s*/i,'').trim(); }
+      if(inp){ var cleaned=(inp.value||'').replace(/^\s*(SN\s*)?\+221\s*/i,'').trim(); if(cleaned!==inp.value) inp.value=cleaned; }
     });
   }
   function removeLocationPhone(root){
@@ -526,9 +527,10 @@
   });
   var oldEnh=window.fixAllPhoneDialFields;
   window.fixAllPhoneDialFields=function(){ if(oldEnh) try{oldEnh();}catch(e){} run(document); };
+  var moTimer=null;
   var mo=new MutationObserver(function(muts){
     var need=false; muts.forEach(function(m){ if(m.addedNodes && m.addedNodes.length) need=true; });
-    if(need) setTimeout(function(){run(document);},20);
+    if(need && !moTimer) moTimer=setTimeout(function(){ moTimer=null; run(document); mo.takeRecords(); },60);
   });
   document.addEventListener('DOMContentLoaded',function(){
     run(document); setTimeout(function(){run(document);},500); setTimeout(function(){run(document);},1200);

@@ -183,7 +183,7 @@
   function syncExpenseOwner(){
     const owner=ownerForBien(get('gpf-d-bien')); const info=$('gpf-d-owner'); if(info) info.innerHTML='Propriétaire : <b>'+esc(owner||'—')+'</b>';
   }
-  async function readFile(){ const f=$('gpf-d-facture')?.files?.[0]; if(!f) return null; return await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(f);}); }
+  async function readFile(){ const f=$('gpf-d-facture')?.files?.[0]; if(!f) return null; return await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>{ const raw=r.result; if(/^image\//i.test(f.type||'') && window.GPMedia && window.GPMedia.compressDataUrl) window.GPMedia.compressDataUrl(raw,1600,0.8).then(resolve); else resolve(raw); };r.onerror=reject;r.readAsDataURL(f);}); }
 
   function open(kind,index=-1){
     injectStyle(); state.kind=kind; state.index=Number.isInteger(index)?index:-1;

@@ -346,6 +346,7 @@
           return;
         }
         finalUrl = await fileToBase64(file);
+        if (/^image\//i.test(file.type||'') && window.GPMedia && window.GPMedia.compressDataUrl) { finalUrl = await window.GPMedia.compressDataUrl(finalUrl, 1600, 0.8); }
         size = file.size;
         // Si un nom de fichier n'est pas déjà dans le nom, on garde le nom saisi
       }

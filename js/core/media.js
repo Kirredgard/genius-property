@@ -37,7 +37,7 @@
     if(!/^image\//i.test(file.type||'')) throw new Error('Le fichier sélectionné n’est pas une image.');
     if(file.size>12*1024*1024) throw new Error('La photo dépasse 12 Mo.');
     var raw=await readFile(file);
-    return compressDataUrl(raw,1600,0.80);
+    return compressDataUrl(raw,1280,0.78);
   }
   window.GPMedia=window.GPMedia||{};
   window.GPMedia.readImage=readImage;
