@@ -95,7 +95,13 @@
     if (db_) { const k = keyOf(db_), floor = addM(nowKey(), -1); return k < floor ? floor : k; }
     return nowKey();
   }
-  const startKey = (d, c) => (validKey(c.suiviDepuis) ? c.suiviDepuis : defaultStart(d, c));
+  /* Un début de suivi figé n'est respecté que s'il y a des paiements : sans paiement, la
+   * « Prochaine échéance » prime (un ancien suiviDepuis erroné = septembre ne doit plus s'imposer). */
+  function startKey(d, c) {
+    const hasPay = contractPayments(d, c).some(p => validKey(p.periode));
+    if (!hasPay && parseD(c.prochain)) return keyOf(parseD(c.prochain));
+    return validKey(c.suiviDepuis) ? c.suiviDepuis : defaultStart(d, c);
+  }
   /** Fige le début de suivi du contrat. Sans cela, il est recalculé à partir des paiements
    *  (puis de « prochain ») : supprimer/modifier le seul paiement d'octobre faisait glisser
    *  le début à novembre, donc octobre disparaissait et le montant était imputé à novembre. */
