@@ -128,8 +128,10 @@
     } catch(_) {}
   }
   function idsOf(list){ var m={}; (list||[]).forEach(function(r){ if(r && r.id!=null) m[String(r.id)]=1; }); return m; }
-  // Fusion non destructive : union par id, la version locale (modifiée) l'emporte.
+  // Fusion non destructive : union par id, la version locale (modifiée) l'emporte,
+  // mais les enregistrements SUPPRIMÉS (meta.deleted) ne reviennent jamais. (V31)
   function mergeData(cloud, local){
+    if(window.GPDB && typeof window.GPDB.mergeSnapshots === 'function') return window.GPDB.mergeSnapshots(cloud, local);
     var out = JSON.parse(JSON.stringify(cloud || {}));
     Object.keys(local || {}).forEach(function(k){
       var lv = local[k], cv = out[k];

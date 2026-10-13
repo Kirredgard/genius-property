@@ -147,6 +147,19 @@
     }
     var expected = Number(state.serverVersion || 1);
     var result = await sb.rpc('gp_update_app_data', {p_payload: payload, p_expected_version: expected, p_allow_shrink: !!opts.allowShrink});
+    if(result.error && /stale_data/i.test(result.error.message || '') && !opts._merged &&
+       window.GPDB && typeof window.GPDB.mergeSnapshots === 'function') {
+      // V31 — Un autre poste a enregistré entre-temps. On NE renvoie PAS notre copie telle quelle
+      // (elle écraserait ses modifications et ferait revenir les éléments supprimés) :
+      // on relit le cloud, on fusionne en respectant les suppressions, puis on renvoie une fois.
+      state.versionKnown = false;
+      var fresh = await pull({applyToLocal:false});
+      var merged = fresh ? window.GPDB.mergeSnapshots(fresh, payload) : payload;
+      try { window.GPDB.save(merged, {silent:true, force:true}); } catch(_) {}
+      try { window.dispatchEvent(new CustomEvent('gp:supabase:pulled')); } catch(_) {}
+      var o2 = {}; Object.keys(opts).forEach(function(k){ o2[k] = opts[k]; }); o2._merged = true;
+      return doPush(merged, o2);
+    }
     if(result.error) {
       if(/stale_data/i.test(result.error.message || '')) {
         state.versionKnown = false;

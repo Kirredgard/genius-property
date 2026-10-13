@@ -82,6 +82,100 @@
     return ['employes','proprietaires','locataires','biens','locatives','contrats','paiements','depenses','fichiers','messages','conversations','agenda'].reduce(function(n,k){ return n + (Array.isArray(d[k]) ? d[k].length : 0); }, 0);
   }
 
+
+  // ---------------------------------------------------------------------------
+  // V31 — Marqueurs de suppression (tombstones)
+  // db.meta.deleted = { collection: { id: isoDate } }
+  // Sans eux, une fusion local/cloud « union par id » ne sait pas distinguer un
+  // enregistrement supprimé d'un enregistrement jamais synchronisé : il revenait.
+  // ---------------------------------------------------------------------------
+  var TOMBSTONE_TTL_MS = 180 * 24 * 3600 * 1000; // 180 jours
+
+  function idMap(list){
+    var m = {};
+    (list || []).forEach(function(r){ if(r && r.id != null) m[String(r.id)] = r; });
+    return m;
+  }
+
+  function pruneTombstones(deleted){
+    var out = {}, limit = Date.now() - TOMBSTONE_TTL_MS;
+    Object.keys(deleted || {}).forEach(function(col){
+      var src = deleted[col] || {};
+      Object.keys(src).forEach(function(id){
+        var t = Date.parse(src[id]);
+        if(!Number.isFinite(t) || t >= limit){ (out[col] = out[col] || {})[id] = src[id]; }
+      });
+    });
+    return out;
+  }
+
+  // Compare l'ancienne version (stockée) et la nouvelle : les ids disparus sont marqués supprimés,
+  // les ids présents (ré-créés) perdent leur marqueur.
+  function applyTombstones(incoming, rawSource, previous){
+    var deleted = pruneTombstones(incoming.meta && incoming.meta.deleted);
+    var now = new Date().toISOString();
+    if(previous){
+      Object.keys(previous).forEach(function(col){
+        if(col === 'meta' || !Array.isArray(previous[col])) return;
+        // Le module n'a pas fourni cette collection : on ne déduit aucune suppression.
+        if(!rawSource || !Array.isArray(rawSource[col])) return;
+        var now_ids = idMap(incoming[col]);
+        previous[col].forEach(function(r){
+          if(r && r.id != null && !now_ids[String(r.id)]) (deleted[col] = deleted[col] || {})[String(r.id)] = now;
+        });
+      });
+    }
+    Object.keys(deleted).forEach(function(col){
+      var present = idMap(incoming[col]);
+      Object.keys(deleted[col]).forEach(function(id){
+        if(present[id]) delete deleted[col][id];
+      });
+      if(!Object.keys(deleted[col]).length) delete deleted[col];
+    });
+    incoming.meta.deleted = deleted;
+    return incoming;
+  }
+
+  // Fusion non destructive de deux snapshots : union par id (le local l'emporte sur un même id),
+  // MAIS les ids supprimés d'un côté ou de l'autre restent supprimés.
+  function mergeSnapshots(cloud, local){
+    cloud = cloud || {}; local = local || {};
+    var out = JSON.parse(JSON.stringify(cloud));
+    var tomb = {};
+    [cloud, local].forEach(function(src){
+      var d = src && src.meta && src.meta.deleted || {};
+      Object.keys(d).forEach(function(col){
+        Object.keys(d[col] || {}).forEach(function(id){
+          tomb[col] = tomb[col] || {};
+          if(!tomb[col][id] || String(d[col][id]) > String(tomb[col][id])) tomb[col][id] = d[col][id];
+        });
+      });
+    });
+    Object.keys(local).forEach(function(k){
+      if(k === 'meta') return;
+      var lv = local[k], cv = out[k];
+      if(Array.isArray(lv)){
+        var res = Array.isArray(cv) ? cv.slice() : [];
+        var pos = {}; res.forEach(function(r,i){ if(r && r.id != null) pos[String(r.id)] = i; });
+        lv.forEach(function(r){
+          if(r && r.id != null && pos[String(r.id)] != null) res[pos[String(r.id)]] = r; else res.push(r);
+        });
+        out[k] = res;
+      } else if(lv && typeof lv === 'object'){
+        out[k] = Object.assign({}, cv && typeof cv === 'object' ? cv : {}, lv);
+      } else if(lv != null){
+        out[k] = lv;
+      }
+    });
+    Object.keys(out).forEach(function(k){
+      if(k === 'meta' || !Array.isArray(out[k]) || !tomb[k]) return;
+      out[k] = out[k].filter(function(r){ return !(r && r.id != null && tomb[k][String(r.id)]); });
+    });
+    out.meta = Object.assign({}, cloud.meta || {}, local.meta || {});
+    out.meta.deleted = pruneTombstones(tomb);
+    return out;
+  }
+
   function readRaw(){
     var local = localStorage.getItem(STORAGE_KEY);
     var authoritative = localStorage.getItem(AUTHORITATIVE_KEY);
@@ -152,6 +246,12 @@
       return false;
     }
 
+    // V31 — enregistre les suppressions (sauf écritures issues du cloud / fusion / restauration forcée).
+    var rawSource = db || window.DB || {};
+    if(!options.skipCloud && !options.force){
+      applyTombstones(incoming, rawSource, stored);
+    }
+
     var nextRev = Math.max(storedRev, incomingRev) + 1;
     stampRevision(incoming, nextRev);
     incoming.meta.updatedAt = new Date().toISOString();
@@ -161,7 +261,9 @@
       writeRaw(serialized);
       localStorage.setItem(AUTHORITATIVE_KEY, serialized);
 
-      if (window.DB && typeof window.DB === 'object') {
+      if (window.DB && typeof window.DB === 'object' && window.DB === incoming) {
+        // Même objet (save(window.DB)) : déjà à jour, ne surtout pas le vider.
+      } else if (window.DB && typeof window.DB === 'object') {
         Object.keys(window.DB).forEach(function(k){ delete window.DB[k]; });
         Object.assign(window.DB, incoming);
       } else {
@@ -375,6 +477,7 @@
     importJSON: importJSON,
     health: health,
     normalize: normalize,
+    mergeSnapshots: mergeSnapshots,
     validateSchema: validateSchema,
     authoritativeKey: AUTHORITATIVE_KEY,
     authoritativeSnapshot: function(){ return safeParse(localStorage.getItem(AUTHORITATIVE_KEY), null); }
