@@ -86,13 +86,14 @@
   function defaultStart(d, c) {
     const keys = contractPayments(d, c).map(p => p.periode).filter(validKey).sort();
     if (keys.length) return keys[0];
-    /* Sans paiement : on prend le plus ancien entre « date début » (plafonnée au mois précédent)
-     * et « prochaine échéance ». « prochaine échéance » seule n'est pas fiable : d'anciens flux
-     * l'avancent d'un mois à chaque paiement, ce qui masquait le contrat sur le mois en cours. */
-    const pr = parseD(c.prochain), db_ = parseD(c.debut), cands = [];
-    if (db_) { const k = keyOf(db_), floor = addM(nowKey(), -1); cands.push(k < floor ? floor : k); }
-    if (pr) cands.push(keyOf(pr));
-    return cands.length ? cands.sort()[0] : nowKey();
+    /* Sans paiement : « Prochaine échéance » est la référence. Un contrat dont la prochaine
+     * échéance est le 05/10 ne doit PAS afficher d'échéance en septembre, même si sa date de début
+     * est ancienne. Sans « prochaine échéance » valide, on retombe sur « date début »
+     * (plafonnée au mois précédent). */
+    const pr = parseD(c.prochain), db_ = parseD(c.debut);
+    if (pr) return keyOf(pr);
+    if (db_) { const k = keyOf(db_), floor = addM(nowKey(), -1); return k < floor ? floor : k; }
+    return nowKey();
   }
   const startKey = (d, c) => (validKey(c.suiviDepuis) ? c.suiviDepuis : defaultStart(d, c));
   /** Fige le début de suivi du contrat. Sans cela, il est recalculé à partir des paiements
