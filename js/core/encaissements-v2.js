@@ -93,6 +93,19 @@
     return nowKey();
   }
   const startKey = (d, c) => (validKey(c.suiviDepuis) ? c.suiviDepuis : defaultStart(d, c));
+  /** Fige le début de suivi du contrat. Sans cela, il est recalculé à partir des paiements
+   *  (puis de « prochain ») : supprimer/modifier le seul paiement d'octobre faisait glisser
+   *  le début à novembre, donc octobre disparaissait et le montant était imputé à novembre. */
+  function ensureStart(d, c) {
+    if (validKey(c.suiviDepuis)) return false;
+    c.suiviDepuis = defaultStart(d, c);
+    return true;
+  }
+  function pinStarts(d) {
+    let changed = false;
+    activeContracts(d).forEach(c => { if (ensureStart(d, c)) changed = true; });
+    return changed;
+  }
   function endKey(c) { const f = parseD(c.fin); return f ? keyOf(f) : '9999-12'; }
   /* Jour d'échéance : « Prochaine échéance » si renseignée, sinon « Date début ». */
   const validDay = v => { const n = Number(v); return Number.isInteger(n) && n >= 1 && n <= 31 ? n : 0; };
@@ -245,6 +258,7 @@
     opts = opts || {};
     const d = prepareRelations(db()), c = activeContracts(d).find(x => cid(x) === cKey || String(x.num || '') === String(cKey));
     if (!c) return { error: 'Contrat introuvable' };
+    ensureStart(d, c); // figer le début de suivi AVANT de retirer l'ancien paiement
     if (!(amount > 0)) return { error: 'Saisissez un montant supérieur à 0' };
     const old = opts.replace ? rowsOfGroup(d, opts.replace) : [];
     if (opts.replace && !old.length) return { error: 'Encaissement introuvable (déjà supprimé ?)' };
@@ -316,6 +330,7 @@
       '\n\nLes soldes seront recalculés. Cette action est enregistrée dans le journal.';
     if (!window.confirm(msg)) return false;
     const now = new Date().toISOString(), oldPeriods = Array.from(new Set(rows.map(p => p.periode).filter(validKey)));
+    if (c) ensureStart(d, c); // sinon le mois supprimé disparaît de l'échéancier
     d.paiements = d.paiements.filter(p => groupOf(p) !== gid);
     if (c) { oldPeriods.forEach(k => syncPeriod(d, c, k, now)); refreshProchain(d, c); }
     pushAudit(d, 'suppression', { recuNo: rows[0].recuNo || '', contrat: c ? (c.num || c.id) : '', locataire: rows[0].locataire || '', montant: Math.round(total) });
@@ -498,6 +513,7 @@
   function render() {
     const page = $('page-paiements'); if (!page) return;
     injectStyle(); migrate();
+    { const d0 = prepareRelations(db()); if (pinStarts(d0)) saveDb(d0); }
     const d = db(), all = rowsForMonth(d);
     const attendu = all.reduce((s, r) => s + r.cur.due, 0), percu = all.reduce((s, r) => s + Math.min(r.cur.paid, r.cur.due), 0);
     const credit = all.reduce((s, r) => s + Math.max(0, r.cur.paid - r.cur.due), 0);
@@ -646,9 +662,14 @@
       groups.map(g => {
         const p = g.rows[0], total = g.rows.reduce((s, x) => s + num(x.paye), 0);
         const per = Array.from(new Set(g.rows.map(x => x.periode).filter(validKey))).sort().map(monthLabel).join(', ') || '—';
+        const paidK = paidMap(d, c), dueK = monthlyDue(d, c);
+        const settledK = Array.from(new Set(g.rows.map(x => x.periode).filter(validKey))).sort().filter(k => dueK > 0 && (paidK[k] || 0) >= dueK);
+        const docBtn = 'style="padding:0 7px;color:#475569"';
+        const docs = (p.recuNo ? '<button class="gpe-btn sm" ' + docBtn + ' data-receipt="' + esc(p.recuNo) + '" title="Reçu de paiement (PDF)" aria-label="Reçu de paiement"><span class="material-symbols-rounded">receipt_long</span></button> ' : '') +
+          settledK.map(k => '<button class="gpe-btn sm" ' + docBtn + ' data-quittance="' + esc(k) + '" data-qcontract="' + esc(fiche.key) + '" data-qperiod="' + esc(k) + '" title="Quittance de loyer · ' + esc(monthLabel(k)) + '" aria-label="Quittance ' + esc(monthLabel(k)) + '"><span class="material-symbols-rounded">workspace_premium</span></button> ').join('');
         const act = canWrite() ? '<button class="gpe-btn sm" data-edit="' + esc(g.gid) + '" title="Modifier"><span class="material-symbols-rounded">edit</span></button> <button class="gpe-btn sm" data-del="' + esc(g.gid) + '" title="Supprimer" style="color:#dc2626"><span class="material-symbols-rounded">delete</span></button>' : '';
         return '<tr><td>' + esc((parseD(p.date) ? shortDate(parseD(p.date)) : p.date) || '—') + '</td><td>' + esc(per) + '</td><td class="gpe-r gpe-green"><b>' + fmt(total) + '</b></td><td>' + esc(p.mode || '—') + (p.ref ? '<span class="gpe-sub">' + esc(p.ref) + '</span>' : '') + '</td><td>' + esc(p.recuNo || '—') + (p.modifiedAt ? '<span class="gpe-sub">modifié</span>' : '') + '</td>' +
-          '<td class="gpe-r" style="white-space:nowrap">' + (p.recuNo ? '<button class="gpe-btn sm" data-receipt="' + esc(p.recuNo) + '" title="Reçu PDF"><span class="material-symbols-rounded">receipt_long</span></button> ' : '') + act + '</td></tr>';
+          '<td class="gpe-r" style="white-space:nowrap">' + docs + act + '</td></tr>';
       }).join('') + '</tbody></table></div>'
       : '<div class="gpe-empty">Aucun paiement enregistré pour ce contrat</div>';
     $('gpeBody').innerHTML =
@@ -661,6 +682,7 @@
   function openFiche(key) {
     injectStyle(); const d = db(), c = activeContracts(d).find(x => cid(x) === key); if (!c) return;
     fiche.key = key; fiche.tab = 'ech';
+    if (ensureStart(d, c)) saveDb(d);
     openDrawer(c.locataire || 'Locataire', esc(c.bien || c.locative || '') + ' · Fiche de compte', '',
       '<button class="gpe-btn" data-close>Fermer</button><button class="gpe-btn" data-statement="' + esc(key) + '"><span class="material-symbols-rounded">description</span>Relevé PDF</button><button class="gpe-btn pri" data-pay="' + esc(key) + '"><span class="material-symbols-rounded">add_card</span>Encaisser</button>');
     paintFiche();
