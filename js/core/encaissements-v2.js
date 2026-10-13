@@ -95,12 +95,17 @@
     if (db_) { const k = keyOf(db_), floor = addM(nowKey(), -1); return k < floor ? floor : k; }
     return nowKey();
   }
-  /* Un début de suivi figé n'est respecté que s'il y a des paiements : sans paiement, la
-   * « Prochaine échéance » prime (un ancien suiviDepuis erroné = septembre ne doit plus s'imposer). */
+  /* Début de suivi = le plus ancien entre : le début figé (ou par défaut), le premier mois payé,
+   * et le mois de la « Prochaine échéance » (modifiable dans le formulaire de la location).
+   * Sans paiement, la « Prochaine échéance » prime sur un ancien début figé erroné. */
   function startKey(d, c) {
-    const hasPay = contractPayments(d, c).some(p => validKey(p.periode));
-    if (!hasPay && parseD(c.prochain)) return keyOf(parseD(c.prochain));
-    return validKey(c.suiviDepuis) ? c.suiviDepuis : defaultStart(d, c);
+    const keys = contractPayments(d, c).map(p => p.periode).filter(validKey).sort();
+    const pr = parseD(c.prochain), prk = pr ? keyOf(pr) : '';
+    if (!keys.length && prk) return prk;
+    let k = validKey(c.suiviDepuis) ? c.suiviDepuis : defaultStart(d, c);
+    if (keys.length && keys[0] < k) k = keys[0];
+    if (prk && prk < k) k = prk;
+    return k;
   }
   /** Fige le début de suivi du contrat. Sans cela, il est recalculé à partir des paiements
    *  (puis de « prochain ») : supprimer/modifier le seul paiement d'octobre faisait glisser
@@ -306,6 +311,7 @@
     const settled = {};
     touched.forEach(k => { const r = syncPeriod(d, c, k, now); if (r) settled[k] = r; });
     const settledPeriods = al.rows.map(a => settled[a.k]).filter(Boolean);
+    c.suiviDepuis = startKey(d, c); // fige le début (ex. mois d'octobre ajouté à la main)
     refreshProchain(d, c);
     pushAudit(d, opts.replace ? 'modification' : 'creation', { recuNo, contrat: c.num || c.id, locataire: c.locataire, montant: Math.round(amount), avant: old.reduce((s, p) => s + num(p.paye), 0) });
     const saved = await saveDb(d);
