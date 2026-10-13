@@ -86,11 +86,13 @@
   function defaultStart(d, c) {
     const keys = contractPayments(d, c).map(p => p.periode).filter(validKey).sort();
     if (keys.length) return keys[0];
-    const pr = parseD(c.prochain);
-    if (pr) return keyOf(pr);
-    const db_ = parseD(c.debut);
-    if (db_) { const k = keyOf(db_), floor = addM(nowKey(), -1); return k < floor ? floor : k; }
-    return nowKey();
+    /* Sans paiement : on prend le plus ancien entre « date début » (plafonnée au mois précédent)
+     * et « prochaine échéance ». « prochaine échéance » seule n'est pas fiable : d'anciens flux
+     * l'avancent d'un mois à chaque paiement, ce qui masquait le contrat sur le mois en cours. */
+    const pr = parseD(c.prochain), db_ = parseD(c.debut), cands = [];
+    if (db_) { const k = keyOf(db_), floor = addM(nowKey(), -1); cands.push(k < floor ? floor : k); }
+    if (pr) cands.push(keyOf(pr));
+    return cands.length ? cands.sort()[0] : nowKey();
   }
   const startKey = (d, c) => (validKey(c.suiviDepuis) ? c.suiviDepuis : defaultStart(d, c));
   /** Fige le début de suivi du contrat. Sans cela, il est recalculé à partir des paiements
@@ -103,7 +105,7 @@
   }
   function pinStarts(d) {
     let changed = false;
-    activeContracts(d).forEach(c => { if (ensureStart(d, c)) changed = true; });
+    activeContracts(d).forEach(c => { if (contractPayments(d, c).some(p => validKey(p.periode)) && ensureStart(d, c)) changed = true; });
     return changed;
   }
   function endKey(c) { const f = parseD(c.fin); return f ? keyOf(f) : '9999-12'; }
@@ -682,7 +684,7 @@
   function openFiche(key) {
     injectStyle(); const d = db(), c = activeContracts(d).find(x => cid(x) === key); if (!c) return;
     fiche.key = key; fiche.tab = 'ech';
-    if (ensureStart(d, c)) saveDb(d);
+    if (contractPayments(d, c).some(p => validKey(p.periode)) && ensureStart(d, c)) saveDb(d);
     openDrawer(c.locataire || 'Locataire', esc(c.bien || c.locative || '') + ' · Fiche de compte', '',
       '<button class="gpe-btn" data-close>Fermer</button><button class="gpe-btn" data-statement="' + esc(key) + '"><span class="material-symbols-rounded">description</span>Relevé PDF</button><button class="gpe-btn pri" data-pay="' + esc(key) + '"><span class="material-symbols-rounded">add_card</span>Encaisser</button>');
     paintFiche();
