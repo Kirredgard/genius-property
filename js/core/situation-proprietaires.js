@@ -40,7 +40,7 @@
 
   function parseD(v) { if (!v) return null; const s = String(v).trim(); let m = s.match(/^(\d{4})-(\d{2})/); if (m) return m[1] + '-' + m[2]; m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/); return m ? m[3] + '-' + pad(m[2]) : ''; }
 
-  function compute(d, from, to, withArrears) {
+  function computeBase(d, from, to, withArrears) {
     to = to || from; withArrears = withArrears === undefined ? true : !!withArrears;
     try { window.GPRelationsV52 && GPRelationsV52.ensure(d); } catch (_) {}
     const enc = window.GPEncV2;
@@ -90,6 +90,48 @@
     });
     return all;
   }
+
+  /* ── Report des avances et des dépenses non couvertes ──────────────────────────
+   * Règle : chaque mois, le solde du propriétaire = net dû − reversé − avances. S'il est négatif
+   * (avance de fonds non récupérée, ou dépense que les sommes disponibles ne couvrent pas),
+   * le déficit est REPORTÉ sur le mois suivant et déduit de ses sommes disponibles, jusqu'à
+   * récupération complète :  déficit(m+1) = min(0, déficit(m) + solde du mois m).
+   * Calculé à la volée depuis les données sources (dépenses, reversements, loyers) : rien n'est
+   * dupliqué ni modifié, l'historique de chaque mois reste intact et un paiement tardif d'un loyer
+   * ancien (ou la correction d'une avance) met automatiquement à jour tous les mois suivants. */
+  function firstDataMonth(d, from) {
+    let min = '';
+    const take = k => { if (k && /^\d{4}-\d{2}$/.test(k) && (!min || k < min)) min = k; };
+    (d.depenses || []).forEach(x => take(parseD(x.date)));
+    (d.reversements || []).forEach(v => take(String(v.periode || '')));
+    (d.paiements || []).forEach(p => take(String(p.periode || '')));
+    return min && min < from ? min : '';
+  }
+  function carryIn(d, from) {
+    const out = {}; const start = firstDataMonth(d, from); if (!start) return out;
+    const state = {};
+    for (let m = start, guard = 0; m < from && guard < 240; m = addM(m, 1), guard++) {
+      computeBase(d, m, m, false).forEach(ow => {
+        const s = state[ow.id] || (state[ow.id] = { def: 0, since: '' });
+        const closing = s.def + ow.aReverser;
+        const next = Math.min(0, closing);
+        if (next < 0 && s.def === 0) s.since = m; if (next === 0) s.since = '';
+        s.def = next;
+      });
+    }
+    Object.keys(state).forEach(id => { if (state[id].def < 0) out[id] = { amount: -state[id].def, since: state[id].since }; });
+    return out;
+  }
+  function compute(d, from, to, withArrears) {
+    to = to || from;
+    const all = computeBase(d, from, to, withArrears), carry = carryIn(d, from);
+    all.forEach(ow => {
+      const c = carry[ow.id]; ow.report = c ? c.amount : 0; ow.reportDepuis = c ? c.since : '';
+      ow.netCum = ow.net - ow.report;
+      ow.aReverser = ow.aReverser - ow.report;
+    });
+    return all;
+  }
   function sum(a, k) { return a.reduce((s, x) => s + (x[k] || 0), 0); }
 
   function periodBar(rg) {
@@ -113,7 +155,7 @@
       '<div class="gps-actions">' + periodBar(rg) + '<button class="gps-btn" data-export>Exporter CSV</button></div></div>' +
       '<div class="gps-cards">' + card(st.arrears ? 'À encaisser (+ arriérés)' : 'À encaisser', T('aEnc')) + card('Encaissé', T('paid'), 'g') + card('Reste à encaisser', T('reste'), 'o') +
       card('Arriérés antérieurs', T('arrears'), 'o', st.arrears ? 'inclus dans le reste' : 'avant la période — non inclus') +
-      card('Ma commission', T('commission'), 'b', 'sur le loyer encaissé') + actCard(rg, T('commission')) + card('Dépenses déduites', T('depTotal'), 'r2', 'facturables aux propriétaires') + card('À reverser', all.reduce((s, o) => s + Math.max(0, o.aReverser), 0), 'g', 'aux propriétaires · déjà reversé : ' + fmt(T('reverse')) + (T('avance') ? ' · avances à récupérer : ' + fmt(all.reduce((s, o) => s + Math.max(0, -o.aReverser), 0)) : '')) + '</div>' +
+      card('Ma commission', T('commission'), 'b', 'sur le loyer encaissé') + actCard(rg, T('commission')) + card('Dépenses déduites', T('depTotal'), 'r2', 'facturables aux propriétaires') + card('À reverser', all.reduce((s, o) => s + Math.max(0, o.aReverser), 0), 'g', 'aux propriétaires · déjà reversé : ' + fmt(T('reverse')) + (all.some(o => o.aReverser < 0) ? ' · avances / dépenses à récupérer : ' + fmt(all.reduce((s, o) => s + Math.max(0, -o.aReverser), 0)) : '')) + '</div>' +
       (noTaux ? '<div class="gps-banner">Certains propriétaires n’ont pas de taux de commission (0 % appliqué). Renseignez-le dans la colonne « Taux ».</div>' : '') +
       '<input class="gps-search" id="gpsQ" placeholder="Rechercher un propriétaire ou un bien…" value="' + esc(st.q) + '">' +
       '<div class="gps-table"><table><thead><tr><th>Propriétaire / Bien</th><th>Taux %</th><th class="r">À encaisser</th><th class="r">Encaissé</th><th class="r">Reste</th><th class="r">Commission</th><th class="r">Dépenses</th><th class="r">À reverser</th><th></th></tr></thead><tbody>' +
@@ -136,9 +178,10 @@
     let h = '<tr class="gps-owner"><td><button class="gps-tog" data-tog="' + esc(o.id || 'none') + '">' + (open ? '▾' : '▸') + '</button><b>' + esc(o.nom) + '</b><span class="gps-sub">' + o.biens.length + ' bien(s)</span></td>' +
       '<td>' + (o.id ? '<input class="gps-taux" type="number" min="0" max="100" step="0.5" data-ot="' + esc(o.id) + '" value="' + (o.taux == null ? '' : o.taux) + '" placeholder="0">' : '—') + '</td>' +
       '<td class="r">' + fmt(o.aEnc) + '</td><td class="r g">' + fmt(o.paid) + '</td><td class="r o">' + fmt(o.reste) + (!st.arrears && o.arrears > 0 ? '<span class="gps-sub">+ ' + fmt(o.arrears) + ' arriérés</span>' : '') + '</td><td class="r b">' + fmt(o.commission) + '</td><td class="r r2">' + fmt(o.depTotal) + '</td>' +
-      '<td class="r ' + (o.net < 0 ? 'neg' : 'g') + '"><b>' + fmt(o.net) + '</b>' + ((o.reverse || o.avance) ? '<span class="gps-sub">' + (o.reverse ? 'reversé ' + fmt(o.reverse) : '') + (o.reverse && o.avance ? ' · ' : '') + (o.avance ? 'avance ' + fmt(o.avance) : '') + (o.aReverser < 0 ? ' · <b class="neg">avance à récupérer ' + fmt(-o.aReverser) + '</b>' : ' · reste ' + fmt(o.aReverser)) + '</span>' : '') + '</td>' +
-      '<td class="r">' + (o.id && single ? '<button class="gps-btn pri" data-rev="' + esc(o.id) + '" data-amt="' + Math.round(o.aReverser) + '" title="' + (o.aReverser <= 0 ? 'Avance de fonds (aucun fonds disponible à reverser)' : (o.reverse > 0 ? 'Reverser le reste (tout dépassement du disponible est compté en avance)' : 'Reverser au propriétaire (tout dépassement du disponible est compté en avance)')) + '" aria-label="Reverser / avance de fonds">\ud83d\udcb8</button>' : '') + (o.id && o.net > 0 && o.aReverser === 0 ? ' <span class="gps-ok">✓ Reversé</span>' : '') + (o.id && (o.reverse > 0 || o.avance > 0) ? ' <button class="gps-btn" data-hist="' + esc(o.id) + '" title="Modifier ou supprimer un reversement ou une avance (en cas d\u2019erreur)" aria-label="Modifier ou supprimer un reversement ou une avance">✏️</button>' : '') + (o.id ? ' <button class="gps-btn" data-bilan="' + esc(o.id) + '" title="Facture / bilan à remettre au propriétaire">🖨</button>' : '') + '</td></tr>';
+      '<td class="r ' + (o.netCum < 0 ? 'neg' : 'g') + '"><b>' + fmt(o.netCum) + '</b>' + ((o.reverse || o.avance || o.report) ? '<span class="gps-sub">' + (o.report ? 'report ' + fmt(-o.report) + (o.reverse || o.avance ? ' · ' : '') : '') + (o.reverse ? 'reversé ' + fmt(o.reverse) : '') + (o.reverse && o.avance ? ' · ' : '') + (o.avance ? 'avance ' + fmt(o.avance) : '') + (o.aReverser < 0 ? ' · <b class="neg">à récupérer ' + fmt(-o.aReverser) + '</b>' : ' · reste ' + fmt(o.aReverser)) + '</span>' : '') + '</td>' +
+      '<td class="r">' + (o.id && single ? '<button class="gps-btn pri" data-rev="' + esc(o.id) + '" data-amt="' + Math.round(o.aReverser) + '" title="' + (o.aReverser <= 0 ? 'Avance de fonds (aucun fonds disponible à reverser)' : (o.reverse > 0 ? 'Reverser le reste (tout dépassement du disponible est compté en avance)' : 'Reverser au propriétaire (tout dépassement du disponible est compté en avance)')) + '" aria-label="Reverser / avance de fonds">\ud83d\udcb8</button>' : '') + (o.id && o.netCum > 0 && o.aReverser === 0 ? ' <span class="gps-ok">✓ Reversé</span>' : '') + (o.id && (o.reverse > 0 || o.avance > 0) ? ' <button class="gps-btn" data-hist="' + esc(o.id) + '" title="Modifier ou supprimer un reversement ou une avance (en cas d\u2019erreur)" aria-label="Modifier ou supprimer un reversement ou une avance">✏️</button>' : '') + (o.id ? ' <button class="gps-btn" data-bilan="' + esc(o.id) + '" title="Facture / bilan à remettre au propriétaire">🖨</button>' : '') + '</td></tr>';
     if (open) {
+      if (o.report > 0) h += '<tr class="gps-loc"><td>↳ Report des mois précédents' + (o.reportDepuis ? ' <span class="gps-sub">avances / dépenses non récupérées depuis ' + monthLabel(o.reportDepuis) + '</span>' : '') + '</td><td colspan="5"></td><td class="r r2">' + fmt(o.report) + '</td><td colspan="2"></td></tr>';
       h += o.biens.map(r => '<tr class="gps-bien"><td>' + esc(r.nom) + '</td><td>' + (r.b && r.b.id ? '<input class="gps-taux" type="number" min="0" max="100" step="0.5" data-bt="' + esc(r.id) + '" value="' + (r.tauxBien == null ? '' : r.tauxBien) + '" placeholder="' + r.taux + (r.tauxHerite ? ' (hérité)' : '') + '">' : '—') + '</td>' +
         '<td class="r">' + fmt(r.aEnc) + '</td><td class="r g">' + fmt(r.paid) + '</td><td class="r o">' + fmt(r.reste) + (!st.arrears && r.arrears > 0 ? '<span class="gps-sub">+ ' + fmt(r.arrears) + ' arriérés</span>' : '') + '</td><td class="r b">' + fmt(r.commission) + '</td><td class="r r2">' + fmt(r.dep) + '</td><td class="r ' + (r.net < 0 ? 'neg' : '') + '">' + fmt(r.net) + '</td><td></td></tr>' +
         r.lignes.map(l => '<tr class="gps-loc"><td>↳ ' + esc(l.loc) + ' <span class="gps-sub">' + esc(l.unite) + '</span></td><td></td><td class="r">' + fmt(l.due) + '</td><td class="r">' + fmt(l.paid) + '</td><td class="r">' + fmt(l.solde) + (!st.arrears && l.arrears > 0 ? '<span class="gps-sub">+ ' + fmt(l.arrears) + ' arriérés</span>' : '') + '</td><td colspan="4"></td></tr>').join('') +
@@ -192,9 +235,9 @@
   }
 
   function lines(all) {
-    const L = [['Propriétaire', 'Bien', 'Taux %', 'À encaisser', 'Encaissé', 'Reste', 'Commission', 'Dépenses', 'À reverser']];
-    all.forEach(o => { L.push([o.nom, 'TOTAL', o.taux == null ? '' : o.taux, o.aEnc, o.paid, o.reste, o.commission, o.depTotal, o.net]);
-      o.biens.forEach(r => L.push([o.nom, r.nom, r.taux, r.aEnc, r.paid, r.reste, r.commission, r.dep, r.net])); });
+    const L = [['Propriétaire', 'Bien', 'Taux %', 'À encaisser', 'Encaissé', 'Reste', 'Commission', 'Dépenses', 'À reverser', 'Dont report antérieur']];
+    all.forEach(o => { L.push([o.nom, 'TOTAL', o.taux == null ? '' : o.taux, o.aEnc, o.paid, o.reste, o.commission, o.depTotal, o.netCum, o.report || 0]);
+      o.biens.forEach(r => L.push([o.nom, r.nom, r.taux, r.aEnc, r.paid, r.reste, r.commission, r.dep, r.net, ''])); });
     return L;
   }
   function exportCsv() {
@@ -312,7 +355,7 @@
   }
 
   function bilanHtml(o, rg, revs, ag) {
-    const avTot = revs.filter(v => v.type === 'avance').reduce((s, v) => s + num(v.montant), 0), totalVerse = revs.reduce((s, v) => s + num(v.montant), 0), solde = o.net - totalVerse, solded = solde <= 0;
+    const avTot = revs.filter(v => v.type === 'avance').reduce((s, v) => s + num(v.montant), 0), totalVerse = revs.reduce((s, v) => s + num(v.montant), 0), report = o.report || 0, solde = o.net - report - totalVerse, solded = solde <= 0;
     const numero = 'BIL-' + rg.from.replace('-', '') + (rg.single ? '' : '-' + rg.to.replace('-', '')) + '-' + String(o.id).slice(-4).toUpperCase();
     const tenants = [], deps = [];
     o.biens.forEach(r => { r.lignes.forEach(l => tenants.push({ bien: r.nom, loc: l.loc, due: l.due, paid: l.paid, solde: l.solde })); r.depLignes.forEach(x => deps.push({ bien: r.nom, lib: x.lib, date: x.date, m: x.m })); });
@@ -348,7 +391,7 @@
         '<tr><td colspan="3" style="' + TOT + '">Total</td><td style="' + TOT + ';text-align:right;white-space:nowrap">' + fmt(o.depTotal) + '</td></tr></tbody></table>') +
       /* 3. bilan */
       wrap(sec('Bilan') + '<table style="width:100%;border-collapse:collapse">' +
-        line('Loyers encaissés, nets de frais de gestion', fmt(loyersNets)) + line('− Dépenses et réparations', fmt(o.depTotal)) + line('Net dû au propriétaire', fmt(o.net), true) + line('− Total déjà versé' + (avTot ? ' (dont avance de fonds ' + fmt(avTot) + ')' : ''), fmt(totalVerse)) +
+        line('Loyers encaissés, nets de frais de gestion', fmt(loyersNets)) + line('− Dépenses et réparations', fmt(o.depTotal)) + line('Net dû au propriétaire', fmt(o.net), true) + (report ? line('− Avances / dépenses non récupérées reportées des mois précédents', fmt(report), false, '#dc2626') : '') + line('− Total déjà versé' + (avTot ? ' (dont avance de fonds ' + fmt(avTot) + ')' : ''), fmt(totalVerse)) +
         '<tr><td style="padding:14px 0 4px;font-size:13px;font-weight:800;border-top:2px solid ' + INK + '">' + (solde < 0 ? 'Avance à récupérer par l\u2019agence' : 'Solde restant dû') + (solded && solde >= 0 ? ' <span style="margin-left:10px;font-size:9px;letter-spacing:1px;color:#15803d;border:1.5px solid #15803d;border-radius:4px;padding:2px 7px;vertical-align:middle">SOLDÉ</span>' : '') + '</td><td style="padding:14px 0 4px;font-size:15px;font-weight:800;text-align:right;white-space:nowrap;border-top:2px solid ' + INK + ';color:' + (solde < 0 ? '#dc2626' : solded ? '#15803d' : '#b45309') + '">' + fmt(Math.abs(solde)) + '</td></tr></table>') +
       /* 4. reversements */
       wrap(sec('Reversements effectués') + '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + TH + '">Date</th><th style="' + TH + '">Mode</th><th style="' + TH + '">Note</th><th style="' + THR + '">Montant</th></tr></thead><tbody>' +
