@@ -93,7 +93,26 @@
   function activeContractForUnit(d,b,u,contracts){var uid=clean(u&&u.id);var byLocation=(contracts||[]).find(function(c){var l=locationForContract(d,c);if(!l)return false;var lb=resolveProperty(d,l),lu=resolveUnit(lb,l);return !!(lb&&String(lb.id)===String(b.id)&&lu&&uid&&String(lu.id)===uid);});if(byLocation)return byLocation;return (contracts||[]).find(function(c){var cb=propertyById(d,c.bienId||c.propertyId),cu=resolveUnit(cb,c);return !!(cb&&String(cb.id)===String(b.id)&&cu&&uid&&String(cu.id)===uid);})||null;}
   function snapshot(d,b){d=ensure(d||{});var us=units(b),cs=activeContractsForProperty(d,b);var rows=us.map(function(u){var c=activeContractForUnit(d,b,u,cs),l=c&&locationForContract(d,c);var occupied=!!c,tid=(c&&(c.locataireId||c.tenantId))||(l&&(l.locataireId||l.tenantId)),t=tid?d.locataires.find(function(x){return String(x.id)===String(tid);}):null;return{unit:u,location:l,contract:c,occupied:occupied,statut:occupied?'Loué':'Disponible',locataireId:tid||'',locataire:t?name(t):(c&&c.locataire)||(l&&l.locataire)||'',loyer:(c&&c.loyer)||(l&&l.loyer)||u.loyer||''};});var occupied=rows.filter(function(r){return r.occupied;});var status=occupied.length===0?'Disponible':occupied.length===rows.length?'Loué':'Partiellement loué';return{units:rows,activeContracts:cs,occupied:occupied,available:rows.filter(function(r){return !r.occupied;}),status:status};}
 
-  function migrate(){var d=db(),before=JSON.stringify(d);ensure(d);var after=JSON.stringify(d);if(before!==after)return save(d);return d;}
+  /* Migration sûre : elle réécrit des ids et des liens. Si elle tourne AVANT la synchronisation cloud,
+     le local « réparé » (nouveaux ids) est ensuite fusionné avec un cloud non réparé → doublons.
+     Elle attend donc la fin de la synchro (ou 15 s), garde une copie de sécurité avant d'écrire,
+     et la sauvegarde reste marquée « à synchroniser » pour que le cloud reçoive aussi les ids réparés. */
+  function runMigration(){
+    var d=db(),before=JSON.stringify(d);ensure(d);var after=JSON.stringify(d);
+    if(before===after)return Promise.resolve(d);
+    try{localStorage.setItem('gp_safety_snapshot',JSON.stringify({date:new Date().toISOString(),why:'avant migration relations',db:JSON.parse(before)}));}catch(_){}
+    return Promise.resolve(save(d)).then(function(){return d;});
+  }
+  function migrate(){
+    var S=window.GPSupabase,cloud=false;
+    try{cloud=!!(S&&typeof S.available==='function'&&S.available()&&typeof S.isReady==='function');}catch(_){}
+    if(!cloud||S.isReady())return runMigration();
+    return new Promise(function(resolve){
+      var done=false,t;
+      function go(){if(done)return;done=true;clearTimeout(t);window.removeEventListener('gp:supabase:pulled',go);resolve(runMigration());}
+      window.addEventListener('gp:supabase:pulled',go);t=setTimeout(go,15000);
+    });
+  }
   window.GPRelationsV52={ensure:ensure,migrate:migrate,save:save,activeContractsForBien:activeContractsForProperty,propertySnapshot:snapshot,isActiveStatus:active,propertiesForOwner:propertiesForOwner,_internals:{resolveProperty:resolveProperty,resolveUnit:resolveUnit,resolveLocation:resolveLocation,normalizeLocation:normalizeLocation,normalizeContract:normalizeContract}};
   window.getProprietaireBiens=function(p){ var d=db(); ensure(d); return propertiesForOwner(d,p); };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){migrate().catch(function(e){console.warn('[Relations V58]',e);});});else migrate().catch(function(e){console.warn('[Relations V58]',e);});
