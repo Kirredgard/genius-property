@@ -90,6 +90,7 @@
   // enregistrement supprimé d'un enregistrement jamais synchronisé : il revenait.
   // ---------------------------------------------------------------------------
   var TOMBSTONE_TTL_MS = 180 * 24 * 3600 * 1000; // 180 jours
+  var _lastDirtyMs = 0;
 
   function idMap(list){
     var m = {};
@@ -158,7 +159,13 @@
         var res = Array.isArray(cv) ? cv.slice() : [];
         var pos = {}; res.forEach(function(r,i){ if(r && r.id != null) pos[String(r.id)] = i; });
         lv.forEach(function(r){
-          if(r && r.id != null && pos[String(r.id)] != null) res[pos[String(r.id)]] = r; else res.push(r);
+          if(r && r.id != null && pos[String(r.id)] != null) res[pos[String(r.id)]] = r;
+          else if(r && r.id == null && typeof r === 'object') {
+            // Ligne sans id : on ne peut pas la rapprocher par id. On évite au moins de la ré-ajouter
+            // à chaque fusion quand une ligne strictement identique existe déjà.
+            var sigR = JSON.stringify(r);
+            if(!res.some(function(x){ return x && x.id == null && JSON.stringify(x) === sigR; })) res.push(r);
+          } else res.push(r);
         });
         out[k] = res;
       } else if(lv && typeof lv === 'object'){
@@ -243,6 +250,7 @@
 
     if(!options.force && stored && incomingRev < storedRev){
       console.warn('[GPDB] Stale write ignored', {incomingRev:incomingRev, storedRev:storedRev});
+      try { if(window.toast) window.toast('Modification non enregistrée : les données ont changé entre-temps. Rechargez la page puis recommencez.', 'warn'); } catch(ignore) {}
       return false;
     }
 
@@ -275,8 +283,11 @@
       // Toute écriture locale non explicitement marquée comme issue du cloud
       // est considérée comme une modification à synchroniser. On ne l'efface
       // qu'après confirmation du serveur.
+      var dirtyStamp = null;
       if (!options.skipCloud) {
-        try { localStorage.setItem('gp_data_dirty_at', new Date().toISOString()); } catch(ignore) {}
+        _lastDirtyMs = Math.max(Date.now(), _lastDirtyMs + 1);
+        dirtyStamp = new Date(_lastDirtyMs).toISOString();
+        try { localStorage.setItem('gp_data_dirty_at', dirtyStamp); } catch(ignore) {}
       }
       if (!options.silent) {
         emit('gp:db:saved', { db: incoming, revision: nextRev });
@@ -292,7 +303,9 @@
           typeof window.GPSupabase.available === 'function' && window.GPSupabase.available() &&
           window.GPSupabase.currentUid && window.GPSupabase.currentUid()) {
         window.GPSupabase.push(incoming).then(function(){
-          try { localStorage.removeItem('gp_data_dirty_at'); } catch(ignore) {}
+          // N'efface le marqueur que si AUCUNE modification locale n'est arrivée pendant l'envoi,
+          // sinon la modification suivante serait perdue au prochain rechargement (le cloud remplacerait le local).
+          try { if(localStorage.getItem('gp_data_dirty_at') === dirtyStamp) localStorage.removeItem('gp_data_dirty_at'); } catch(ignore) {}
           try { localStorage.setItem('gp_last_cloud_sync_at', new Date().toISOString()); } catch(ignore) {}
         }).catch(function(e){
           var msg = e && (e.message || String(e)) || 'Erreur inconnue';
