@@ -10,7 +10,8 @@
  *          net = encaissé − frais ; les revenus d'activités (tableau de bord, Situation) sont comptés NETS des frais,
  *          chaque frais étant rattaché au mois de sa date ;
  *          un revenu est rattaché au mois de sa DATE d'encaissement (comme les commissions).
- * Lien Situation : window.GPActivites.revenue(from,to) → { marches, autres, total } */
+ * Lien Situation : window.GPActivites.revenue(from,to) → { marches, autres, total }
+ * Revenu global agence = commissions + activités − dépenses agence (voir js/core/agence-finance.js) */
 (function () {
   'use strict';
   if (window.GPActivites) return;
@@ -97,14 +98,14 @@
     ({ dash: dash, marches: marches, autres: autres })[st.tab](d);
   }
   function dash(d) {
-    const fl = flows(d).filter(f => f.k.slice(0, 4) === String(st.year)), act = fl.reduce((s, f) => s + f.montant, 0), frs = fl.reduce((s, f) => s + (f.montant < 0 ? -f.montant : 0), 0), com = commissions(st.year);
+    const fl = flows(d).filter(f => f.k.slice(0, 4) === String(st.year)), act = fl.reduce((s, f) => s + f.montant, 0), frs = fl.reduce((s, f) => s + (f.montant < 0 ? -f.montant : 0), 0), com = commissions(st.year), depAg = window.GPAgence ? GPAgence.expenses(st.year + '-01', st.year + '-12') : 0;
     const open = d.marches.map(mStats), reste = open.reduce((s, x, i) => s + (d.marches[i].statut === 'cours' ? x.reste : 0), 0);
     const byM = Array(12).fill(0); fl.forEach(f => byM[+f.k.slice(5) - 1] += f.montant); const mx = Math.max(1, ...byM);
     const byA = {}; fl.forEach(f => { const n = actName(d, f.act); byA[n] = (byA[n] || 0) + f.montant; });
     const rows = Object.entries(byA).sort((a, b) => b[1] - a[1]);
     $('gpaBody').innerHTML = '<div class="gpa-cards"><div class="gpa-card"><small>Revenus nets d’activités</small><strong class="gpa-g">' + fmt(act) + '</strong></div>' +
       '<div class="gpa-card"><small>Frais déduits</small><strong class="' + (frs ? 'gpa-r' : '') + '">' + fmt(frs) + '</strong></div>' +
-      '<div class="gpa-card"><small>Commissions locatives</small><strong>' + fmt(com) + '</strong></div><div class="gpa-card"><small>Revenu global agence</small><strong>' + fmt(act + com) + '</strong></div>' +
+      '<div class="gpa-card"><small>Commissions locatives</small><strong>' + fmt(com) + '</strong></div><div class="gpa-card"><small>Dépenses agence</small><strong class="' + (depAg ? 'gpa-r' : '') + '">' + fmt(depAg) + '</strong></div><div class="gpa-card"><small>Revenu global agence</small><strong class="' + (act + com - depAg < 0 ? 'gpa-r' : '') + '">' + fmt(act + com - depAg) + '</strong><em>commission + activités − dépenses agence</em></div>' +
       '<div class="gpa-card"><small>Reste à encaisser</small><strong class="gpa-o">' + fmt(reste) + '</strong><em>marchés en cours</em></div>' +
       '<div class="gpa-card"><small>Marchés en retard</small><strong class="' + (open.some(x => x.late) ? 'gpa-r' : '') + '">' + open.filter(x => x.late).length + '</strong></div></div>' +
       '<div class="gpa-box"><h4>Évolution mensuelle ' + st.year + '</h4><div class="gpa-chart">' + byM.map((v, i) => '<div title="' + fmt(v) + '"><i style="height:' + Math.max(0, Math.round(v / mx * 100)) + 'px"></i>' + MONTHS[i] + '</div>').join('') + '</div></div>' +

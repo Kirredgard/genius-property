@@ -167,9 +167,10 @@
   function actCard(rg, com) {
     try {
       if (!window.GPActivites || !(window.GPPermissions ? GPPermissions.has(null, 'activites:view') : true)) return '';
-      const r = GPActivites.revenue(rg.from, rg.to);
+      const r = GPActivites.revenue(rg.from, rg.to), dep = window.GPAgence ? GPAgence.expenses(rg.from, rg.to) : 0, glob = com + r.total - dep;
       return '<div class="gps-card"><small>Revenus d’activités</small><strong class="g">' + fmt(r.total) + '</strong><em>marchés + autres revenus</em></div>' +
-        '<div class="gps-card"><small>Revenu global agence</small><strong class="b">' + fmt(com + r.total) + '</strong><em>commission + activités</em></div>';
+        '<div class="gps-card"><small>Dépenses agence</small><strong class="r2">' + fmt(dep) + '</strong><em>non facturées aux propriétaires</em></div>' +
+        '<div class="gps-card"><small>Revenu global agence</small><strong class="' + (glob < 0 ? 'r2' : 'b') + '">' + fmt(glob) + '</strong><em>commission + activités − dépenses agence</em></div>';
     } catch (_) { return ''; }
   }
 
