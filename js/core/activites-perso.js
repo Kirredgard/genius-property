@@ -68,35 +68,35 @@
 
   /* ── état + styles ── */
   const st = { tab: 'dash', mode: 'mois', year: new Date().getFullYear(), month: today().slice(0, 7), from: new Date().getFullYear() + '-01', to: today().slice(0, 7), q: '', f: 'tous', open: '' };
-  const MONTHS_L = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
   const addM = (k, n) => { const m = +k.slice(5, 7) - 1 + n, y = +k.slice(0, 4) + Math.floor(m / 12); return y + '-' + pad(((m % 12) + 12) % 12 + 1); };
-  /** Période affichée : { from, to } au format YYYY-MM (inclus) selon le mode choisi. */
+  /** Période affichée (comme Situation propriétaires) : mois, période (de … à …) ou année plafonnée au mois en cours. */
+  const monthLabel = k => { const [y, m] = k.split('-').map(Number); const t = new Date(y, m - 1, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }); return t.charAt(0).toUpperCase() + t.slice(1); };
   function range() {
-    if (st.mode === 'annee') return { from: st.year + '-01', to: st.year + '-12' };
-    if (st.mode === 'periode') return st.from <= st.to ? { from: st.from, to: st.to } : { from: st.to, to: st.from };
-    return { from: st.month, to: st.month };
+    if (st.mode === 'annee') {
+      const y = st.year, cur = today().slice(0, 7); let to = y + '-12';
+      const capped = to > cur && (y + '-01') <= cur; if (capped) to = cur;
+      return { from: y + '-01', to, label: 'Année ' + y + (capped ? ' (jusqu’à ' + monthLabel(cur) + ')' : '') };
+    }
+    if (st.mode === 'periode') {
+      let f = st.from || st.month, t = st.to || st.month; if (f > t) { const x = f; f = t; t = x; }
+      return { from: f, to: t, label: f === t ? monthLabel(f) : monthLabel(f) + ' → ' + monthLabel(t) };
+    }
+    return { from: st.month, to: st.month, label: monthLabel(st.month) };
   }
-  const labM = k => MONTHS_L[+k.slice(5, 7) - 1] + ' ' + k.slice(0, 4);
-  function rangeLabel() { const r = range(); return st.mode === 'annee' ? String(st.year) : (r.from === r.to ? labM(r.from) : labM(r.from) + ' → ' + labM(r.to)); }
-  function ymSel(key, val) {
-    const y0 = +val.slice(0, 4), cy = new Date().getFullYear(); let lo = Math.min(y0, cy - 4), hi = Math.max(y0, cy + 1), ys = '';
-    for (let y = hi; y >= lo; y--) ys += '<option value="' + y + '"' + (y === y0 ? ' selected' : '') + '>' + y + '</option>';
-    return '<select class="gpa-btn sm" data-per="' + key + '" data-part="m">' + MONTHS_L.map((m, i) => '<option value="' + (i + 1) + '"' + (i + 1 === +val.slice(5, 7) ? ' selected' : '') + '>' + m + '</option>').join('') + '</select>' +
-      '<select class="gpa-btn sm" data-per="' + key + '" data-part="y">' + ys + '</select>';
-  }
+  const rangeLabel = () => range().label;
   function periodBar() {
-    const modes = [['mois', 'Mois'], ['periode', 'Période'], ['annee', 'Année']];
-    let ctl;
-    if (st.mode === 'annee') ctl = '<button class="gpa-btn sm" data-yr="-1">‹</button><b style="font-size:13px">' + st.year + '</b><button class="gpa-btn sm" data-yr="1">›</button>';
-    else if (st.mode === 'periode') ctl = '<span style="font-size:12px">Du</span>' + ymSel('from', st.from) + '<span style="font-size:12px">au</span>' + ymSel('to', st.to);
-    else ctl = '<button class="gpa-btn sm" data-mo="-1">‹</button>' + ymSel('month', st.month) + '<button class="gpa-btn sm" data-mo="1">›</button>';
-    return '<div class="gpa-tabs">' + modes.map(m => '<button class="gpa-tab' + (st.mode === m[0] ? ' on' : '') + '" data-mode="' + m[0] + '">' + m[1] + '</button>').join('') + '</div>' + ctl;
+    const rg = range(), seg = (m, l) => '<button class="gps-btn seg' + (st.mode === m ? ' on' : '') + '" data-mode="' + m + '">' + l + '</button>';
+    let nav;
+    if (st.mode === 'periode') nav = '<label class="gps-chk">De <input type="month" id="gpaFrom" value="' + esc(rg.from) + '"></label><label class="gps-chk">à <input type="month" id="gpaTo" value="' + esc(rg.to) + '"></label>';
+    else nav = '<button class="gps-btn" data-mo="-1">‹</button><b>' + (st.mode === 'annee' ? esc(rg.label) : esc(monthLabel(st.month))) + '</b><button class="gps-btn" data-mo="1">›</button>';
+    return '<span class="gps-seg">' + seg('mois', 'Mois') + seg('periode', 'Période') + seg('annee', 'Année') + '</span>' + nav;
   }
   function css() {
     if ($('gpa-style')) return;
     document.head.insertAdjacentHTML('beforeend', `<style id="gpa-style">
 .gpa{--g:#d4af37;--l:#eef2f7;--m:#6b7280}.gpa *{box-sizing:border-box}
 .gpa-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.gps-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.gps-btn{border:1px solid #e5e7eb;background:#fff;border-radius:8px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer}.gps-seg{display:inline-flex}.gps-seg .gps-btn{border-radius:0}.gps-seg .gps-btn:first-child{border-radius:8px 0 0 8px}.gps-seg .gps-btn:last-child{border-radius:0 8px 8px 0}.gps-btn.seg.on{background:#111827;color:#fff;border-color:#111827}.gps-chk{font-size:12px;color:#374151;display:inline-flex;align-items:center;gap:5px}.gps-chk input[type=month]{height:30px;border:1px solid #e5e7eb;border-radius:7px;padding:0 6px;font-size:12px}
 .gpa-tabs{display:flex;gap:4px;border-bottom:1px solid var(--l)}.gpa-tab{border:0;background:none;padding:9px 14px;font-size:12px;font-weight:900;color:var(--m);cursor:pointer;border-bottom:2px solid transparent}.gpa-tab.on{color:#111827;border-color:var(--g)}
 .gpa-btn{height:34px;border-radius:9px;padding:0 12px;font-size:12px;font-weight:800;cursor:pointer;border:1px solid #e5e7eb;background:#fff;color:#111827;display:inline-flex;align-items:center;gap:6px}.gpa-btn.pri{background:var(--g);border-color:var(--g)}.gpa-btn.sm{height:28px;padding:0 8px}.gpa-btn.del{color:#dc2626}.gpa-btn .material-symbols-rounded{font-size:16px}
 .gpa-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:12px 0}.gpa-card{background:#fff;border:1px solid var(--l);border-radius:12px;padding:12px}.gpa-card small{display:block;color:var(--m);font-size:10px;font-weight:700;text-transform:uppercase}.gpa-card strong{display:block;font-size:17px;margin-top:4px}
@@ -118,7 +118,7 @@
     css(); const d = ensure(db()), w = canWrite();
     const tabs = [['dash', 'Tableau de bord'], ['marches', 'Marchés (' + d.marches.length + ')'], ['autres', 'Autres revenus (' + d.revenusAutres.length + ')']];
     page.innerHTML = '<div class="gpa"><div class="gpa-top"><div class="gpa-tabs">' + tabs.map(t => '<button class="gpa-tab' + (st.tab === t[0] ? ' on' : '') + '" data-tab="' + t[0] + '">' + t[1] + '</button>').join('') + '</div>' +
-      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' + (st.tab === 'dash' ? periodBar() : '') +
+      '<div class="gps-actions">' + (st.tab === 'dash' ? periodBar() : '') +
       (w ? '<button class="gpa-btn" data-acts>Activités</button>' + (st.tab === 'autres' ? '<button class="gpa-btn pri" data-newrev>+ Revenu</button>' : '<button class="gpa-btn pri" data-newm>+ Marché</button>') : '') + '</div></div><div id="gpaBody"></div></div>';
     ({ dash: dash, marches: marches, autres: autres })[st.tab](d);
   }
@@ -141,7 +141,7 @@
     const mx = Math.max(1, ...bk.map(b => b.v));
     const byA = {}; fl.forEach(f => { const n = actName(d, f.act); byA[n] = (byA[n] || 0) + f.montant; });
     const rows = Object.entries(byA).sort((a, b) => b[1] - a[1]);
-    $('gpaBody').innerHTML = '<div style="font-size:12px;color:var(--m);margin:0 0 8px">Période affichée : <b>' + esc(lab) + '</b></div><div class="gpa-cards"><div class="gpa-card"><small>Revenus nets d’activités</small><strong class="gpa-g">' + fmt(act) + '</strong></div>' +
+    $('gpaBody').innerHTML = '<div class="gpa-cards"><div class="gpa-card"><small>Revenus nets d’activités</small><strong class="gpa-g">' + fmt(act) + '</strong></div>' +
       '<div class="gpa-card"><small>Frais déduits</small><strong class="' + (frs ? 'gpa-r' : '') + '">' + fmt(frs) + '</strong></div>' +
       '<div class="gpa-card"><small>Commissions locatives</small><strong>' + fmt(com) + '</strong></div><div class="gpa-card"><small>Dépenses agence</small><strong class="' + (depAg ? 'gpa-r' : '') + '">' + fmt(depAg) + '</strong></div><div class="gpa-card"><small>Revenu global agence</small><strong class="' + (act + com - depAg < 0 ? 'gpa-r' : '') + '">' + fmt(act + com - depAg) + '</strong><em>commission + activités − dépenses agence</em></div>' +
       '<div class="gpa-card"><small>Reste à encaisser</small><strong class="gpa-o">' + fmt(reste) + '</strong><em>marchés en cours (état actuel)</em></div>' +
@@ -342,7 +342,8 @@
   document.addEventListener('click', async e => {
     const t = e.target.closest('[data-tab],[data-yr],[data-mode],[data-mo],[data-acts],[data-newm],[data-newrev],[data-x],[data-view],[data-editm],[data-delm],[data-savem],[data-newp],[data-editp],[data-delp],[data-savep],[data-viewr],[data-editr],[data-delr],[data-saver],[data-addact],[data-delact],[data-updoc],[data-opendoc],[data-dldoc],[data-deldoc],[data-newf],[data-editf],[data-delf],[data-savef],[data-back]');
     if (!t || !(t.closest('#page-activites') || t.closest('#gpaDr'))) return; const D = t.dataset, pr = v => String(v).split('|');
-    if ('x' in D) return close(); if (D.tab) { st.tab = D.tab; return render(); } if (D.yr) { st.year += +D.yr; return render(); } if (D.mode) { st.mode = D.mode; return render(); } if (D.mo) { st.month = addM(st.month, +D.mo); return render(); }
+    if ('x' in D) return close(); if (D.tab) { st.tab = D.tab; return render(); } if (D.yr) { st.year += +D.yr; return render(); } if (D.mode) { st.mode = D.mode; if (st.mode === 'annee') st.year = +st.month.slice(0, 4); if (st.mode === 'periode' && (!st.from || !st.to || st.from === st.year + '-01')) { st.from = addM(st.month, -2); st.to = st.month; } return render(); }
+    if (D.mo) { if (st.mode === 'annee') st.year += +D.mo; else st.month = addM(st.month, +D.mo); return render(); }
     if ('acts' in D) return actsDrawer(); if ('newm' in D) return marcheDrawer(); if ('newrev' in D) return revDrawer();
     if (D.view) return viewDrawer(D.view); if (D.editm) return marcheDrawer(D.editm); if (D.delm) return del('m', D.delm); if ('savem' in D) return saveMarche(D.savem);
     if (D.newp) return payDrawer(D.newp); if (D.editp) return payDrawer(...pr(D.editp)); if (D.delp) return del('p', ...pr(D.delp)); if ('savep' in D) return savePay(...pr(D.savep));
@@ -355,9 +356,8 @@
   document.addEventListener('input', e => { if (e.target.id === 'gpaQ') { st.q = e.target.value; marches(ensure(db())); const i = $('gpaQ'); i && i.focus(); i && i.setSelectionRange(st.q.length, st.q.length); } });
   document.addEventListener('change', async e => { const n = e.target.dataset && e.target.dataset.actname; if (n && e.target.value.trim()) { const d = ensure(db()), a = d.activites.find(x => x.id === n); if (a) { a.nom = e.target.value.trim(); await save(d); render(); } } });
   document.addEventListener('change', e => {
-    const t = e.target; if (!t || !t.dataset || !t.dataset.per || !t.closest('#page-activites')) return;
-    const k = t.dataset.per, cur = st[k], y = t.dataset.part === 'y' ? t.value : cur.slice(0, 4), m = t.dataset.part === 'm' ? pad(t.value) : cur.slice(5, 7);
-    st[k] = y + '-' + m; render();
+    const t = e.target; if (!t || (t.id !== 'gpaFrom' && t.id !== 'gpaTo') || !t.closest('#page-activites')) return;
+    if (/^\d{4}-\d{2}$/.test(t.value)) { st[t.id === 'gpaFrom' ? 'from' : 'to'] = t.value; render(); }
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('gpaDr')) close(); });
 
