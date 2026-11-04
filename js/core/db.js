@@ -118,8 +118,21 @@
 
   // Compare l'ancienne version (stockée) et la nouvelle : les ids disparus sont marqués supprimés,
   // les ids présents (ré-créés) perdent leur marqueur.
-  function applyTombstones(incoming, rawSource, previous){
+  function applyTombstones(incoming, rawSource, previous, options){
+    options = options || {};
+    // Conserver les tombstones déjà enregistrés, même si un ancien module
+    // construit un snapshot sans recopier meta.deleted.
     var deleted = pruneTombstones(incoming.meta && incoming.meta.deleted);
+    var previousDeleted = pruneTombstones(previous && previous.meta && previous.meta.deleted);
+    Object.keys(previousDeleted).forEach(function(col){
+      deleted[col] = deleted[col] || {};
+      Object.keys(previousDeleted[col]).forEach(function(id){
+        if(!deleted[col][id] || String(previousDeleted[col][id]) > String(deleted[col][id])) {
+          deleted[col][id] = previousDeleted[col][id];
+        }
+      });
+    });
+
     var now = new Date().toISOString();
     if(previous){
       Object.keys(previous).forEach(function(col){
@@ -132,12 +145,16 @@
         });
       });
     }
+
+    // Un ancien snapshot contenant une fiche déjà supprimée ne peut pas annuler
+    // sa suppression. Une restauration volontaire nécessitera une API dédiée.
     Object.keys(deleted).forEach(function(col){
-      var present = idMap(incoming[col]);
-      Object.keys(deleted[col]).forEach(function(id){
-        if(present[id]) delete deleted[col][id];
+      if(!Array.isArray(incoming[col])) return;
+      var blocked = deleted[col];
+      if(options.allowRestoreDeleted === true) return;
+      incoming[col] = incoming[col].filter(function(row){
+        return !(row && row.id != null && blocked[String(row.id)]);
       });
-      if(!Object.keys(deleted[col]).length) delete deleted[col];
     });
     incoming.meta.deleted = deleted;
     return incoming;
@@ -263,7 +280,7 @@
     // V31 — enregistre les suppressions (sauf écritures issues du cloud / fusion / restauration forcée).
     var rawSource = db || window.DB || {};
     if(!options.skipCloud && !options.force){
-      applyTombstones(incoming, rawSource, stored);
+      applyTombstones(incoming, rawSource, stored, options);
     }
 
     var nextRev = Math.max(storedRev, incomingRev) + 1;
