@@ -15,7 +15,13 @@
     return Number.isFinite(n) ? n : 0;
   };
   const today = () => new Date().toISOString().slice(0,10);
-  const newRowId = () => (window.crypto && typeof window.crypto.randomUUID === 'function') ? window.crypto.randomUUID() : ('gp-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12));
+  // Stable identifiers are essential for cross-device reconciliation and deletion markers.
+  // Prefer the application's UID generator, then Web Crypto, then a collision-resistant fallback.
+  const newRecordId = prefix => {
+    try { if (window.GP && typeof window.GP.uid === 'function') return String(window.GP.uid(prefix || 'gp')); } catch (_) {}
+    try { if (window.crypto && typeof window.crypto.randomUUID === 'function') return String(window.crypto.randomUUID()); } catch (_) {}
+    return String(prefix || 'gp') + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 12);
+  };
   const saveDb = async d => {
     if (window.GPDB && window.GPDB.save) return window.GPDB.save(d);
     window.DB = d;
@@ -209,7 +215,8 @@
     if(kind==='paiement'){
       const locValue=get('gpf-p-location'); const l=locationForValue(locValue); if(!l) return notify('Sélectionnez une location','err');
       const montant=num(get('gpf-p-montant')), paye=num(get('gpf-p-paye')); if(montant<=0) return notify('Le montant dû doit être supérieur à 0','err'); if(paye<0||paye>montant) return notify('Le montant encaissé est invalide','err');
-      const oldPayment=idx>=0?d.paiements?.[idx]:null; const row={...(oldPayment||{}),id:oldPayment?.id||newRowId(),locataire:locataireLabel(l),locative:locValue,bien:l.bien||l.bienNom||'',montant:String(Math.round(montant)),paye:String(Math.round(paye)),reste:String(Math.max(0,Math.round(montant-paye))),date:get('gpf-p-date')||today(),mode:get('gpf-p-mode')||'Espèces'};
+      const oldPayment=idx>=0?d.paiements[idx]:null;
+      const row={...(oldPayment||{}),id:(oldPayment&&oldPayment.id)||newRecordId('pay'),locataire:locataireLabel(l),locative:locValue,bien:l.bien||l.bienNom||'',montant:String(Math.round(montant)),paye:String(Math.round(paye)),reste:String(Math.max(0,Math.round(montant-paye))),date:get('gpf-p-date')||today(),mode:get('gpf-p-mode')||'Espèces'};
       if(!Array.isArray(d.paiements)) d.paiements=[];
       if(idx>=0 && d.paiements[idx]) Object.assign(d.paiements[idx],row); else d.paiements.unshift(row);
       if(num(row.reste)===0 && Array.isArray(d.contrats)){
@@ -221,7 +228,7 @@
       const lib=get('gpf-d-libelle'), montant=num(get('gpf-d-montant')), date=get('gpf-d-date')||today(), type=get('gpf-d-type'), cat=get('gpf-d-cat'), bien=type==='bien'?get('gpf-d-bien'):'';
       if(lib.length<3) return notify('Le libellé doit contenir au moins 3 caractères','err'); if(montant<=0) return notify('Le montant doit être supérieur à 0','err'); if(type==='bien'&&!bien) return notify('Sélectionnez le bien concerné','err');
       if(!Array.isArray(d.depenses)) d.depenses=[]; const old=idx>=0?d.depenses[idx]:null; const file=await readFile();
-      const row={...(old||{}),id:old?.id||newRowId(),libelle:lib,type,cat,categorie:cat,montant:String(Math.round(montant)),date,bien,proprietaire:ownerForBien(bien),...bienRefForName(bien),facturable:type==='agence'?'non':get('gpf-d-facturable'),factureData:file||old?.factureData||null};
+      const row={...(old||{}),id:(old&&old.id)||newRecordId('dep'),libelle:lib,type,cat,categorie:cat,montant:String(Math.round(montant)),date,bien,proprietaire:ownerForBien(bien),...bienRefForName(bien),facturable:type==='agence'?'non':get('gpf-d-facturable'),factureData:file||old?.factureData||null};
       if(idx>=0&&d.depenses[idx]) d.depenses[idx]=row; else d.depenses.unshift(row);
       const saved=await saveDb(d); if(saved===false) return notify('Modification non enregistrée. Rechargez puis réessayez.','err'); refresh(kind); close(); notify(idx>=0?'Dépense modifiée ✓':'Dépense enregistrée ✓');
     }
