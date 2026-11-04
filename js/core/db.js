@@ -79,7 +79,7 @@
 
   function countRecordsRaw(raw){
     var d = safeParse(raw, {}) || {};
-    return ['employes','proprietaires','locataires','biens','locatives','contrats','paiements','depenses','fichiers','messages','conversations','agenda'].reduce(function(n,k){ return n + (Array.isArray(d[k]) ? d[k].length : 0); }, 0);
+    return ['employes','proprietaires','locataires','biens','locatives','contrats','paiements','depenses','fichiers','messages','conversations','agenda','activites','marches','revenusAutres','reversements'].reduce(function(n,k){ return n + (Array.isArray(d[k]) ? d[k].length : 0); }, 0);
   }
 
 

@@ -19,7 +19,7 @@
     syncReady: false,   // true seulement après la réconciliation local/cloud de la session
     cloudCount: 0       // nombre d'enregistrements vus côté serveur au dernier pull
   };
-  var RECORD_KEYS = ['employes','proprietaires','locataires','biens','locatives','contrats','paiements','depenses','fichiers','messages','conversations','agenda'];
+  var RECORD_KEYS = ['employes','proprietaires','locataires','biens','locatives','contrats','paiements','depenses','fichiers','messages','conversations','agenda','activites','marches','revenusAutres','reversements'];
   function countRecords(d){
     d = d || {};
     return RECORD_KEYS.reduce(function(n,k){ return n + (Array.isArray(d[k]) ? d[k].length : 0); }, 0);

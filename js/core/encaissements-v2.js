@@ -24,6 +24,7 @@
   const pad = n => String(n).padStart(2, '0');
   const notify = (m, t) => (typeof window.toast === 'function' ? window.toast(m, t) : console.log(m));
   const db = () => (window.GPDB && window.GPDB.load ? window.GPDB.load() : (window.DB || {}));
+  const newRowId = () => (window.crypto && typeof window.crypto.randomUUID === 'function') ? window.crypto.randomUUID() : ('gp-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12));
   const saveDb = async d => {
     if (window.GPDB && window.GPDB.save) return window.GPDB.save(d);
     window.DB = d;
@@ -300,6 +301,7 @@
     const recuNo = keep.recuNo || nextRecu(d), groupe = keep.groupe || ('ENC-' + Date.now().toString(36)), now = new Date().toISOString();
     al.rows.slice().reverse().forEach(a => {
       d.paiements.unshift({
+        id: newRowId(),
         locataire: c.locataire, locative: c.locative, bien: c.bien || loc.bien || '',
         contratId: c.id, contractId: c.id, contrat: c.num || c.id, locationId: c.locationId || '', bienId: c.bienId || '', proprietaireId: c.proprietaireId || '', locataireId: c.locataireId || '', periode: a.k,
         montant: String(Math.round(a.due)), paye: String(Math.round(a.amount)), reste: '0',
