@@ -161,12 +161,96 @@
           </div>
 
           <div class="gp-storage-card full">
+            <h3><span class="material-symbols-rounded">history</span> Historique Supabase de l'agence</h3>
+            <p class="gp-history-note">Consulte les 200 dernières sauvegardes cloud. La restauration exige le rôle administrateur et vérifie la version actuelle avant toute modification. Une restauration remplace le snapshot complet de l'agence.</p>
+            <div id="gp-supabase-history-status" class="gp-storage-muted">Chargement de l'historique Supabase…</div>
+            <div style="overflow:auto">
+              <table class="gp-storage-table">
+                <thead><tr><th>ID</th><th>Version</th><th>Date</th><th>Enregistrements</th><th>Action</th></tr></thead>
+                <tbody id="gp-supabase-history-rows"><tr><td colspan="5">Chargement…</td></tr></tbody>
+              </table>
+            </div>
+            <div class="gp-storage-actions">
+              <button class="gp-storage-btn" onclick="GPAdminStockage.loadSupabaseHistory()"><span class="material-symbols-rounded">refresh</span> Actualiser l'historique</button>
+            </div>
+          </div>
+
+          <div class="gp-storage-card full">
             <h3><span class="material-symbols-rounded">terminal</span> Diagnostic</h3>
             <pre class="gp-storage-status" id="gp-storage-diagnostic">${esc(JSON.stringify({ storage: st, firebase: ss }, null, 2))}</pre>
             <div class="gp-storage-actions"><button class="gp-storage-btn" onclick="GPAdminStockage.render()"><span class="material-symbols-rounded">refresh</span> Rafraîchir</button></div>
           </div>
         </div>
       </div>`;
+    loadSupabaseHistory();
+  }
+
+  function historyDate(value){
+    if(!value) return '—';
+    var d = new Date(value);
+    return isNaN(d.getTime()) ? String(value) : d.toLocaleString();
+  }
+
+  async function loadSupabaseHistory(){
+    var status = getEl('gp-supabase-history-status');
+    var tbody = getEl('gp-supabase-history-rows');
+    if(!status || !tbody) return;
+    status.textContent = 'Chargement de l’historique Supabase…';
+    tbody.innerHTML = '<tr><td colspan="5">Chargement…</td></tr>';
+    try {
+      if(!window.GPSupabase || !window.GPSupabase.ready) throw new Error('Connexion Supabase indisponible.');
+      var sb = await window.GPSupabase.ready();
+      var currentResult = await sb.rpc('gp_get_app_data');
+      if(currentResult.error) throw currentResult.error;
+      var currentRow = Array.isArray(currentResult.data) ? currentResult.data[0] : currentResult.data;
+      var currentVersion = Number(currentRow && currentRow.version || 0);
+      if(!currentVersion) throw new Error('Version actuelle introuvable.');
+
+      var historyResult = await sb.rpc('gp_list_app_data_history');
+      if(historyResult.error) throw historyResult.error;
+      var rows = Array.isArray(historyResult.data) ? historyResult.data : [];
+      status.textContent = 'Version cloud actuelle : ' + currentVersion + ' · ' + rows.length + ' sauvegarde(s) disponible(s).';
+      if(!rows.length){
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:16px">Aucune sauvegarde Supabase disponible.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(function(row){
+        var hid = Number(row.hid);
+        var version = Number(row.version);
+        return '<tr><td>'+esc(hid)+'</td><td>'+esc(version)+'</td><td>'+esc(historyDate(row.saved_at))+'</td><td>'+esc(row.record_count == null ? '—' : row.record_count)+'</td><td><div class="gp-history-row-actions"><button class="gp-storage-btn danger" onclick="GPAdminStockage.restoreSupabaseHistory('+hid+','+currentVersion+','+version+')">Restaurer</button></div></td></tr>';
+      }).join('');
+    } catch(e) {
+      status.textContent = 'Historique indisponible : ' + (e.message || String(e));
+      tbody.innerHTML = '<tr><td colspan="5" style="color:#991b1b">Impossible de charger l’historique Supabase.</td></tr>';
+    }
+  }
+
+  async function restoreSupabaseHistory(hid, expectedVersion, historyVersion){
+    if(!Number.isSafeInteger(Number(hid)) || !Number.isSafeInteger(Number(expectedVersion))) {
+      toast('Identifiants de restauration invalides.', 'err'); return;
+    }
+    var message = 'ATTENTION : cette opération remplacera toutes les données actuelles de l’agence par le snapshot historique choisi.\\n\\n' +
+      'Sauvegarde historique : #' + hid + ' (version ' + historyVersion + ')\\n' +
+      'Version actuelle attendue : ' + expectedVersion + '\\n\\n' +
+      'Une copie de sécurité de l’état actuel sera conservée. Continuer ?';
+    if(!window.confirm(message)) return;
+    try {
+      if(!window.GPSupabase || !window.GPSupabase.ready) throw new Error('Connexion Supabase indisponible.');
+      var sb = await window.GPSupabase.ready();
+      var result = await sb.rpc('gp_restore_app_data_history_safe', {
+        p_hid: Number(hid),
+        p_expected_version: Number(expectedVersion)
+      });
+      if(result.error) throw result.error;
+      var newVersion = result.data;
+      // Recharge le snapshot restauré en local sans le renvoyer vers le cloud.
+      await window.GPSupabase.pull({ applyToLocal: true });
+      toast('Restauration terminée. Nouvelle version : ' + newVersion, 'ok');
+      window.location.reload();
+    } catch(e) {
+      toast('Restauration refusée ou échouée : ' + (e.message || String(e)), 'err');
+      loadSupabaseHistory();
+    }
   }
 
   function saveFirebaseConfig(){
@@ -246,7 +330,9 @@ service cloud.firestore {
     pullFirebase: pullFirebase,
     backup: backup,
     exportJson: exportJson,
-    showSql: showSql
+    showSql: showSql,
+    loadSupabaseHistory: loadSupabaseHistory,
+    restoreSupabaseHistory: restoreSupabaseHistory
   };
 
   if(window.GPNavigation && window.GPNavigation.registerRenderer){
