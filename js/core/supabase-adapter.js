@@ -19,7 +19,7 @@
     syncReady: false,   // true seulement après la réconciliation local/cloud de la session
     cloudCount: 0       // nombre d'enregistrements vus côté serveur au dernier pull
   };
-  var RECORD_KEYS = ['employes','proprietaires','locataires','biens','locatives','contrats','paiements','depenses','fichiers','messages','conversations','agenda','activites','marches','revenusAutres','reversements'];
+  var RECORD_KEYS = ['employes','proprietaires','locataires','biens','locatives','contrats','paiements','depenses','fichiers','messages','conversations','agenda'];
   function countRecords(d){
     d = d || {};
     return RECORD_KEYS.reduce(function(n,k){ return n + (Array.isArray(d[k]) ? d[k].length : 0); }, 0);
@@ -178,6 +178,115 @@
     return row;
   }
 
+  // PHASE 7 — API de synchronisation par fiche (pont volontairement inactif).
+  // Ces fonctions ne sont PAS branchées sur GPDB.save()/flush : l'ancien snapshot
+  // reste l'unique chemin automatique tant que le backfill et la réconciliation
+  // de toutes les collections n'ont pas été validés.
+  var RECORD_COLLECTIONS = [
+    'employes','proprietaires','locataires','biens','locatives','contrats',
+    'paiements','depenses','fichiers','messages','conversations','agenda',
+    'marches','reversements','revenusAutres','activites'
+  ];
+
+  function validateRecordArgs(collection, recordId) {
+    if (RECORD_COLLECTIONS.indexOf(String(collection || '')) < 0) {
+      throw pushError('invalid_collection', 'Collection non prise en charge.');
+    }
+    if (recordId == null || !String(recordId).trim() || String(recordId).length > 200) {
+      throw pushError('invalid_record_id', 'Identifiant de fiche absent ou invalide.');
+    }
+  }
+
+  function normalizeRecordError(err) {
+    var msg = String(err && (err.message || err.details || err) || 'Erreur Supabase');
+    if (/record_conflict/i.test(msg)) {
+      return pushError('record_conflict', 'Cette fiche a été modifiée sur un autre appareil. Rechargez-la avant de réessayer.');
+    }
+    if (/not_authorized|permission denied|row-level security/i.test(msg)) {
+      return pushError('record_not_authorized', 'Accès refusé pour cette fiche ou cette agence.');
+    }
+    return err instanceof Error ? err : new Error(msg);
+  }
+
+  async function pullRecordCollection(collection, options) {
+    options = options || {};
+    if (RECORD_COLLECTIONS.indexOf(String(collection || '')) < 0) {
+      throw pushError('invalid_collection', 'Collection non prise en charge.');
+    }
+    var sb = await ready();
+    var pageSize = Math.max(1, Math.min(Number(options.pageSize || 500), 1000));
+    var offset = 0, rows = [];
+    while (true) {
+      var result = await sb.from('gp_app_records')
+        .select('record_id,payload,version,deleted_at,updated_at')
+        .eq('collection', collection)
+        .order('record_id', {ascending:true})
+        .range(offset, offset + pageSize - 1);
+      if (result.error) throw normalizeRecordError(result.error);
+      var page = Array.isArray(result.data) ? result.data : [];
+      rows = rows.concat(page);
+      if (page.length < pageSize) break;
+      offset += page.length;
+    }
+    return rows;
+  }
+
+  async function pullAllRecordCollections(options) {
+    var out = {};
+    for (var i = 0; i < RECORD_COLLECTIONS.length; i++) {
+      var collection = RECORD_COLLECTIONS[i];
+      out[collection] = await pullRecordCollection(collection, options);
+    }
+    return out;
+  }
+
+  async function writeRecord(collection, recordId, payload, expectedVersion) {
+    validateRecordArgs(collection, recordId);
+    if (!Number.isInteger(Number(expectedVersion)) || Number(expectedVersion) < 0) {
+      throw pushError('invalid_expected_version', 'La version attendue doit être un entier positif ou zéro.');
+    }
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+      throw pushError('invalid_payload', 'Le contenu de la fiche doit être un objet.');
+    }
+    var sb = await ready();
+    var result = await sb.rpc('gp_upsert_app_record', {
+      p_collection: collection,
+      p_record_id: String(recordId),
+      p_payload: payload,
+      p_expected_version: Number(expectedVersion),
+      p_deleted: false
+    });
+    if (result.error) throw normalizeRecordError(result.error);
+    return Array.isArray(result.data) ? result.data[0] : result.data;
+  }
+
+  async function deleteRecord(collection, recordId, expectedVersion) {
+    validateRecordArgs(collection, recordId);
+    if (!Number.isInteger(Number(expectedVersion)) || Number(expectedVersion) < 0) {
+      throw pushError('invalid_expected_version', 'La version attendue doit être un entier positif ou zéro.');
+    }
+    var sb = await ready();
+    var result = await sb.rpc('gp_upsert_app_record', {
+      p_collection: collection,
+      p_record_id: String(recordId),
+      p_payload: null,
+      p_expected_version: Number(expectedVersion),
+      p_deleted: true
+    });
+    if (result.error) throw normalizeRecordError(result.error);
+    return Array.isArray(result.data) ? result.data[0] : result.data;
+  }
+
+  function recordSyncCapabilities() {
+    return {
+      available: !!state.client,
+      activated: false,
+      automatic: false,
+      collections: RECORD_COLLECTIONS.slice(),
+      note: 'API préparatoire : aucune écriture par fiche automatique n’est déclenchée.'
+    };
+  }
+
   // Les envois sont mis en file : deux sauvegardes rapprochées n'utilisent plus
   // la même version attendue (ce qui provoquait des rejets stale_data).
   function push(data, opts){
@@ -226,6 +335,12 @@
     reset: reset,
     countRecords: countRecords,
     status: status,
+    // API de phase 7 — appel explicite seulement, sans activation automatique.
+    pullRecordCollection: pullRecordCollection,
+    pullAllRecordCollections: pullAllRecordCollections,
+    writeRecord: writeRecord,
+    deleteRecord: deleteRecord,
+    recordSyncCapabilities: recordSyncCapabilities,
     library: loadLibrary
   };
 
