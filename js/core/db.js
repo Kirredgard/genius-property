@@ -79,7 +79,7 @@
 
   function countRecordsRaw(raw){
     var d = safeParse(raw, {}) || {};
-    return ['employes','proprietaires','locataires','biens','locatives','contrats','paiements','depenses','fichiers','messages','conversations','agenda','activites','marches','revenusAutres','reversements'].reduce(function(n,k){ return n + (Array.isArray(d[k]) ? d[k].length : 0); }, 0);
+    return ['employes','proprietaires','locataires','biens','locatives','contrats','paiements','depenses','fichiers','messages','conversations','agenda'].reduce(function(n,k){ return n + (Array.isArray(d[k]) ? d[k].length : 0); }, 0);
   }
 
 
@@ -89,7 +89,8 @@
   // Sans eux, une fusion local/cloud « union par id » ne sait pas distinguer un
   // enregistrement supprimé d'un enregistrement jamais synchronisé : il revenait.
   // ---------------------------------------------------------------------------
-  var TOMBSTONE_TTL_MS = 180 * 24 * 3600 * 1000; // 180 jours
+  // Les marqueurs de suppression ne doivent pas expirer automatiquement :
+  // un appareil resté hors ligne plus de 180 jours pourrait sinon republier une fiche supprimée.
   var _lastDirtyMs = 0;
 
   function idMap(list){
@@ -99,12 +100,17 @@
   }
 
   function pruneTombstones(deleted){
-    var out = {}, limit = Date.now() - TOMBSTONE_TTL_MS;
+    // Rétention permanente par défaut : purger sur une simple durée crée un
+    // risque de résurrection depuis une sauvegarde/appareil resté longtemps hors ligne.
+    // Une future purge devra être une opération serveur coordonnée après accusé
+    // de réception de tous les appareils, jamais un TTL local.
+    var out = {};
     Object.keys(deleted || {}).forEach(function(col){
       var src = deleted[col] || {};
       Object.keys(src).forEach(function(id){
-        var t = Date.parse(src[id]);
-        if(!Number.isFinite(t) || t >= limit){ (out[col] = out[col] || {})[id] = src[id]; }
+        if(id != null && String(id) !== '' && src[id]) {
+          (out[col] = out[col] || {})[String(id)] = src[id];
+        }
       });
     });
     return out;
