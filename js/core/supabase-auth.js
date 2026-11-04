@@ -216,22 +216,19 @@
         window.GPDB.save(cloud, {silent:true, skipCloud:true, force:true});
         try { window.dispatchEvent(new CustomEvent('gp:supabase:pulled')); } catch(_) {}
       } else if(cloudCount > 0 && localCount > 0) {
-        // FUSION si le local a des modifications en attente OU contient des données absentes du cloud
-        // (envoi précédent échoué / marqueur perdu) : remplacer par le cloud ferait perdre ces données.
-        // Les suppressions restent respectées grâce aux marqueurs meta.deleted.
-        if(localDirty || !cloudCoversLocal(cloud, local)) {
-          safetySnapshot(local, 'avant fusion');
-          var merged = mergeData(cloud, local);
-          window.GPDB.save(merged, {silent:true, force:true});
-          await A.push(merged, {bootstrap:true});
-          try { localStorage.removeItem('gp_data_dirty_at'); } catch(_) {}
-          try { window.dispatchEvent(new CustomEvent('gp:supabase:pulled')); } catch(_) {}
-        } else {
-          // Pas de modification locale en attente : le cloud est la source de vérité,
-          // mais on garde une copie de sécurité du local avant de le remplacer.
-          window.GPDB.save(cloud, {silent:true, skipCloud:true, force:true});
-          try { window.dispatchEvent(new CustomEvent('gp:supabase:pulled')); } catch(_) {}
+        // Sécurité anti-résurrection : une fusion automatique ne peut pas distinguer
+        // une vraie création hors ligne d'une ligne supprimée du cloud (notamment sans id).
+        // On conserve donc le cache local complet en secours, mais le cloud reste autoritaire.
+        var localMismatch = localDirty || !cloudCoversLocal(cloud, local);
+        if(localMismatch) {
+          safetySnapshot(local, 'cache local isolé — réconciliation manuelle requise');
         }
+        window.GPDB.save(cloud, {silent:true, skipCloud:true, force:true});
+        try { localStorage.removeItem('gp_data_dirty_at'); } catch(_) {}
+        if(localMismatch && window.toast) {
+          window.toast('Le cloud a été chargé sans fusion automatique. Une copie du cache local est conservée dans gp_safety_snapshot ; vérifiez-la avant toute récupération.', 'warn');
+        }
+        try { window.dispatchEvent(new CustomEvent('gp:supabase:pulled')); } catch(_) {}
       }
       if(A.setReady) A.setReady(true);   // les envois sont maintenant autorisés
     } catch(e) {
