@@ -111,25 +111,33 @@
     const state = {};
     for (let m = start, guard = 0; m < from && guard < 240; m = addM(m, 1), guard++) {
       computeBase(d, m, m, false).forEach(ow => {
-        const s = state[ow.id] || (state[ow.id] = { def: 0, expense: 0, since: '' });
-        const priorCredit = Math.max(0, -s.def);
-        // Fonds disponibles avant les dépenses du mois : loyers encaissés moins commission,
-        // reversements et avances déjà enregistrés.
-        const fundsBeforeExpenses = ow.paid - ow.commission - ow.reverse - ow.avance;
-        // Les fonds positifs apurent d'abord les crédits antérieurs, puis les dépenses du mois.
-        const remainingPriorExpense = Math.max(0, s.expense - Math.max(0, fundsBeforeExpenses));
-        const availableForCurrentExpenses = Math.max(0, fundsBeforeExpenses - priorCredit);
-        const currentUncoveredExpense = Math.max(0, ow.depTotal - availableForCurrentExpenses);
-        const nextCredit = Math.max(0, priorCredit - fundsBeforeExpenses + ow.depTotal);
-        const nextExpense = Math.min(nextCredit, remainingPriorExpense + currentUncoveredExpense);
-        if (nextCredit > 0 && s.def === 0) s.since = m;
-        if (nextCredit === 0) s.since = '';
-        s.def = -nextCredit;
-        s.expense = nextExpense;
+        const s = state[ow.id] || (state[ow.id] = { advance: 0, expenses: 0, since: '' });
+        /* Le solde mensuel disponible est calculé hors avances du mois : une avance
+           enregistrée est un crédit distinct destiné aux mois suivants. */
+        const balanceBeforeAdvance = ow.net - ow.reverse;
+        let available = Math.max(0, balanceBeforeAdvance);
+        const deficit = Math.max(0, -balanceBeforeAdvance);
+
+        // Les sommes disponibles récupèrent d'abord les dépenses impayées,
+        // puis les avances antérieures. Chaque catégorie garde son propre solde.
+        const repayExpenses = Math.min(s.expenses, available);
+        s.expenses -= repayExpenses;
+        available -= repayExpenses;
+        const repayAdvance = Math.min(s.advance, available);
+        s.advance -= repayAdvance;
+
+        // Un solde négatif après reversements correspond à une somme à récupérer.
+        if (deficit > 0) s.expenses += deficit;
+        // Une avance de fonds est toujours reportée, même si le mois est soldé.
+        if (ow.avance > 0) s.advance += ow.avance;
+
+        if ((s.advance + s.expenses) > 0 && !s.since) s.since = m;
+        if ((s.advance + s.expenses) === 0) s.since = '';
       });
     }
     Object.keys(state).forEach(id => {
-      if (state[id].def < 0) out[id] = { amount: -state[id].def, expenses: state[id].expense, since: state[id].since };
+      const s = state[id], amount = s.advance + s.expenses;
+      if (amount > 0) out[id] = { amount, expenses: s.expenses, since: s.since, advance: s.advance };
     });
     return out;
   }
