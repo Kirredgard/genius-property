@@ -85,7 +85,9 @@
     return m;
   }
   function defaultStart(d, c) {
-    const keys = contractPayments(d, c).map(p => p.periode).filter(validKey).sort();
+    // Seuls les encaissements réellement positifs fixent l'historique financier.
+    // Les lignes d'échéance à 0 FCFA ne doivent pas forcer un ancien mois de départ.
+    const keys = contractPayments(d, c).filter(p => num(p.paye) > 0).map(p => p.periode).filter(validKey).sort();
     if (keys.length) return keys[0];
     /* Sans paiement : « Prochaine échéance » est la référence. Un contrat dont la prochaine
      * échéance est le 05/10 ne doit PAS afficher d'échéance en septembre, même si sa date de début
@@ -104,7 +106,10 @@
    *   impayés avant la première échéance définie dans la fiche de location.
    * Aucun paiement ni aucune échéance stockée n'est supprimé ici : le calendrier est calculé. */
   function startKey(d, c) {
-    const keys = contractPayments(d, c).map(p => p.periode).filter(validKey).sort();
+    // Une échéance ancienne sans montant encaissé n'est pas un paiement historique.
+    // Si aucun encaissement réel n'existe, la date « Prochain paiement » est prioritaire,
+    // même si suiviDepuis ou des lignes à 0 FCFA pointent vers un mois antérieur.
+    const keys = contractPayments(d, c).filter(p => num(p.paye) > 0).map(p => p.periode).filter(validKey).sort();
     const pr = parseD(c.prochain || c.prochainPaiement), prk = pr ? keyOf(pr) : '';
     if (!keys.length && prk) return prk;
     let k = validKey(c.suiviDepuis) ? c.suiviDepuis : defaultStart(d, c);
