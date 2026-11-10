@@ -34,6 +34,10 @@
   const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
   const keyOf = d => d.getFullYear() + '-' + pad(d.getMonth() + 1);
   const nowKey = () => keyOf(new Date());
+  // Date de démarrage réelle du suivi locatif confirmée par l'agence :
+  // aucun loyer n'a été encaissé ni ne doit être réclamé avant octobre 2026.
+  // Ce seuil est global à tous les contrats et n'efface aucune donnée historique.
+  const TRACKING_START_KEY = '2026-10';
   const todayISO = () => iso(new Date());
   const addM = (k, n) => { const [y, m] = k.split('-').map(Number); return keyOf(new Date(y, m - 1 + n, 1)); };
   const validKey = k => /^\d{4}-(0[1-9]|1[0-2])$/.test(String(k || ''));
@@ -93,10 +97,10 @@
      * échéance est le 05/10 ne doit PAS afficher d'échéance en septembre, même si sa date de début
      * est ancienne. Sans « prochaine échéance » valide, on retombe sur « date début »
      * (plafonnée au mois précédent). */
-    const pr = parseD(c.prochain), db_ = parseD(c.debut);
-    if (pr) return keyOf(pr);
-    if (db_) { const k = keyOf(db_), floor = addM(nowKey(), -1); return k < floor ? floor : k; }
-    return nowKey();
+    const pr = parseD(c.prochain || c.prochainPaiement), db_ = parseD(c.debut);
+    if (pr) { const k = keyOf(pr); return k < TRACKING_START_KEY ? TRACKING_START_KEY : k; }
+    if (db_) { const k = keyOf(db_), floor = addM(nowKey(), -1); return (k < floor ? floor : k) < TRACKING_START_KEY ? TRACKING_START_KEY : (k < floor ? floor : k); }
+    return nowKey() < TRACKING_START_KEY ? TRACKING_START_KEY : nowKey();
   }
   /* Début de suivi :
    * - s'il existe un paiement réellement enregistré, conserver le plus ancien mois payé
@@ -107,15 +111,20 @@
    * Aucun paiement ni aucune échéance stockée n'est supprimé ici : le calendrier est calculé. */
   function startKey(d, c) {
     // Une échéance ancienne sans montant encaissé n'est pas un paiement historique.
-    // Si aucun encaissement réel n'existe, la date « Prochain paiement » est prioritaire,
-    // même si suiviDepuis ou des lignes à 0 FCFA pointent vers un mois antérieur.
+    // L'agence a confirmé qu'aucun locataire n'a payé et qu'aucun loyer n'est dû
+    // avant octobre 2026 : on applique donc ce seuil à TOUS les contrats.
+    // Les lignes historiques antérieures restent stockées dans Supabase, mais elles
+    // ne génèrent plus d'échéance ni d'arriéré dans le suivi mensuel.
     const keys = contractPayments(d, c).filter(p => num(p.paye) > 0).map(p => p.periode).filter(validKey).sort();
     const pr = parseD(c.prochain || c.prochainPaiement), prk = pr ? keyOf(pr) : '';
-    if (!keys.length && prk) return prk;
-    let k = validKey(c.suiviDepuis) ? c.suiviDepuis : defaultStart(d, c);
-    if (keys.length && keys[0] < k) k = keys[0];
-    if (prk && prk < k) k = prk;
-    return k;
+    let k;
+    if (!keys.length && prk) k = prk;
+    else {
+      k = validKey(c.suiviDepuis) ? c.suiviDepuis : defaultStart(d, c);
+      if (keys.length && keys[0] < k) k = keys[0];
+      if (prk && prk < k) k = prk;
+    }
+    return k < TRACKING_START_KEY ? TRACKING_START_KEY : k;
   }
   /** Fige le début de suivi du contrat. Sans cela, il est recalculé à partir des paiements
    *  (puis de « prochain ») : supprimer/modifier le seul paiement d'octobre faisait glisser
