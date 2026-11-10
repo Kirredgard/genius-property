@@ -116,8 +116,12 @@
         // Une ligne type 'avance' est un crédit distinct à récupérer sur les mois suivants :
         // elle s'ajoute au report, même si le mois d'origine apparaît soldé dans le tableau.
         const priorCredit = Math.max(0, -s.def);
+        // Le disponible du mois est calculé après dépenses/commission et reversements
+        // ordinaires. Un disponible positif rembourse d'abord le report antérieur.
         const balanceBeforeAdvance = ow.net - ow.reverse;
         const remainingPrior = Math.max(0, priorCredit - Math.max(0, balanceBeforeAdvance));
+        // Les avances explicitement enregistrées restent un crédit distinct. Le déficit
+        // négatif du mois (ex. dépense après reversement total) s'ajoute au crédit reporté.
         const nextCredit = remainingPrior + Math.max(0, ow.avance) + Math.max(0, -balanceBeforeAdvance);
         const next = -nextCredit;
         if (next < 0 && s.def === 0) s.since = m; if (next === 0) s.since = '';
