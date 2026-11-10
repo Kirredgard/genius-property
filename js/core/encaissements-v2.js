@@ -96,12 +96,16 @@
     if (db_) { const k = keyOf(db_), floor = addM(nowKey(), -1); return k < floor ? floor : k; }
     return nowKey();
   }
-  /* Début de suivi = le plus ancien entre : le début figé (ou par défaut), le premier mois payé,
-   * et le mois de la « Prochaine échéance » (modifiable dans le formulaire de la location).
-   * Sans paiement, la « Prochaine échéance » prime sur un ancien début figé erroné. */
+  /* Début de suivi :
+   * - s'il existe un paiement réellement enregistré, conserver le plus ancien mois payé
+   *   afin de ne jamais masquer l'historique financier ;
+   * - s'il n'existe encore aucun paiement, la « Prochaine échéance » est la source de vérité,
+   *   même si suiviDepuis contient un ancien mois mémorisé. Cela évite de générer de faux
+   *   impayés avant la première échéance définie dans la fiche de location.
+   * Aucun paiement ni aucune échéance stockée n'est supprimé ici : le calendrier est calculé. */
   function startKey(d, c) {
     const keys = contractPayments(d, c).map(p => p.periode).filter(validKey).sort();
-    const pr = parseD(c.prochain), prk = pr ? keyOf(pr) : '';
+    const pr = parseD(c.prochain || c.prochainPaiement), prk = pr ? keyOf(pr) : '';
     if (!keys.length && prk) return prk;
     let k = validKey(c.suiviDepuis) ? c.suiviDepuis : defaultStart(d, c);
     if (keys.length && keys[0] < k) k = keys[0];
