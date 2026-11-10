@@ -92,13 +92,12 @@
   }
 
   /* ── Report des avances et des dépenses non couvertes ──────────────────────────
-   * Règle : chaque mois, le solde du propriétaire = net dû − reversé − avances. S'il est négatif
-   * (avance de fonds non récupérée, ou dépense que les sommes disponibles ne couvrent pas),
-   * le déficit est REPORTÉ sur le mois suivant et déduit de ses sommes disponibles, jusqu'à
-   * récupération complète :  déficit(m+1) = min(0, déficit(m) + solde du mois m).
-   * Calculé à la volée depuis les données sources (dépenses, reversements, loyers) : rien n'est
-   * dupliqué ni modifié, l'historique de chaque mois reste intact et un paiement tardif d'un loyer
-   * ancien (ou la correction d'une avance) met automatiquement à jour tous les mois suivants. */
+   * Une avance de fonds (type === 'avance') est un crédit à récupérer sur les mois suivants.
+   * Le mois où elle est enregistrée reste soldé selon son affichage courant, mais le montant
+   * de l'avance est aussi conservé dans le report d'ouverture du mois suivant. Les déficits
+   * non couverts suivent la même logique et sont récupérés progressivement sur les loyers nets.
+   * Calculé à la volée depuis les données sources : aucune transaction n'est dupliquée ou modifiée.
+   * Toute correction/suppression d'une avance recalcule automatiquement les mois suivants. */
   function firstDataMonth(d, from) {
     let min = '';
     const take = k => { if (k && /^\d{4}-\d{2}$/.test(k) && (!min || k < min)) min = k; };
@@ -113,8 +112,14 @@
     for (let m = start, guard = 0; m < from && guard < 240; m = addM(m, 1), guard++) {
       computeBase(d, m, m, false).forEach(ow => {
         const s = state[ow.id] || (state[ow.id] = { def: 0, since: '' });
-        const closing = s.def + ow.aReverser;
-        const next = Math.min(0, closing);
+        // Le report antérieur s'impute sur le net du mois après les reversements ordinaires.
+        // Une ligne type 'avance' est un crédit distinct à récupérer sur les mois suivants :
+        // elle s'ajoute au report, même si le mois d'origine apparaît soldé dans le tableau.
+        const priorCredit = Math.max(0, -s.def);
+        const balanceBeforeAdvance = ow.net - ow.reverse;
+        const remainingPrior = Math.max(0, priorCredit - Math.max(0, balanceBeforeAdvance));
+        const nextCredit = remainingPrior + Math.max(0, ow.avance) + Math.max(0, -balanceBeforeAdvance);
+        const next = -nextCredit;
         if (next < 0 && s.def === 0) s.since = m; if (next === 0) s.since = '';
         s.def = next;
       });
